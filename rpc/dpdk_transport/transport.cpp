@@ -786,7 +786,5 @@ void DpdkTransport::install_flow_rule(size_t phy_port, size_t qp_id, uint32_t ip
 
 //     Log_warn("Installed flow-director rule. Queue %zu, RX UDP port = %u.\n",
 //               qp_id, udp_port);
-//   }
+  }
 }
-}
- }
