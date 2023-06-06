@@ -1,0 +1,36 @@
+network:
+  - ampere00:
+      id: 0
+      mac: 1c:01:dd:51:b2:ae
+      ip: 192.168.2.115
+      port: 8000
+
+  - ampere01:
+      id: 1
+      mac: 1c:01:dd:51:b2:af
+      ip: 192.168.2.116
+      port: 8100
+
+  - ampere02:
+      id: 2
+      mac: 1c:02:dd:51:b2:ae
+      ip: 192.168.2.125
+      port: 8000
+
+  - ampere02:
+      id: 3
+      mac: 1c:02:dd:51:b2:af
+      ip: 192.168.2.126
+      port: 8100
+
+  - catskill:
+      id: 4
+      mac: 02:de:ad:be:ef:60
+      ip: 192.168.2.3
+      port: 8501
+
+  - greenport:
+      id: 5
+      mac: 02:de:ad:be:ef:80
+      ip: 192.168.2.3
+      port: 8501
