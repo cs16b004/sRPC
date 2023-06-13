@@ -54,8 +54,6 @@ public:
     int host_threads_ = 1;
 
     std::string name_;
-
-    uint32_t duration_ = 10;
     std::vector<NetworkInfo> net_info_;
     std::string dpdk_options_;
     CpuInfo cpu_info_;
@@ -67,12 +65,7 @@ public:
     int transport_ = 0;
     int workload_ = 0;
     int ratio_ = 0;
-    int key_len_ = 0;
-    int val_len_ = 0;
-    int partition_size_ = 0;
-    int partition_type_ = 0;
-    int partition_max_size_ = 0;
-    int partition_per_dma_ = 0;
+ 
 
 private:
     void load_cfg_files();
@@ -121,24 +114,6 @@ public:
     }
     int get_ratio() const {
         return ratio_;
-    }
-    int get_key_len() const {
-        return key_len_;
-    }
-    int get_val_len() const {
-        return val_len_;
-    }
-    int get_partition_size() const {
-        return partition_size_;
-    }
-    int get_partition_type() const {
-        return partition_type_;
-    }
-    int get_partition_max_size() const {
-        return partition_max_size_;
-    }
-    int get_partition_per_dma() const {
-        return partition_per_dma_;
     }
 };
 }

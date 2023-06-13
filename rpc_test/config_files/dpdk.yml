@@ -2,6 +2,6 @@ dpdk:
   # the ratio between number of rx threads to tx
   # strictly it should be greater than zero but
   # it is recommended to be between 1 and 2
-  rxtx_thread: 2.0
-  option: ./server -a e3:00.0 -d librte_net_mlx5.so -d librte_mempool_ring.so -l 0,32,33
+  rxtx_thread: 1.0
+  option: ./server -a e3:00.0 -d librte_net_mlx5.so -d librte_mempool_ring.so -l 0,1,2,3,4,32,33,34,35,36
   # option: ./client -a 0000:01:00.0,dv_flow_en=0,rxq_cqe_comp_en=0

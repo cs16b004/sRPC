@@ -16,24 +16,11 @@ int Config::create_config(int argc, char** argv) {
     config_s = new Config();
 
     char* end_ptr = nullptr;
-    config_s->duration_ = 10;
 
     int c;
     std::string filename;
-    while ((c = getopt(argc, argv, "f:d:")) != -1) {
+    while ((c = getopt(argc, argv, "f:")) != -1) {
         switch(c) {
-        case 'd': /* duration */
-            config_s->duration_ = strtoul(optarg, &end_ptr, 10);
-            while (*end_ptr != '\0') {
-                if (*end_ptr != ':') {
-                    Log_fatal("bad time argument: %s", optarg);
-                    assert(false);
-                }
-                config_s->duration_ *= 60;
-                config_s->duration_ += strtoul(end_ptr + 1, &end_ptr, 10);
-            }
-            break;
-
         case 'f':
             filename = std::string(optarg);
             config_s->config_paths_.push_back(filename);

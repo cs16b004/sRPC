@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "dpdk_transport/config.hpp"
-#include "dpdk_transport/transport.hpp"
 
 namespace rrr {
 void UDPServer::handle_read(){
@@ -20,10 +20,23 @@ void UDPServer::handle_read(){
     auto cli = &clientAddr;
     
     len = sizeof(*cli);  //len is value/resuslt
-    buf->resize(1500);
-    int n = ::recvfrom(sockfd_, (char *)buf->data(), 10,
+    buf->resize(100*100*100);
+    int n = ::recvfrom(sockfd_, (char *)buf->data(), 500,
                         MSG_DONTWAIT, (struct sockaddr *) cli, &len);
-    Log_info("Number of bytes received %d",n);
+   
+    if (n < 0) {
+        
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // No data available yet, try again
+                continue;
+            } else {
+                perror("recvfrom failed");
+                break;
+            }
+    }
+    else{
+         Log_info("Number of bytes received %d",n);
+    }
    // buf->resize(n);
     i64 xid;
     memcpy(&xid, buf->data() + xid_pos, sizeof(i64));
@@ -143,8 +156,8 @@ void UDPServer::start(){
     int argc = 5;
     Config::create_config(argc,argv);
     Config* config = Config::get_config();
-    //DpdkTransport dpdk_;
-   // dpdk_.init(config);
+    
+    dpdk_.init(config);
 
     // struct sockaddr_in serverAddr, clientAddr;
     

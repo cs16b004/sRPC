@@ -3,6 +3,9 @@
 #include "transport.hpp"
 #include <rte_ethdev.h>
 #include <rte_eth_ctrl.h>
+#include <rte_flow.h>
+#include <rte_ip.h>
+
 
 #define DPDK_RX_DESC_SIZE           1024
 #define DPDK_TX_DESC_SIZE           1024
@@ -11,9 +14,14 @@
 #define DPDK_MBUF_CACHE_SIZE        250
 #define DPDK_RX_BURST_SIZE          64
 #define DPDK_TX_BURST_SIZE          1
-
+#define MAX_PATTERN_NUM		3
+#define MAX_ACTION_NUM		2
 #define DPDK_RX_WRITEBACK_THRESH    64
+#define SRC_IP ((0<<24) + (0<<16) + (0<<8) + 0) /* src ip = 0.0.0.0 */
 
+#define FULL_MASK 0xffffffff /* full mask */
+
+#define EMPTY_MASK 0x0 /* empty mask */
 #define DPDK_PREFETCH_NUM           2
 namespace rrr{
 
@@ -38,16 +46,18 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     auto rx_info = reinterpret_cast<dpdk_thread_info*>(arg);
     auto dpdk_th = rx_info->dpdk_th;
     unsigned lcore_id = rte_lcore_id();
+    
     uint16_t port_id = rx_info->port_id;
 
     Log_info("Enter receive thread %d on core %d on port_id %d on queue %d",
              rx_info->thread_id, lcore_id, port_id, rx_info->queue_id);
-
+   
     while (!dpdk_th->force_quit) {
         struct rte_mbuf **bufs = rx_info->buf;
         const uint16_t max_size = rx_info->max_size;
         uint16_t nb_rx = rte_eth_rx_burst(port_id, rx_info->queue_id, 
                                           bufs, max_size);
+        //Log_info("Packets Received %d",nb_rx);
         if (unlikely(nb_rx == 0))
             continue;
         /* Log_debug("Thread %d received %d packets on queue %d and port_id %d", */
@@ -66,6 +76,17 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         rte_prefetch0(rte_pktmbuf_mtod(rx_info->buf[i], uint8_t*));
 
     for (int i = 0; i < rx_info->count; i++) {
+        struct rte_flow *matched_flow;
+    struct rte_flow_error error;
+        // matched_flow = rte_flow_classify(rx_info->port_id, ((struct rte_mbuf*)rx_info->buf[i])->hash, ((struct rte_mbuf*)rx_info->buf[i])->hash.fdir.hi, 0, &error);
+        // if (matched_flow != NULL) {
+        //     printf("Packet matched flow rule.\n");
+        //     // Handle the matched packet
+        // }
+        // else {
+        //     printf("Packet did not match any flow rule.\n");
+        //     // Handle unmatched packet
+        // }
         uint8_t* pkt_ptr = rte_pktmbuf_mtod((struct rte_mbuf*)rx_info->buf[i], uint8_t*);
         unsigned pkt_offset = 0;
 
@@ -74,8 +95,8 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         if (eth_hdr == nullptr)
             Log_fatal("Received packet was NULL");
         if (eth_hdr->ether_type != htons(EtherTypeIP)) {
-            /* Log_debug("Thread %d: packet droped as eth type is %04x", */
-            /*           rx_info->thread_id, ntohs(eth_hdr->ether_type)); */
+            Log_debug("Thread %d: packet droped as eth type is %0x", 
+                       rx_info->thread_id, ntohs(eth_hdr->ether_type)); 
             rx_info->stat.pkt_error++;
             rx_info->stat.pkt_eth_type_err++;
             continue;
@@ -87,11 +108,25 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         if (ipv4_hdr == nullptr)
             Log_fatal("IPv4 is NULL");
         if (ipv4_hdr->next_proto_id != IPProtUDP) {
-            /* Log_debug("Thread %d: packet droped as ipv4 protocol is %02x", */
-            /*           rx_info->thread_id, ipv4_hdr->next_proto_id); */
+             Log_debug("Thread %d: packet droped as ipv4 protocol is %02x", 
+                       rx_info->thread_id, ipv4_hdr->next_proto_id); 
             rx_info->stat.pkt_error++;
             rx_info->stat.pkt_ip_prot_err++;
             continue;
+        }
+        // Check for IP Address;
+        rte_be32_t pkt_ip_addr = ipv4_hdr->dst_addr;
+        
+            Log_debug("Thread %d: packet dst ipv4  is %s", 
+                       rx_info->thread_id, ipv4_to_string(pkt_ip_addr).c_str());
+            
+            
+        if (src_addr_[config_->host_name_].ip != (pkt_ip_addr)){
+            continue;
+            // Log_debug("Thread %d: packet droped as dst ipv4  is %s", 
+            //            rx_info->thread_id, ipv4_to_string(pkt_ip_addr).c_str());
+           
+            // Log_debug("Thread %d: src IP addr %s",rx_info->thread_id, ipv4_to_string(src_addr_[config_->host_name_].ip).c_str())   ;
         }
 
         /* Check UDP Header */
@@ -100,48 +135,48 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         if (udp_hdr == nullptr)
             Log_fatal("UDP is NULL");
         uint16_t dest_port = ntohs(udp_hdr->dst_port);
-        uint16_t rx_udp_port = src_addr_[rx_info->port_id].port/* + rx_info->queue_id */;
+        uint16_t rx_udp_port = src_addr_[config_->host_name_].port/* + rx_info->queue_id */;
         if (dest_port != rx_udp_port) {
-            /* Log_debug("Thread %d: packet droped as udp port is %d was not %d", */
-            /*           rx_info->thread_id, dest_port, rx_udp_port); */
+             Log_debug("Thread %d: packet droped as udp port is %d was not %d", 
+                       rx_info->thread_id, dest_port, rx_udp_port); 
             rx_info->stat.pkt_error++;
             rx_info->stat.pkt_port_num_err++;
             continue;
         }
+        Log_info("Packet matched !!");
+        // int server_id = -1;
+        // uint16_t src_port = ntohs(udp_hdr->src_port);
+        // NetAddress addr(eth_hdr->s_addr.addr_bytes, (uint32_t) ipv4_hdr->src_addr, src_port);
+        // for (auto& dest : dest_addr_) {
+        //     if (addr == dest.second) {
+        //         rx_info->stat.pkt_port_dest[dest.first]++;
+        //         server_id = dest.first;
+        //         break;
+        //     }
+        // }
+        // if (server_id == -1) {
+        //     server_id = dest_addr_.size();
+        //     dest_addr_[server_id] = addr;
+        //     rx_info->stat.pkt_port_dest[server_id] = 1;
+        // }
 
-        int server_id = -1;
-        uint16_t src_port = ntohs(udp_hdr->src_port);
-        NetAddress addr(eth_hdr->s_addr.addr_bytes, (uint32_t) ipv4_hdr->src_addr, src_port);
-        for (auto& dest : dest_addr_) {
-            if (addr == dest.second) {
-                rx_info->stat.pkt_port_dest[dest.first]++;
-                server_id = dest.first;
-                break;
-            }
-        }
-        if (server_id == -1) {
-            server_id = dest_addr_.size();
-            dest_addr_[server_id] = addr;
-            rx_info->stat.pkt_port_dest[server_id] = 1;
-        }
+        // Log_debug("Thread %d on queue %d and port_id %d",
+        //           rx_info->thread_id, rx_info->queue_id, rx_info->port_id);
 
-        Log_debug("Thread %d on queue %d and port_id %d",
-                  rx_info->thread_id, rx_info->queue_id, rx_info->port_id);
+        // pkt_offset += sizeof(struct rte_udp_hdr);
 
-        pkt_offset += sizeof(struct rte_udp_hdr);
-
-        uint8_t* payload = reinterpret_cast<uint8_t*>(pkt_ptr + pkt_offset);
-        int payload_len = ntohs(udp_hdr->dgram_len) - sizeof(struct rte_udp_hdr);
-        int app_offset = response_handler(payload, payload_len,
-                                          server_id, rx_info->thread_id);
-        if (app_offset < 0) {
-            Log_debug("Thread %d: packet drop as application process had error: %d",
-                      app_offset);
-            rx_info->stat.pkt_error++;
-            rx_info->stat.pkt_app_err++;
-            continue;
-        }
-        rx_info->stat.pkt_count++;
+        // uint8_t* payload = reinterpret_cast<uint8_t*>(pkt_ptr + pkt_offset);
+        // int payload_len = ntohs(udp_hdr->dgram_len) - sizeof(struct rte_udp_hdr);
+        // int app_offset = response_handler(payload, payload_len,
+        //                                   server_id, rx_info->thread_id);
+        // if (app_offset < 0) {
+        //     Log_debug("Thread %d: packet drop as application process had error: %d",
+        //               app_offset);
+        //     rx_info->stat.pkt_error++;
+        //     rx_info->stat.pkt_app_err++;
+        //     continue;
+        // }
+        // rx_info->stat.pkt_count++;
 
         /* TODO: check the total packet size with how much we processed */
 
@@ -155,52 +190,52 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         rte_pktmbuf_free(rx_info->buf[i]);
 }
 
-void DpdkTransport::send(uint8_t* payload, unsigned length,
-                      int server_id, int client_id) {
-    dpdk_thread_info* tx_info = &(thread_tx_info[client_id]);
-    if (tx_info->count == 0) {
-        int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id]);
-        if (ret < 0)
-            rte_panic("couldn't allocate mbufs");
-    }
+// void DpdkTransport::send(uint8_t* payload, unsigned length,
+//                       int server_id, int client_id) {
+//     dpdk_thread_info* tx_info = &(thread_tx_info[client_id]);
+//     if (tx_info->count == 0) {
+//         int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id]);
+//         if (ret < 0)
+//             rte_panic("couldn't allocate mbufs");
+//     }
 
-    uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
+//     uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
 
-    int hdr_len = make_pkt_header(pkt_buf, length, tx_info->port_id,
-                                  server_id, tx_info->udp_port_id);
-    /* We want to have uniform distribution accross all of rx threads */
-    /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
-    memcpy(pkt_buf + hdr_len, payload, length);
+//     int hdr_len = make_pkt_header(pkt_buf, length, tx_info->port_id,
+//                                   server_id, tx_info->udp_port_id);
+//     /* We want to have uniform distribution accross all of rx threads */
+//     /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
+//     memcpy(pkt_buf + hdr_len, payload, length);
 
-    int data_size = hdr_len + length;
-    tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4);
-    tx_info->buf[tx_info->count]->nb_segs = 1;
-    tx_info->buf[tx_info->count]->pkt_len = data_size;
-    tx_info->buf[tx_info->count]->data_len = data_size;
-    Log_debug("Thread %d send packet to server %d with size of %d",
-              client_id, server_id, data_size);
+//     int data_size = hdr_len + length;
+//     tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4);
+//     tx_info->buf[tx_info->count]->nb_segs = 1;
+//     tx_info->buf[tx_info->count]->pkt_len = data_size;
+//     tx_info->buf[tx_info->count]->data_len = data_size;
+//     Log_debug("Thread %d send packet to server %d with size of %d",
+//               client_id, server_id, data_size);
 
-    tx_info->count++;
-    if (unlikely(tx_info->count == tx_info->max_size)) {
-        int ret = rte_eth_tx_burst(tx_info->port_id, tx_info->queue_id,
-                                   tx_info->buf, tx_info->count);
-        if (unlikely(ret < 0))
-            rte_panic("Tx couldn't send\n");
+//     tx_info->count++;
+//     if (unlikely(tx_info->count == tx_info->max_size)) {
+//         int ret = rte_eth_tx_burst(tx_info->port_id, tx_info->queue_id,
+//                                    tx_info->buf, tx_info->count);
+//         if (unlikely(ret < 0))
+//             rte_panic("Tx couldn't send\n");
 
-        if (unlikely(ret != tx_info->count))
-            rte_panic("Couldn't send all packets\n");
+//         if (unlikely(ret != tx_info->count))
+//             rte_panic("Couldn't send all packets\n");
 
-        tx_info->stat.pkt_count += tx_info->count;
-        tx_info->count = 0;
-    }
-    else
-        tx_info->stat.pkt_error += tx_info->count;
-}
+//         tx_info->stat.pkt_count += tx_info->count;
+//         tx_info->count = 0;
+//     }
+//     else
+//         tx_info->stat.pkt_error += tx_info->count;
+// }
 
 int DpdkTransport::make_pkt_header(uint8_t *pkt, int payload_len,
-                                int src_id, int dest_id, int port_offset) {
-    NetAddress& src_addr = src_addr_[src_id];
-    NetAddress& dest_addr = dest_addr_[dest_id];
+                                int src_id, std::string dest_name, int port_offset) {
+    NetAddress& src_addr = src_addr_[config_->host_name_];
+    NetAddress& dest_addr = dest_addr_[dest_name]; 
 
     unsigned pkt_offset = 0;
     eth_hdr_t* eth_hdr = reinterpret_cast<eth_hdr_t*>(pkt);
@@ -220,6 +255,8 @@ int DpdkTransport::make_pkt_header(uint8_t *pkt, int payload_len,
 }
 
 void DpdkTransport::init(Config* config) {
+   // src_addr_ = new NetAddress();
+    config_= config;
     addr_config(config->host_name_, config->get_net_info());
 
     Config::CpuInfo cpu_info = config->get_cpu_info();
@@ -238,7 +275,8 @@ void DpdkTransport::init(Config* config) {
     main_thread = std::thread([this, argv_str](){
         this->init_dpdk_main_thread(argv_str);
     });
-    sleep(2);
+    
+    //sleep(200);
 }
 
 void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
@@ -308,21 +346,10 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
     thread_rx_info = new dpdk_thread_info[rx_threads_];
     thread_tx_info = new dpdk_thread_info[tx_threads_];
 
-    // port_info_ = new qdma_port_info[port_num_];
+    
 
      uint16_t portid;
      RTE_ETH_FOREACH_DEV(portid) {
-    //     int32_t config_bar, user_bar, bypass_bar;
-    //     ret = rte_pmd_qdma_get_bar_details(portid, &config_bar, &user_bar, &bypass_bar);
-    //     if (ret < 0)
-    //         rte_exit(EXIT_FAILURE, "Couldn't read qdma bar\n");
-
-    //     port_info_[portid].config_bar_idx = config_bar;
-    //     port_info_[portid].user_bar_idx = user_bar;
-    //     port_info_[portid].bypass_bar_idx = bypass_bar;
-
-    //     Log_info("PCIe bars for port %d: config bar: %d, user bar: %d, bypass bar: %d",
-    //              portid, config_bar, user_bar, bypass_bar);
 
         if (port_init(portid) != 0)
             rte_exit(EXIT_FAILURE, "Cannot init port %" PRIu16 "\n",
@@ -333,6 +360,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
 
     uint16_t lcore;
     for (lcore = 1; lcore < rx_threads_; lcore++) {
+        Log_info("Launching RX Thread");
         int retval = rte_eal_remote_launch(dpdk_rx_loop, &thread_rx_info[lcore], lcore);
         if (retval < 0)
             rte_exit(EXIT_FAILURE, "Couldn't lunch core %d\n", lcore);
@@ -346,9 +374,11 @@ void DpdkTransport::addr_config(std::string host_name,
                        std::vector<Config::NetworkInfo> net_info) {
     Log_info("Setting up netowkr info....");
     for (auto& net : net_info) {
-        std::map<int, NetAddress>* addr;
-        if (host_name == net.name)
+        std::map<std::string, NetAddress>* addr;
+        if (host_name == net.name){
             addr = &src_addr_;
+            Log_info("Configuring local address %d, %s",net.id,net.ip.c_str());
+        }
         else
             addr = &dest_addr_;
 
@@ -357,11 +387,11 @@ void DpdkTransport::addr_config(std::string host_name,
         /* else */
         /*     addr = &dest_addr_; */
 
-        auto it = addr->find(net.id);
+        auto it = addr->find(host_name);
         assert(it == addr->end());
-        Log_info("Adding a host with id %d : info :\n %s",net.id,net.to_string().c_str());
+        Log_info("Adding a host with name %s : info :\n %s",net.name.c_str(),net.to_string().c_str());
         addr->emplace(std::piecewise_construct,
-                      std::forward_as_tuple(net.id),
+                      std::forward_as_tuple(net.name),
                       std::forward_as_tuple(net.mac.c_str(),
                                             net.ip.c_str(),
                                             net.port));
@@ -394,12 +424,33 @@ int DpdkTransport::port_init(uint16_t port_id) {
                   port_id, strerror(-retval));
         return retval;
     }
+    isolate(port_id);
 
     memset(&port_conf, 0x0, sizeof(struct rte_eth_conf));
     memset(&txconf, 0x0, sizeof(struct rte_eth_txconf));
     memset(&rxconf, 0x0, sizeof(struct rte_eth_rxconf));
+    port_conf = {
+		.rxmode = {
+			.split_hdr_size = 0,
+		},
+		.txmode = {
+			.offloads =
+				DEV_TX_OFFLOAD_VLAN_INSERT |
+				DEV_TX_OFFLOAD_IPV4_CKSUM  |
+				DEV_TX_OFFLOAD_UDP_CKSUM   |
+				DEV_TX_OFFLOAD_TCP_CKSUM   |
+				DEV_TX_OFFLOAD_SCTP_CKSUM  |
+				DEV_TX_OFFLOAD_TCP_TSO,
+		},
+	};
+    
+    port_conf.txmode.offloads &= dev_info.tx_offload_capa;
 
+    rxconf = dev_info.default_rxconf;
+	rxconf.offloads = port_conf.rxmode.offloads;
+    
     retval = rte_eth_dev_configure(port_id, rx_queue_, tx_queue_, &port_conf);
+
     if (retval != 0) {
         Log_error("Error during device configuration (port %u) info: %s",
                   port_id, strerror(-retval));
@@ -459,39 +510,12 @@ int DpdkTransport::port_init(uint16_t port_id) {
         int thread_id = port_id * tx_queue_ + i;
         thread_tx_info[thread_id].init(this, thread_id, port_id, i, DPDK_TX_BURST_SIZE);
     }
-
+    install_flow_rule(port_id);
     return 0;
 }
 
 int DpdkTransport::port_close(uint16_t port_id) {
-    // struct rte_pmd_qdma_dev_attributes dev_attr;
-    // int retval;
-
-    // retval = rte_pmd_qdma_get_device_capabilities(port_id, &dev_attr);
-    // if (retval < 0) {
-    //     Log_error("rte_pmd_qdma_get_device_capabilities failed for port: %d",
-    //               port_id);
-    //     return retval;
-    // }
-
-    // int user_bar_idx = port_info_[port_id].user_bar_idx;
-    // if ((dev_attr.device_type == RTE_PMD_QDMA_DEVICE_SOFT) &&
-    //     (dev_attr.ip_type == RTE_PMD_EQDMA_SOFT_IP)) {
-    //     qdma_port_info::qdma_reg_write(user_bar_idx, C2H_CONTROL_REG,
-    //                                    C2H_STREAM_MARKER_PKT_GEN_VAL, port_id);
-
-    //     uint16_t retry = 50;
-    //     while (retry) {
-    //         usleep(500);
-    //         int reg_val = qdma_port_info::qdma_reg_read(user_bar_idx, C2H_STATUS_REG, port_id);
-    //         if (reg_val & MARKER_RESPONSE_COMPLETION_BIT)
-    //             break;
-
-    //         Log_error("Failed to receive c2h marker completion, retry count = %u\n",
-    //                   (50 - (retry-1)));
-    //         retry--;
-    //     }
-    // }
+   
 
     rte_eth_dev_stop(port_id);
    // rte_pmd_qdma_dev_close(port_id);
@@ -571,7 +595,7 @@ void DpdkTransport::register_resp_callback() {
     response_handler = [&](uint8_t* data, int data_len,
                           int server_id, int client_id) -> int {
         Log_debug("client %d got xid %ld", client_id, *reinterpret_cast<uint64_t*>(data));
-        this->send(data, data_len, server_id, client_id);
+        //this->send(data, data_len, server_id, client_id);
         return data_len;
     };
 }
@@ -677,114 +701,117 @@ void packet_stats::show_statistics() {
     if (pkt_app_err > 0)
         Log_info("Error on Application: %ld", pkt_app_err);
 }
-
-// void qdma_port_info::print_opennic_regs(uint32_t bar_idx) {
-//     Log_info("===================");
-//     Log_info("OpenNIC Statistics:");
-//     Log_info("===================");
-//     uint32_t tx_packet_sent_0 = qdma_reg_read(0, bar_idx, TX_PACKET_SENT_0);
-//     uint32_t tx_packet_dropped_0 = qdma_reg_read(0, bar_idx, TX_PACKET_DROPPED_0);
-//     uint32_t rx_packet_received_0 = qdma_reg_read(0, bar_idx, RX_PACKET_RECEIVED_0);
-//     uint32_t rx_packet_dropped_0 = qdma_reg_read(0, bar_idx, RX_PACKET_DROPPED_0);
-//     uint32_t rx_packet_w_error_0 = qdma_reg_read(0, bar_idx, RX_PACKET_W_ERROR_0);
-
-//     uint32_t tx_packet_sent_1 = qdma_reg_read(0, bar_idx, TX_PACKET_SENT_1);
-//     uint32_t tx_packet_dropped_1 = qdma_reg_read(0, bar_idx, TX_PACKET_DROPPED_1);
-//     uint32_t rx_packet_received_1 = qdma_reg_read(0, bar_idx, RX_PACKET_RECEIVED_1);
-//     uint32_t rx_packet_dropped_1 = qdma_reg_read(0, bar_idx, RX_PACKET_DROPPED_1);
-//     uint32_t rx_packet_w_error_1 = qdma_reg_read(0, bar_idx, RX_PACKET_W_ERROR_1);
-
-//     if (tx_packet_sent_0 > 0)
-//         Log_info("CMAC 0 Tx packets sent %ld", tx_packet_sent_0);
-//     if (tx_packet_dropped_0 > 0)
-//         Log_info("CMAC 0 Tx packets dropped %ld", tx_packet_dropped_0);
-//     if (rx_packet_received_0 > 0)
-//         Log_info("CMAC 0 Rx packets received %ld", rx_packet_received_0);
-//     if (rx_packet_dropped_0 > 0)
-//         Log_info("CMAC 0 Rx packets dropped %ld", rx_packet_dropped_0);
-//     if (rx_packet_w_error_0 > 0)
-//         Log_info("CMAC 0 Rx packets with error %ld", rx_packet_w_error_0);
-
-//     if (tx_packet_sent_1 > 0)
-//         Log_info("CMAC 1 Tx packets sent %ld", tx_packet_sent_1);
-//     if (tx_packet_dropped_1 > 0)
-//         Log_info("CMAC 1 Tx packets dropped %ld", tx_packet_dropped_1);
-//     if (rx_packet_received_1 > 0)
-//         Log_info("CMAC 1 Rx packets received %ld", rx_packet_received_1);
-//     if (rx_packet_dropped_1 > 0)
-//         Log_info("CMAC 1 Rx packets dropped %ld", rx_packet_dropped_1);
-//     if (rx_packet_w_error_1 > 0)
-//         Log_info("CMAC 1 Rx packets with error %ld", rx_packet_w_error_1);
-// }
-
-// void DpdkTransport::qdma_port_info::qdma_reg_write(int port_id, uint32_t bar,
-//                                                 uint32_t offset, uint32_t value) {
-//     qdma_pci_write_reg(&rte_eth_devices[port_id], bar, offset, value);
-// }
-
-// uint32_t DpdkTransport::qdma_port_info::qdma_reg_read(int port_id, uint32_t bar,
-//                                                    uint32_t offset) {
-//     return qdma_pci_read_reg(&rte_eth_devices[port_id], bar, offset);
-// }
-
-void DpdkTransport::install_flow_rule(size_t phy_port, size_t qp_id, uint32_t ipv4_addr,uint16_t udp_port){
+int  DpdkTransport::isolate(uint8_t phy_port){ 
+	 	struct rte_flow_error* error = (struct rte_flow_error*) malloc(sizeof(struct rte_flow_error));
+		int ret = rte_flow_isolate(phy_port, 1,error);
+		if (ret < 0) 
+             Log_error("Failed to enable flow isolation for port %d\n, message: %s", phy_port,error->message);
+        else
+             Log_info("Flow isolation enabled for port %d\n", phy_port);
+		return ret; 
+}
+void DpdkTransport::install_flow_rule(size_t phy_port){
     
-  bool installed = false;
+  
+   struct rte_flow_attr attr;
+	struct rte_flow_item pattern[MAX_PATTERN_NUM];
+	struct rte_flow_action action[MAX_ACTION_NUM];
+	struct rte_flow *flow = NULL;
+	struct rte_flow_action_queue queue = { .index = 0 };
+	struct rte_flow_item_ipv4 ip_spec;
+	struct rte_flow_item_ipv4 ip_mask;
+    struct rte_flow_item_eth eth_spec;
+    struct rte_flow_item_eth eth_mask;
+    struct rte_flow_item_udp udp_spec;
+    struct rte_flow_item_udp udp_mask;
 
-//   const int ntuple_filter_supported =
-//       rte_eth_dev_filter_supported(phy_port, RTE_ETH_FILTER_NTUPLE);
+    struct rte_flow_error error;
+	int res;
 
-//   const int fdir_filter_supported =
-//       rte_eth_dev_filter_supported(phy_port, RTE_ETH_FILTER_FDIR);
+	memset(pattern, 0, sizeof(pattern));
+	memset(action, 0, sizeof(action));
 
-//   if (ntuple_filter_supported != 0 && fdir_filter_supported != 0) {
-//     Log_warn("No flow steering supported by NIC. Apps likely won't work.\n");
-//     return;
-//   }
+	/*
+	 * set the rule attribute.
+	 * in this case only ingress packets will be checked.
+	 */
+	memset(&attr, 0, sizeof(struct rte_flow_attr));
+    attr.priority =1 ;
+	attr.ingress = 1;
 
-//   // Try the simplest filter first. I couldn't get FILTER_FDIR to work with
-//   // ixgbe, although it technically supports flow director.
-//   if (ntuple_filter_supported == 0) {
-//     struct rte_eth_ntuple_filter ntuple;
-//     memset(&ntuple, 0, sizeof(ntuple));
-//     ntuple.flags = RTE_5TUPLE_FLAGS;
-//     ntuple.dst_port = rte_cpu_to_be_16(udp_port);
-//     ntuple.dst_port_mask = UINT16_MAX;
-//     ntuple.dst_ip = rte_cpu_to_be_32(ipv4_addr);
-//     ntuple.dst_ip_mask = UINT32_MAX;
-//     ntuple.proto = IPPROTO_UDP;
-//     ntuple.proto_mask = UINT8_MAX;
-//     ntuple.priority = 1;
-//     ntuple.queue = qp_id;
+	/*
+	 * create the action sequence.
+	 * one action only,  move packet to queue
+	 */
+	action[0].type = RTE_FLOW_ACTION_TYPE_QUEUE;
+	action[0].conf = &queue;
+	action[1].type = RTE_FLOW_ACTION_TYPE_END;
 
-//     int ret = rte_eth_dev_filter_ctrl(phy_port, RTE_ETH_FILTER_NTUPLE,
-//                                       RTE_ETH_FILTER_ADD, &ntuple);
-//     if (ret != 0) {
-//       Log_warn("Failed to add ntuple filter. This could be survivable.\n");
-//     } else {
-//       Log_warn("Installed ntuple flow rule. Queue %zu, RX UDP port = %u.\n",
-//                 qp_id, udp_port);
-//     }
-//     installed = (ret == 0);
-//   }
+	/*
+	 * set the first level of the pattern (ETH).
+	 * since in this example we just want to get the
+	 * ipv4 we set this level to allow all.
+	 */
+	pattern[0].type = RTE_FLOW_ITEM_TYPE_ETH;
+    memset(&eth_spec, 0, sizeof(struct rte_flow_item_eth));
+    memset(&eth_mask, 0, sizeof(struct rte_flow_item_eth));
+    eth_spec.type = RTE_BE16(RTE_ETHER_TYPE_IPV4);
+    eth_mask.type = RTE_BE16(0xffff);
+    pattern[0].type = RTE_FLOW_ITEM_TYPE_ETH;
+    pattern[0].spec = &eth_spec;
+    pattern[0].mask = &eth_mask;
 
-//   if (!installed && fdir_filter_supported == 0) {
-//     // Use fdir filter for i40e (5-tuple not supported)
-//     rte_eth_fdir_filter filter;
-//     memset(&filter, 0, sizeof(filter));
-//     filter.soft_id = qp_id;
-//     filter.input.flow_type = RTE_ETH_FLOW_NONFRAG_IPV4_UDP;
-//     filter.input.flow.udp4_flow.dst_port = rte_cpu_to_be_16(udp_port);
-//     filter.input.flow.udp4_flow.ip.dst_ip = rte_cpu_to_be_32(ipv4_addr);
-//     filter.action.rx_queue = qp_id;
-//     filter.action.behavior = RTE_ETH_FDIR_ACCEPT;
-//     filter.action.report_status = RTE_ETH_FDIR_NO_REPORT_STATUS;
+	/*
+	 * setting the second level of the pattern (IP).
+	 * in this example this is the level we care about
+	 * so we set it according to the parameters.
+	 */
+	memset(&ip_spec, 0, sizeof(struct rte_flow_item_ipv4));
+	memset(&ip_mask, 0, sizeof(struct rte_flow_item_ipv4));
+	ip_spec.hdr.dst_addr = src_addr_[config_->host_name_].ip;
 
-//     int ret = rte_eth_dev_filter_ctrl(phy_port, RTE_ETH_FILTER_FDIR,
-//                                       RTE_ETH_FILTER_ADD, &filter);
-//     rt_assert(ret == 0, "Failed to add fdir flow rule: ", strerror(-1 * ret));
+     ip_mask.hdr.dst_addr = RTE_BE32(0xffffffff);
+    //ip_spec.hdr.src_addr = 0;
+    //ip_mask.hdr.src_addr = RTE_BE32(0);
 
-//     Log_warn("Installed flow-director rule. Queue %zu, RX UDP port = %u.\n",
-//               qp_id, udp_port);
-  }
+    Log_info("IP Address to be queued %s",ipv4_to_string(ip_spec.hdr.dst_addr).c_str());
+
+	//ip_mask.hdr.dst_addr = 
+	
+	pattern[1].type = RTE_FLOW_ITEM_TYPE_IPV4;
+	pattern[1].spec = &ip_spec;
+	pattern[1].mask = &ip_mask;
+
+	
+
+    memset(&udp_mask, 0, sizeof(struct rte_flow_item_udp));
+    memset(&udp_spec, 0, sizeof(struct rte_flow_item_udp));
+    udp_spec.hdr.dst_port = RTE_BE16(8501);
+    udp_mask.hdr.dst_port = RTE_BE16(0xffff);
+    /* TODO: Change this to support leader change */
+    udp_spec.hdr.src_port = 0;
+    udp_mask.hdr.src_port = RTE_BE16(0);
+    udp_mask.hdr.dgram_len = RTE_BE16(0);
+    pattern[2].type = RTE_FLOW_ITEM_TYPE_UDP;
+    pattern[2].spec = &udp_spec;
+    pattern[2].mask = &udp_mask;
+    /* the final level must be always type end */
+	pattern[2].type = RTE_FLOW_ITEM_TYPE_END;
+	res = rte_flow_validate(phy_port, &attr, pattern, action, &error);
+    
+
+	if (!res){
+		flow = rte_flow_create(phy_port, &attr, pattern, action, &error);
+        Log_info("Flow Rule Added for IP Address : %s",ipv4_to_string(src_addr_[config_->host_name_].ip).c_str());
+        // int ret = rte_flow_isolate(phy_port, 1,&error);
+   
+        //  if (!ret) 
+        //     Log_error("Failed to enable flow isolation for port %d\n, message: %s", phy_port,error.message);
+        //  else
+        //     Log_info("Flow isolation enabled for port %d\n", phy_port);
+    }else{
+        Log_error("Failed to create flow rule: %s\n", error.message);
+    }
+
+}
 }

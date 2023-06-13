@@ -8,6 +8,7 @@
 
 #include "misc/marshal.hpp"
 #include "polling.hpp"
+#include "dpdk_transport/transport.hpp"
 
 // for getaddrinfo() used in Server::start()
 struct addrinfo;
@@ -144,6 +145,7 @@ public:
     }
 };
 class UDPServer : Pollable {
+        DpdkTransport dpdk_;
         friend class Server;
         const int xid_pos = 32;
         Server* server_;

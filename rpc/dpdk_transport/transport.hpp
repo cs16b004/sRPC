@@ -51,7 +51,7 @@ namespace rrr{
             SpinLock in_l_;
             SpinLock out_l_;
             uint32_t bytes_recvd, bytes_txd;
-            
+            uint16_t udp_port;
             enum {OPEN, CLOSED} status_;
             public:
             Connection(NetAddress & addr){
@@ -60,6 +60,9 @@ namespace rrr{
                 bytes_recvd=0;
                 bytes_txd = 0;
                 
+            }
+            bool isOpen(){
+                return (status_ == OPEN);
             }
             uint32_t putIn(uint8_t *in_bytes,uint32_t n){
                 in_l_.lock();
@@ -77,11 +80,18 @@ namespace rrr{
                 bytes_txd+=n_read;
                 out_l_.unlock();
             }
+            void printStats(){
+                std::stringstream ss;
+                ss<<"[ Status: "<<status_<<"\n Bytes Received: "<<bytes_recvd<<"\n Bytes Transmitted: "<<bytes_txd<<"]\n";
+                Log_info(ss.str().c_str());
+            }
 
     };
     
     class DpdkTransport {
     private:
+
+        Config* config_;
         int port_num_ = 0;
         int tx_threads_ = 0;
         int rx_threads_ = 0;
@@ -91,9 +101,9 @@ namespace rrr{
         struct rte_mempool **tx_mbuf_pool;
         struct rte_mempool **rx_mbuf_pool;
         std::map<uint32_t,rrr::Connection*> connections_;
-
-        std::map<int, NetAddress> src_addr_;
-        std::map<int, NetAddress> dest_addr_;
+        
+        std::map<std::string, NetAddress> src_addr_;
+        std::map<std::string, NetAddress> dest_addr_;
 
         struct dpdk_thread_info *thread_rx_info{nullptr};
         struct dpdk_thread_info *thread_tx_info{nullptr};
@@ -111,18 +121,19 @@ namespace rrr{
         int port_init(uint16_t port_id);
         int port_reset(uint16_t port_id);
         int port_close(uint16_t port_id);
-        static void install_flow_rule(size_t phy_port, size_t qp_id, uint32_t ipv4_addr,uint16_t udp_port);
+        void install_flow_rule(size_t phy_port);
 
         static int dpdk_rx_loop(void* arg);
         void process_incoming_packets(dpdk_thread_info* rx_buf_info);
 
         int make_pkt_header(uint8_t *pkt, int payload_len,
-                        int src_id, int dest_id, int port_offset);
+                        int src_id, std::string dest_id, int port_offset);
+        int isolate(uint8_t phy_port);
 
 
 public:
     void init(Config* config);
-    void send(uint8_t* payload, unsigned length, int server_id, int client_id);
+   // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
     uint32_t connect (std::string server_ip,uint32_t port);
     int connect(std::string addr);
     // int accept (); For Server Implementation;
