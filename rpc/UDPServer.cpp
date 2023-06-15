@@ -23,7 +23,7 @@ void UDPServer::handle_read(){
     buf->resize(100*100*100);
     int n = ::recvfrom(sockfd_, (char *)buf->data(), 500,
                         MSG_DONTWAIT, (struct sockaddr *) cli, &len);
-   
+    
     if (n < 0) {
         
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -157,7 +157,7 @@ void UDPServer::start(){
     Config::create_config(argc,argv);
     Config* config = Config::get_config();
     
-    dpdk_.init(config);
+   // dpdk_.init(config);
 
     // struct sockaddr_in serverAddr, clientAddr;
     

@@ -18,52 +18,52 @@ namespace rrr {
 
 #ifdef RPC_STATISTICS
 
-static const int g_stat_server_batching_size = 1000;
-static int g_stat_server_batching[g_stat_server_batching_size];
-static int g_stat_server_batching_idx;
-static uint64_t g_stat_server_batching_report_time = 0;
-static const uint64_t g_stat_server_batching_report_interval = 1000 * 1000 * 1000;
+static const int g_stat_TCPServer_batching_size = 1000;
+static int g_stat_TCPServer_batching[g_stat_TCPServer_batching_size];
+static int g_stat_TCPServer_batching_idx;
+static uint64_t g_stat_TCPServer_batching_report_time = 0;
+static const uint64_t g_stat_TCPServer_batching_report_interval = 1000 * 1000 * 1000;
 
-static void stat_server_batching(size_t batch) {
-    g_stat_server_batching_idx = (g_stat_server_batching_idx + 1) % g_stat_server_batching_size;
-    g_stat_server_batching[g_stat_server_batching_idx] = batch;
+static void stat_TCPServer_batching(size_t batch) {
+    g_stat_TCPServer_batching_idx = (g_stat_TCPServer_batching_idx + 1) % g_stat_TCPServer_batching_size;
+    g_stat_TCPServer_batching[g_stat_TCPServer_batching_idx] = batch;
     uint64_t now = base::rdtsc();
-    if (now - g_stat_server_batching_report_time > g_stat_server_batching_report_interval) {
+    if (now - g_stat_TCPServer_batching_report_time > g_stat_TCPServer_batching_report_interval) {
         // do report
         int min = numeric_limits<int>::max();
         int max = 0;
         int sum_count = 0;
         int sum = 0;
-        for (int i = 0; i < g_stat_server_batching_size; i++) {
-            if (g_stat_server_batching[i] == 0) {
+        for (int i = 0; i < g_stat_TCPServer_batching_size; i++) {
+            if (g_stat_TCPServer_batching[i] == 0) {
                 continue;
             }
-            if (g_stat_server_batching[i] > max) {
-                max = g_stat_server_batching[i];
+            if (g_stat_TCPServer_batching[i] > max) {
+                max = g_stat_TCPServer_batching[i];
             }
-            if (g_stat_server_batching[i] < min) {
-                min = g_stat_server_batching[i];
+            if (g_stat_TCPServer_batching[i] < min) {
+                min = g_stat_TCPServer_batching[i];
             }
-            sum += g_stat_server_batching[i];
+            sum += g_stat_TCPServer_batching[i];
             sum_count++;
-            g_stat_server_batching[i] = 0;
+            g_stat_TCPServer_batching[i] = 0;
         }
         double avg = double(sum) / sum_count;
-        Log::info("* SERVER BATCHING: min=%d avg=%.1lf max=%d", min, avg, max);
-        g_stat_server_batching_report_time = now;
+        Log::info("* TCPServer BATCHING: min=%d avg=%.1lf max=%d", min, avg, max);
+        g_stat_TCPServer_batching_report_time = now;
     }
 }
 
 // rpc_id -> <count, cumulative>
 static unordered_map<i32, pair<Counter, Counter>> g_stat_rpc_counter;
-static uint64_t g_stat_server_rpc_counting_report_time = 0;
-static const uint64_t g_stat_server_rpc_counting_report_interval = 1000 * 1000 * 1000;
+static uint64_t g_stat_TCPServer_rpc_counting_report_time = 0;
+static const uint64_t g_stat_TCPServer_rpc_counting_report_interval = 1000 * 1000 * 1000;
 
-static void stat_server_rpc_counting(i32 rpc_id) {
+static void stat_TCPServer_rpc_counting(i32 rpc_id) {
     g_stat_rpc_counter[rpc_id].first.next();
 
     uint64_t now = base::rdtsc();
-    if (now - g_stat_server_rpc_counting_report_time > g_stat_server_rpc_counting_report_interval) {
+    if (now - g_stat_TCPServer_rpc_counting_report_time > g_stat_TCPServer_rpc_counting_report_interval) {
         // do report
         for (auto& it: g_stat_rpc_counter) {
             i32 counted_rpc_id = it.first;
@@ -73,33 +73,33 @@ static void stat_server_rpc_counting(i32 rpc_id) {
             i64 cumulative = it.second.second.peek_next();
             Log::info("* RPC COUNT: id=%#08x count=%ld cumulative=%ld", counted_rpc_id, count, cumulative);
         }
-        g_stat_server_rpc_counting_report_time = now;
+        g_stat_TCPServer_rpc_counting_report_time = now;
     }
 }
 
 #endif // RPC_STATISTICS
 
 
-std::unordered_set<i32> ServerConnection::rpc_id_missing_s;
-SpinLock ServerConnection::rpc_id_missing_l_s;
+std::unordered_set<i32> TCPConnection::rpc_id_missing_s;
+SpinLock TCPConnection::rpc_id_missing_l_s;
 
 
-ServerConnection::ServerConnection(Server* server, int socket)
-        : server_(server), socket_(socket), bmark_(nullptr), status_(CONNECTED) {
+TCPConnection::TCPConnection(TCPServer* TCPServer, int socket)
+        : TCPServer_(TCPServer), socket_(socket), bmark_(nullptr), status_(CONNECTED) {
     // increase number of open connections
-    server_->sconns_ctr_.next(1);
+    TCPServer_->sconns_ctr_.next(1);
 }
 
-ServerConnection::~ServerConnection() {
+TCPConnection::~TCPConnection() {
     // decrease number of open connections
-    server_->sconns_ctr_.next(-1);
+    TCPServer_->sconns_ctr_.next(-1);
 }
 
-int ServerConnection::run_async(const std::function<void()>& f) {
-    return server_->threadpool_->run_async(f);
+int TCPConnection::run_async(const std::function<void()>& f) {
+    return TCPServer_->threadpool_->run_async(f);
 }
 
-void ServerConnection::begin_reply(Request* req, i32 error_code /* =... */) {
+void TCPConnection::begin_reply(Request* req, i32 error_code /* =... */) {
     out_l_.lock();
     v32 v_error_code = error_code;
     v64 v_reply_xid = req->xid;
@@ -110,7 +110,7 @@ void ServerConnection::begin_reply(Request* req, i32 error_code /* =... */) {
     *this << v_error_code;
 }
 
-void ServerConnection::end_reply() {
+void TCPConnection::end_reply() {
     // set reply size in packet
     if (bmark_ != nullptr) {
         i32 reply_size = out_.get_and_reset_write_cnt();
@@ -121,12 +121,12 @@ void ServerConnection::end_reply() {
 
     // always enable write events since the code above gauranteed there
     // will be some data to send
-    server_->pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
+    TCPServer_->pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
 
     out_l_.unlock();
 }
 
-void ServerConnection::handle_read() {
+void TCPConnection::handle_read() {
     if (status_ == CLOSED) {
         return;
     }
@@ -160,7 +160,7 @@ void ServerConnection::handle_read() {
     }
 
 #ifdef RPC_STATISTICS
-    stat_server_batching(complete_requests.size());
+    stat_TCPServer_batching(complete_requests.size());
 #endif // RPC_STATISTICS
 
     for (auto& req: complete_requests) {
@@ -172,18 +172,18 @@ void ServerConnection::handle_read() {
             delete req;
             continue;
         }
-
+        //req->print();
         i32 rpc_id;
         req->m >> rpc_id;
 
 #ifdef RPC_STATISTICS
-        stat_server_rpc_counting(rpc_id);
+        stat_TCPServer_rpc_counting(rpc_id);
 #endif // RPC_STATISTICS
 
-        auto it = server_->handlers_.find(rpc_id);
-        if (it != server_->handlers_.end()) {
-            // the handler should delete req, and release server_connection refcopy.
-            it->second(req, (ServerConnection *) this->ref_copy());
+        auto it = TCPServer_->handlers_.find(rpc_id);
+        if (it != TCPServer_->handlers_.end()) {
+            // the handler should delete req, and release TCPServer_connection refcopy.
+            it->second(req, (TCPConnection *) this->ref_copy());
         } else {
             rpc_id_missing_l_s.lock();
             bool surpress_warning = false;
@@ -194,7 +194,7 @@ void ServerConnection::handle_read() {
             }
             rpc_id_missing_l_s.unlock();
             if (!surpress_warning) {
-                Log_error("rrr::ServerConnection: no handler for rpc_id=0x%08x", rpc_id);
+                Log_error("rrr::TCPConnection: no handler for rpc_id=0x%08x", rpc_id);
             }
             begin_reply(req, ENOENT);
             end_reply();
@@ -203,7 +203,7 @@ void ServerConnection::handle_read() {
     }
 }
 
-void ServerConnection::handle_write() {
+void TCPConnection::handle_write() {
     if (status_ == CLOSED) {
         return;
     }
@@ -211,35 +211,35 @@ void ServerConnection::handle_write() {
     out_l_.lock();
     out_.write_to_fd(socket_);
     if (out_.empty()) {
-        server_->pollmgr_->update_mode(this, Pollable::READ);
+        TCPServer_->pollmgr_->update_mode(this, Pollable::READ);
     }
     out_l_.unlock();
 }
 
-void ServerConnection::handle_error() {
+void TCPConnection::handle_error() {
     this->close();
 }
 
-void ServerConnection::close() {
+void TCPConnection::close() {
     bool should_release = false;
 
     if (status_ == CONNECTED) {
-        server_->sconns_l_.lock();
-        unordered_set<ServerConnection*>::iterator it = server_->sconns_.find(this);
-        if (it == server_->sconns_.end()) {
+        TCPServer_->sconns_l_.lock();
+        unordered_set<TCPConnection*>::iterator it = TCPServer_->sconns_.find(this);
+        if (it == TCPServer_->sconns_.end()) {
             // another thread has already calling close()
-            server_->sconns_l_.unlock();
+            TCPServer_->sconns_l_.unlock();
             return;
         }
-        server_->sconns_.erase(it);
+        TCPServer_->sconns_.erase(it);
 
-        // because we released this connection from server_->sconns_
+        // because we released this connection from TCPServer_->sconns_
         should_release = true;
 
-        server_->pollmgr_->remove(this);
-        server_->sconns_l_.unlock();
+        TCPServer_->pollmgr_->remove(this);
+        TCPServer_->sconns_l_.unlock();
 
-        Log_debug("rrr::ServerConnection: closed on fd=%d", socket_);
+        Log_debug("rrr::TCPConnection: closed on fd=%d", socket_);
 
         status_ = CLOSED;
         ::close(socket_);
@@ -251,7 +251,7 @@ void ServerConnection::close() {
     }
 }
 
-int ServerConnection::poll_mode() {
+int TCPConnection::poll_mode() {
     int mode = Pollable::READ;
     out_l_.lock();
     if (!out_.empty()) {
@@ -261,8 +261,8 @@ int ServerConnection::poll_mode() {
     return mode;
 }
 
-Server::Server(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */)
-        : server_sock_(-1), status_(NEW) {
+TCPServer::TCPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */)
+        : TCPServer_sock_(-1), status_(NEW) {
 
     // get rid of eclipse warning
     memset(&loop_th_, 0, sizeof(loop_th_));
@@ -280,19 +280,19 @@ Server::Server(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */)
     }
 }
 
-Server::~Server() {
+TCPServer::~TCPServer() {
     if (status_ == RUNNING) {
         status_ = STOPPING;
         // wait till accepting thread done
         Pthread_join(loop_th_, nullptr);
 
-        verify(server_sock_ == -1 && status_ == STOPPED);
+        verify(TCPServer_sock_ == -1 && status_ == STOPPED);
     }
 
     sconns_l_.lock();
-    vector<ServerConnection*> sconns(sconns_.begin(), sconns_.end());
+    vector<TCPConnection*> sconns(sconns_.begin(), sconns_.end());
     // NOTE: do NOT clear sconns_ here, because when running the following
-    // it->close(), the ServerConnection object will check the sconns_ to
+    // it->close(), the TCPConnection object will check the sconns_ to
     // ensure it still resides in sconns_
     sconns_l_.unlock();
 
@@ -319,38 +319,38 @@ Server::~Server() {
     threadpool_->release();
     pollmgr_->release();
 
-    //Log_debug("rrr::Server: destroyed");
+    //Log_debug("rrr::TCPServer: destroyed");
 }
 
-struct start_server_loop_args_type {
-    Server* server;
+struct start_TCPServer_loop_args_type {
+    TCPServer* TCPServer;
     struct addrinfo* gai_result;
     struct addrinfo* svr_addr;
 };
 
-void* Server::start_server_loop(void* arg) {
-    start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
+void* TCPServer::start_server_loop(void* arg) {
+    start_TCPServer_loop_args_type* start_TCPServer_loop_args = (start_TCPServer_loop_args_type*) arg;
 
-    start_server_loop_args->server->server_loop(start_server_loop_args->svr_addr);
+    start_TCPServer_loop_args->TCPServer->server_loop(start_TCPServer_loop_args->svr_addr);
 
-    freeaddrinfo(start_server_loop_args->gai_result);
-    delete start_server_loop_args;
+    freeaddrinfo(start_TCPServer_loop_args->gai_result);
+    delete start_TCPServer_loop_args;
 
     pthread_exit(nullptr);
     return nullptr;
 }
 
-void Server::server_loop(struct addrinfo* svr_addr) {
+void TCPServer::server_loop(struct addrinfo* svr_addr) {
     fd_set fds;
     while (status_ == RUNNING) {
         FD_ZERO(&fds);
-        FD_SET(server_sock_, &fds);
+        FD_SET(TCPServer_sock_, &fds);
 
-        // use select to avoid waiting on accept when closing server
+        // use select to avoid waiting on accept when closing TCPServer
         timeval tv;
         tv.tv_sec = 0;
         tv.tv_usec = 50 * 1000; // 0.05 sec
-        int fdmax = server_sock_;
+        int fdmax = TCPServer_sock_;
 
         int n_ready = select(fdmax + 1, &fds, nullptr, nullptr, &tv);
         if (n_ready == 0) {
@@ -360,29 +360,29 @@ void Server::server_loop(struct addrinfo* svr_addr) {
             break;
         }
 
-        int clnt_socket = accept(server_sock_, svr_addr->ai_addr, &svr_addr->ai_addrlen);
+        int clnt_socket = accept(TCPServer_sock_, svr_addr->ai_addr, &svr_addr->ai_addrlen);
         if (clnt_socket >= 0 && status_ == RUNNING) {
-            Log_debug("rrr::Server: got new client, fd=%d", clnt_socket);
+            Log_debug("rrr::TCPServer: got new client, fd=%d", clnt_socket);
             verify(set_nonblocking(clnt_socket, true) == 0);
 
             sconns_l_.lock();
-            ServerConnection* sconn = new ServerConnection(this, clnt_socket);
+            TCPConnection* sconn = new TCPConnection(this, clnt_socket);
             sconns_.insert(sconn);
             pollmgr_->add(sconn);
             sconns_l_.unlock();
         }
     }
 
-    close(server_sock_);
-    server_sock_ = -1;
+    close(TCPServer_sock_);
+    TCPServer_sock_ = -1;
     status_ = STOPPED;
 }
 
-int Server::start(const char* bind_addr) {
+int TCPServer::start(const char* bind_addr) {
     string addr(bind_addr);
     size_t idx = addr.find(":");
     if (idx == string::npos) {
-        Log_error("rrr::Server: bad bind address: %s", bind_addr);
+        Log_error("rrr::TCPServer: bad bind address: %s", bind_addr);
         return EINVAL;
     }
     string host = addr.substr(0, idx);
@@ -393,56 +393,56 @@ int Server::start(const char* bind_addr) {
 
     hints.ai_family = AF_INET; // ipv4
     hints.ai_socktype = SOCK_STREAM; // tcp
-    hints.ai_flags = AI_PASSIVE; // server side
+    hints.ai_flags = AI_PASSIVE; // TCPServer side
 
     int r = getaddrinfo((host == "0.0.0.0") ? nullptr : host.c_str(), port.c_str(), &hints, &result);
     if (r != 0) {
-        Log_error("rrr::Server: getaddrinfo(): %s", gai_strerror(r));
+        Log_error("rrr::TCPServer: getaddrinfo(): %s", gai_strerror(r));
         return EINVAL;
     }
 
     for (rp = result; rp != nullptr; rp = rp->ai_next) {
-        server_sock_ = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (server_sock_ == -1) {
+        TCPServer_sock_ = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (TCPServer_sock_ == -1) {
             continue;
         }
 
         const int yes = 1;
-        verify(setsockopt(server_sock_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == 0);
-        verify(setsockopt(server_sock_, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes)) == 0);
+        verify(setsockopt(TCPServer_sock_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == 0);
+        verify(setsockopt(TCPServer_sock_, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes)) == 0);
 
-        if (::bind(server_sock_, rp->ai_addr, rp->ai_addrlen) == 0) {
+        if (::bind(TCPServer_sock_, rp->ai_addr, rp->ai_addrlen) == 0) {
             break;
         }
-        close(server_sock_);
-        server_sock_ = -1;
+        close(TCPServer_sock_);
+        TCPServer_sock_ = -1;
     }
 
     if (rp == nullptr) {
         // failed to bind
-        Log_error("rrr::Server: bind(): %s", strerror(errno));
+        Log_error("rrr::TCPServer: bind(): %s", strerror(errno));
         freeaddrinfo(result);
         return EINVAL;
     }
 
     // about backlog: http://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/023/2333/2333s2.html
     const int backlog = SOMAXCONN;
-    verify(listen(server_sock_, backlog) == 0);
-    verify(set_nonblocking(server_sock_, true) == 0);
+    verify(listen(TCPServer_sock_, backlog) == 0);
+    verify(set_nonblocking(TCPServer_sock_, true) == 0);
 
     status_ = RUNNING;
-    Log_info("rrr::Server: started on %s", bind_addr);
+    Log_info("rrr::TCPServer: started on %s", bind_addr);
 
-    start_server_loop_args_type* start_server_loop_args = new start_server_loop_args_type();
-    start_server_loop_args->server = this;
-    start_server_loop_args->gai_result = result;
-    start_server_loop_args->svr_addr = rp;
-    Pthread_create(&loop_th_, nullptr, Server::start_server_loop, start_server_loop_args);
+    start_TCPServer_loop_args_type* start_TCPServer_loop_args = new start_TCPServer_loop_args_type();
+    start_TCPServer_loop_args->TCPServer = this;
+    start_TCPServer_loop_args->gai_result = result;
+    start_TCPServer_loop_args->svr_addr = rp;
+    Pthread_create(&loop_th_, nullptr, TCPServer::start_TCPServer_loop, start_TCPServer_loop_args);
 
     return 0;
 }
 
-int Server::reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*)>& func) {
+int TCPServer::reg(i32 rpc_id, const std::function<void(Request*, TCPConnection*)>& func) {
     // disallow duplicate rpc_id
     if (handlers_.find(rpc_id) != handlers_.end()) {
         return EEXIST;
@@ -453,7 +453,7 @@ int Server::reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*
     return 0;
 }
 
-void Server::unreg(i32 rpc_id) {
+void TCPServer::unreg(i32 rpc_id) {
     handlers_.erase(rpc_id);
 }
 

@@ -10,11 +10,11 @@
 #include "polling.hpp"
 #include "dpdk_transport/transport.hpp"
 
-// for getaddrinfo() used in Server::start()
+// for getaddrinfo() used in TCPServer::start()
 struct addrinfo;
 #define MAX_BUFFER_SIZE 12000
 namespace rrr {
-class Server;
+class TCPServer;
 
 /**
  * The raw packet sent from client will be like this:
@@ -35,10 +35,41 @@ public:
     virtual int __reg_to__(Server*) = 0;
 };
 
-class ServerConnection: public Pollable {
 
-    friend class Server;
+class DeferredReply: public NoCopy {
+    rrr::Request* req_;
+    rrr::TCPConnection* sconn_;
+    std::function<void()> marshal_reply_;
+    std::function<void()> cleanup_;
 
+public:
+
+    DeferredReply(rrr::Request* req, rrr::TCPConnection* sconn,
+                  const std::function<void()>& marshal_reply, const std::function<void()>& cleanup)
+        : req_(req), sconn_(sconn), marshal_reply_(marshal_reply), cleanup_(cleanup) {}
+
+    ~DeferredReply() {
+        cleanup_();
+        delete req_;
+        sconn_->release();
+        req_ = nullptr;
+        sconn_ = nullptr;
+    }
+
+    int run_async(const std::function<void()>& f) {
+        return sconn_->run_async(f);
+    }
+
+    void reply() {
+        sconn_->begin_reply(req_);
+        marshal_reply_();
+        sconn_->end_reply();
+        delete this;
+    }
+};
+// Abstract Class to be used by both UDP Server and TCP Server Connections
+class ServerConnection: Pollable{
+protected:
     Marshal in_, out_;
     SpinLock out_l_;
 
@@ -50,26 +81,54 @@ class ServerConnection: public Pollable {
     enum {
         CONNECTED, CLOSED
     } status_;
+    
+    static std::unordered_set<i32> rpc_id_missing_s;
+    static SpinLock rpc_id_missing_l_s;
 
+
+ // Protected destructor as required by RefCounted.
+    ~ServerConnection();
+public:
+
+    ServerConnection(Server* server, int socket);
+    virtual void begin_reply(Request* req, i32 error_code = 0) = 0;
+    virtual void end_reply() = 0;
+    virtual int run_async(const std::function<void()>& f) = 0;
+    template<class T>
+    ServerConnection& operator <<(const T& v) {
+        this->out_ << v;
+        return *this;
+    }
+    ServerConnection& operator <<(Marshal& m) {
+        this->out_.read_from_marshal(m, m.content_size());
+        return *this;
+    }
+    int fd() {
+        return socket_;
+    }
+};
+class TCPConnection: public ServerConnection {
+
+    friend class TCPServer;
+
+   
+    TCPServer* TCPServer_;
+   
     /**
      * Only to be called by:
-     * 1: ~Server(), which is called when destroying Server
+     * 1: ~TCPServer(), which is called when destroying TCPServer
      * 2: handle_error(), which is called by PollMgr
      */
     void close();
 
-    // used to surpress multiple "no handler for rpc_id=..." errro
-    static std::unordered_set<i32> rpc_id_missing_s;
-    static SpinLock rpc_id_missing_l_s;
-
 protected:
 
     // Protected destructor as required by RefCounted.
-    ~ServerConnection();
+    ~TCPConnection();
 
 public:
 
-    ServerConnection(Server* server, int socket);
+    TCPConnection(TCPServer* TCPServer, int socket);
 
     /**
      * Start a reply message. Must be paired with end_reply().
@@ -93,12 +152,12 @@ public:
     int run_async(const std::function<void()>& f);
 
     template<class T>
-    ServerConnection& operator <<(const T& v) {
+    TCPConnection& operator <<(const T& v) {
         this->out_ << v;
         return *this;
     }
 
-    ServerConnection& operator <<(Marshal& m) {
+    TCPConnection& operator <<(Marshal& m) {
         this->out_.read_from_marshal(m, m.content_size());
         return *this;
     }
@@ -113,95 +172,16 @@ public:
     void handle_error();
 };
 
-class DeferredReply: public NoCopy {
-    rrr::Request* req_;
-    rrr::ServerConnection* sconn_;
-    std::function<void()> marshal_reply_;
-    std::function<void()> cleanup_;
-
-public:
-
-    DeferredReply(rrr::Request* req, rrr::ServerConnection* sconn,
-                  const std::function<void()>& marshal_reply, const std::function<void()>& cleanup)
-        : req_(req), sconn_(sconn), marshal_reply_(marshal_reply), cleanup_(cleanup) {}
-
-    ~DeferredReply() {
-        cleanup_();
-        delete req_;
-        sconn_->release();
-        req_ = nullptr;
-        sconn_ = nullptr;
-    }
-
-    int run_async(const std::function<void()>& f) {
-        return sconn_->run_async(f);
-    }
-
-    void reply() {
-        sconn_->begin_reply(req_);
-        marshal_reply_();
-        sconn_->end_reply();
-        delete this;
-    }
-};
-class UDPServer : Pollable {
-        DpdkTransport dpdk_;
-        friend class Server;
-        const int xid_pos = 32;
-        Server* server_;
-        std::string addr_;
-        struct addrinfo* p_gai_result_{nullptr};
-        struct addrinfo* p_svr_addr_{nullptr};
-        rrr::PollMgr* pm;
-        std::vector<std::pair<const struct sockaddr_in*, std::vector<uint8_t>*>> out_{};
-        rrr::ThreadPool* threadpool_;
-        SpinLock out_l_;
-        int port_;
-        int sockfd_;
-        char buffer_out[MAX_BUFFER_SIZE];
-        enum {
-            NEW, RUNNING, STOPPING, STOPPED
-        } status_;
-
-        public:
-        UDPServer(std::string addr):addr_(addr){
-            pm = new PollMgr(1);
-            threadpool_ = new ThreadPool(1);
-            status_ = NEW;
-            //Log_info("UDP Server Started at Address %s:%d",addr_.c_str(),port_);
-        };
-        void start();
-        void handle_read();
-        void handle_write();
-        void handle_error();
-        int fd(){
-            return sockfd_;
-        }
-        int poll_mode();
-        virtual ~UDPServer() {
-            if (p_gai_result_ != nullptr) {
-                freeaddrinfo(p_gai_result_);
-                p_gai_result_ = nullptr;
-                p_svr_addr_ = nullptr;
-            }
-            if (sockfd_ > 0)
-                    ::close(sockfd_);
-        }
-        
-        };
-class Server: public NoCopy {
-
-    friend class ServerConnection;
-
-    std::unordered_map<i32, std::function<void(Request*, ServerConnection*)>> handlers_;
+class Server: public NoCopy{
+     std::unordered_map<i32, std::function<void(Request*, Connection*)>> handlers_;
     PollMgr* pollmgr_;
     ThreadPool* threadpool_;
-    int server_sock_;
+    int TCPServer_sock_;
 
     Counter sconns_ctr_;
 
     SpinLock sconns_l_;
-    std::unordered_set<ServerConnection*> sconns_;
+    std::unordered_set<Connection*> sconns_;
 
     enum {
         NEW, RUNNING, STOPPING, STOPPED
@@ -222,24 +202,7 @@ public:
     int reg(Service* svc) {
         return svc->__reg_to__(this);
     }
-
-    /**
-     * The svc_func need to do this:
-     *
-     *  {
-     *     // process request
-     *     ..
-     *
-     *     // send reply
-     *     server_connection->begin_reply();
-     *     *server_connection << {reply_content};
-     *     server_connection->end_reply();
-     *
-     *     // cleanup resource
-     *     delete request;
-     *     server_connection->release();
-     *  }
-     */
+     
     int reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*)>& func);
 
     template<class S>
@@ -251,6 +214,79 @@ public:
         }
 
         handlers_[rpc_id] = [svc, svc_func] (Request* req, ServerConnection* sconn) {
+            (svc->*svc_func)(req, sconn);
+        };
+
+        return 0;
+    }
+
+    void unreg(i32 rpc_id);
+};
+class UDPServer: Server {
+
+  };
+class TCPServer: public NoCopy {
+
+    friend class TCPConnection;
+
+    std::unordered_map<i32, std::function<void(Request*, TCPConnection*)>> handlers_;
+    PollMgr* pollmgr_;
+    ThreadPool* threadpool_;
+    int TCPServer_sock_;
+
+    Counter sconns_ctr_;
+
+    SpinLock sconns_l_;
+    std::unordered_set<TCPConnection*> sconns_;
+
+    enum {
+        NEW, RUNNING, STOPPING, STOPPED
+    } status_;
+
+    pthread_t loop_th_;
+
+    static void* start_server_loop(void* arg);
+    void server_loop(struct addrinfo* svr_addr);
+
+public:
+
+    TCPServer(PollMgr* pollmgr = nullptr, ThreadPool* thrpool = nullptr);
+    virtual ~TCPServer();
+
+    int start(const char* bind_addr);
+
+    int reg(Service* svc) {
+        return svc->__reg_to__(this);
+    }
+
+    /**
+     * The svc_func need to do this:
+     *
+     *  {
+     *     // process request
+     *     ..
+     *
+     *     // send reply
+     *     TCPServer_connection->begin_reply();
+     *     *TCPServer_connection << {reply_content};
+     *     TCPServer_connection->end_reply();
+     *
+     *     // cleanup resource
+     *     delete request;
+     *     TCPServer_connection->release();
+     *  }
+     */
+    int reg(i32 rpc_id, const std::function<void(Request*, TCPConnection*)>& func);
+
+    template<class S>
+    int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request*, TCPConnection*)) {
+
+        // disallow duplicate rpc_id
+        if (handlers_.find(rpc_id) != handlers_.end()) {
+            return EEXIST;
+        }
+
+        handlers_[rpc_id] = [svc, svc_func] (Request* req, TCPConnection* sconn) {
             (svc->*svc_func)(req, sconn);
         };
 

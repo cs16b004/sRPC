@@ -7,9 +7,15 @@
 #include "../../misc/marshal.hpp"
 #include "config.hpp"
 #include "utils.hpp"
+#include "../polling.hpp"
+#include <rte_ethdev.h>
+#include <rte_eth_ctrl.h>
+#include <rte_flow.h>
+#include <rte_ip.h>
 
 
 namespace rrr{
+    struct Request;
     struct packet_stats {
         uint64_t pkt_count = 0;
 
@@ -42,10 +48,11 @@ namespace rrr{
         NetAddress& operator=(const NetAddress& other);
     };
     
-    class Connection{
+    class Connection : public Pollable{
         private:
             uint32_t fd;
             char* name;
+            uint32_t socket_;
             NetAddress to_addr_;
             Marshal in_,out_;
             SpinLock in_l_;
@@ -85,12 +92,68 @@ namespace rrr{
                 ss<<"[ Status: "<<status_<<"\n Bytes Received: "<<bytes_recvd<<"\n Bytes Transmitted: "<<bytes_txd<<"]\n";
                 Log_info(ss.str().c_str());
             }
+             void close();
+
+    // used to surpress multiple "no handler for rpc_id=..." errro
+            static std::unordered_set<i32> rpc_id_missing_s;
+            static SpinLock rpc_id_missing_l_s;
+
+    protected:
+
+        // Protected destructor as required by RefCounted.
+            ~Connection();
+
+        public:
+
+            
+
+    /**
+     * Start a reply message. Must be paired with end_reply().
+     *
+     * Reply message format:
+     * <size> <xid> <error_code> <ret1> <ret2> ... <retN>
+     * NOTE: size does not include size itself (<xid>..<retN>).
+     *
+     * User only need to fill <ret1>..<retN>.
+     *
+     * Currently used errno:
+     * 0: everything is fine
+     * ENOENT: method not found
+     * EINVAL: invalid packet (field missing)
+     */
+            void begin_reply(Request* req, i32 error_code = 0);
+
+            void end_reply();
+
+    // helper function, do some work in background
+            int run_async(const std::function<void()>& f);
+
+        template<class T>
+            Connection& operator <<(const T& v) {
+                this->out_ << v;
+                return *this;
+            }
+
+            Connection& operator <<(Marshal& m) {
+                this->out_.read_from_marshal(m, m.content_size());
+                return *this;
+            }
+
+            int fd() {
+                return socket_;
+            }
+
+            int poll_mode();
+            void handle_write();
+            void handle_read();
+            void handle_error();
 
     };
     
     class DpdkTransport {
+        friend class UDPServer;
     private:
-
+        unsigned udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         Config* config_;
         int port_num_ = 0;
         int tx_threads_ = 0;
@@ -100,7 +163,7 @@ namespace rrr{
         uint16_t rx_queue_ = 1, tx_queue_ = 1;
         struct rte_mempool **tx_mbuf_pool;
         struct rte_mempool **rx_mbuf_pool;
-        std::map<uint32_t,rrr::Connection*> connections_;
+        std::map<uint16_t,rrr::Connection*> connections_;
         
         std::map<std::string, NetAddress> src_addr_;
         std::map<std::string, NetAddress> dest_addr_;

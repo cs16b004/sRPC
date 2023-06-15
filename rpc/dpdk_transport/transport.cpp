@@ -1,10 +1,7 @@
 
 #include <cstdint>
 #include "transport.hpp"
-#include <rte_ethdev.h>
-#include <rte_eth_ctrl.h>
-#include <rte_flow.h>
-#include <rte_ip.h>
+
 
 
 #define DPDK_RX_DESC_SIZE           1024
@@ -24,9 +21,93 @@
 #define EMPTY_MASK 0x0 /* empty mask */
 #define DPDK_PREFETCH_NUM           2
 namespace rrr{
-
+    struct Request;
 char* DpdkTransport::getMacFromIp(std::string ip){
     return "02:de:ad:be:ef:60";
+}
+
+int Connection::poll_mode(){
+ int mode = Pollable::READ;
+    out_l_.lock();
+    if (!out_.empty()) {
+        mode |= Pollable::WRITE;
+    }
+    out_l_.unlock();
+    return mode;
+}
+void Connection::handle_write(){
+ 
+ // For Server Reply and client request
+ return;
+}
+void Connection::handle_read(){
+    if(status_ == CLOSED)
+        return;
+    
+    std::list<Request*> complete_requests;
+
+    
+    i32 packet_size;
+    int n_peek = in_.peek(&packet_size, sizeof(i32));
+    if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
+        // consume the packet size
+        verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
+
+        Request* req = new Request;
+        verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
+
+        v64 v_xid;
+        req->m >> v_xid;
+        req->xid = v_xid.get();
+        complete_requests.push_back(req);
+
+        } 
+
+#ifdef RPC_STATISTICS
+    stat_server_batching(complete_requests.size());
+#endif // RPC_STATISTICS
+
+    for (auto& req: complete_requests) {
+
+        if (req->m.content_size() < sizeof(i32)) {
+            // rpc id not provided
+            begin_reply(req, EINVAL);
+            end_reply();
+            delete req;
+            continue;
+        }
+        //req->print();
+        i32 rpc_id;
+        req->m >> rpc_id;
+
+#ifdef RPC_STATISTICS
+        stat_server_rpc_counting(rpc_id);
+#endif // RPC_STATISTICS
+
+        auto it = server_->handlers_.find(rpc_id);
+        if (it != server_->handlers_.end()) {
+            // the handler should delete req, and release server_connection refcopy.
+            it->second(req, (ServerConnection *) this->ref_copy());
+        } else {
+            rpc_id_missing_l_s.lock();
+            bool surpress_warning = false;
+            if (rpc_id_missing_s.find(rpc_id) == rpc_id_missing_s.end()) {
+                rpc_id_missing_s.insert(rpc_id);
+            } else {
+                surpress_warning = true;
+            }
+            rpc_id_missing_l_s.unlock();
+            if (!surpress_warning) {
+                Log_error("rrr::ServerConnection: no handler for rpc_id=0x%08x", rpc_id);
+            }
+            begin_reply(req, ENOENT);
+            end_reply();
+            delete req;
+        }
+    }
+}
+void Connection::handle_error(){
+
 }
 
 uint32_t DpdkTransport::connect(std::string server_ip,uint32_t port){
@@ -57,7 +138,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
         const uint16_t max_size = rx_info->max_size;
         uint16_t nb_rx = rte_eth_rx_burst(port_id, rx_info->queue_id, 
                                           bufs, max_size);
-        //Log_info("Packets Received %d",nb_rx);
+       
         if (unlikely(nb_rx == 0))
             continue;
         /* Log_debug("Thread %d received %d packets on queue %d and port_id %d", */
@@ -76,111 +157,16 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         rte_prefetch0(rte_pktmbuf_mtod(rx_info->buf[i], uint8_t*));
 
     for (int i = 0; i < rx_info->count; i++) {
-        struct rte_flow *matched_flow;
-    struct rte_flow_error error;
-        // matched_flow = rte_flow_classify(rx_info->port_id, ((struct rte_mbuf*)rx_info->buf[i])->hash, ((struct rte_mbuf*)rx_info->buf[i])->hash.fdir.hi, 0, &error);
-        // if (matched_flow != NULL) {
-        //     printf("Packet matched flow rule.\n");
-        //     // Handle the matched packet
-        // }
-        // else {
-        //     printf("Packet did not match any flow rule.\n");
-        //     // Handle unmatched packet
-        // }
         uint8_t* pkt_ptr = rte_pktmbuf_mtod((struct rte_mbuf*)rx_info->buf[i], uint8_t*);
-        unsigned pkt_offset = 0;
-
-        /* Check Ethernet Header */
-        auto eth_hdr = reinterpret_cast<struct rte_ether_hdr*>(pkt_ptr);
-        if (eth_hdr == nullptr)
-            Log_fatal("Received packet was NULL");
-        if (eth_hdr->ether_type != htons(EtherTypeIP)) {
-            Log_debug("Thread %d: packet droped as eth type is %0x", 
-                       rx_info->thread_id, ntohs(eth_hdr->ether_type)); 
-            rx_info->stat.pkt_error++;
-            rx_info->stat.pkt_eth_type_err++;
-            continue;
-        }
-
-        /* Check IPv4 Header */
-        pkt_offset += sizeof(struct rte_ether_hdr);
-        auto ipv4_hdr = reinterpret_cast<struct rte_ipv4_hdr*>(pkt_ptr + pkt_offset);
-        if (ipv4_hdr == nullptr)
-            Log_fatal("IPv4 is NULL");
-        if (ipv4_hdr->next_proto_id != IPProtUDP) {
-             Log_debug("Thread %d: packet droped as ipv4 protocol is %02x", 
-                       rx_info->thread_id, ipv4_hdr->next_proto_id); 
-            rx_info->stat.pkt_error++;
-            rx_info->stat.pkt_ip_prot_err++;
-            continue;
-        }
-        // Check for IP Address;
-        rte_be32_t pkt_ip_addr = ipv4_hdr->dst_addr;
         
-            Log_debug("Thread %d: packet dst ipv4  is %s", 
-                       rx_info->thread_id, ipv4_to_string(pkt_ip_addr).c_str());
-            
-            
-        if (src_addr_[config_->host_name_].ip != (pkt_ip_addr)){
-            continue;
-            // Log_debug("Thread %d: packet droped as dst ipv4  is %s", 
-            //            rx_info->thread_id, ipv4_to_string(pkt_ip_addr).c_str());
-           
-            // Log_debug("Thread %d: src IP addr %s",rx_info->thread_id, ipv4_to_string(src_addr_[config_->host_name_].ip).c_str())   ;
-        }
+        
+        struct rte_udp_hdr* udp_hdr = reinterpret_cast<struct rte_udp_hdr*> (pkt_ptr + udp_hdr_offset);
 
-        /* Check UDP Header */
-        pkt_offset += sizeof(struct rte_ipv4_hdr);
-        auto udp_hdr = reinterpret_cast<struct rte_udp_hdr*>(pkt_ptr + pkt_offset);
-        if (udp_hdr == nullptr)
-            Log_fatal("UDP is NULL");
-        uint16_t dest_port = ntohs(udp_hdr->dst_port);
-        uint16_t rx_udp_port = src_addr_[config_->host_name_].port/* + rx_info->queue_id */;
-        if (dest_port != rx_udp_port) {
-             Log_debug("Thread %d: packet droped as udp port is %d was not %d", 
-                       rx_info->thread_id, dest_port, rx_udp_port); 
-            rx_info->stat.pkt_error++;
-            rx_info->stat.pkt_port_num_err++;
-            continue;
-        }
-        Log_info("Packet matched !!");
-        // int server_id = -1;
-        // uint16_t src_port = ntohs(udp_hdr->src_port);
-        // NetAddress addr(eth_hdr->s_addr.addr_bytes, (uint32_t) ipv4_hdr->src_addr, src_port);
-        // for (auto& dest : dest_addr_) {
-        //     if (addr == dest.second) {
-        //         rx_info->stat.pkt_port_dest[dest.first]++;
-        //         server_id = dest.first;
-        //         break;
-        //     }
-        // }
-        // if (server_id == -1) {
-        //     server_id = dest_addr_.size();
-        //     dest_addr_[server_id] = addr;
-        //     rx_info->stat.pkt_port_dest[server_id] = 1;
-        // }
-
-        // Log_debug("Thread %d on queue %d and port_id %d",
-        //           rx_info->thread_id, rx_info->queue_id, rx_info->port_id);
-
-        // pkt_offset += sizeof(struct rte_udp_hdr);
-
-        // uint8_t* payload = reinterpret_cast<uint8_t*>(pkt_ptr + pkt_offset);
-        // int payload_len = ntohs(udp_hdr->dgram_len) - sizeof(struct rte_udp_hdr);
-        // int app_offset = response_handler(payload, payload_len,
-        //                                   server_id, rx_info->thread_id);
-        // if (app_offset < 0) {
-        //     Log_debug("Thread %d: packet drop as application process had error: %d",
-        //               app_offset);
-        //     rx_info->stat.pkt_error++;
-        //     rx_info->stat.pkt_app_err++;
-        //     continue;
-        // }
-        // rx_info->stat.pkt_count++;
-
-        /* TODO: check the total packet size with how much we processed */
-
-        /* Prefetch packets */
+        uint16_t src_port = ntohs(udp_hdr->src_port);
+        
+        
+        Log_debug("Packet matched for connection id : &d!!",src_port);
+        
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
         if (prefetch_idx < rx_info->count)
             rte_prefetch0(rte_pktmbuf_mtod(rx_info->buf[prefetch_idx], uint8_t*));

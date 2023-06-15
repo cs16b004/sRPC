@@ -58,8 +58,8 @@ marshal.o: ../misc/marshal.cpp ../misc/marshal.hpp
 polling.o: ../rpc/polling.cpp ../rpc/polling.hpp
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/polling.cpp -o polling.o
 
-transport.o: ../rpc/dpdk_transport/transport.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/utils.hpp config.o marshal.o 
-			${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport.cpp -o transport.o
+transport.o: ../rpc/dpdk_transport/transport.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/utils.hpp config.o marshal.o polling.o 
+			${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport.cpp config.o polling.o -o transport.o
 
 config.o: ../rpc/dpdk_transport/config.cpp ../rpc/dpdk_transport/config.hpp
 		  ${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/config.cpp -o config.o

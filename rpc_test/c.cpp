@@ -35,6 +35,7 @@ void *do_add(void *) {
             }
         }
         fg.wait_all();
+        
     }
     return NULL;
 }
@@ -65,6 +66,7 @@ void *do_add_short(void *) {
             start %= ns;
         }
         fg.wait_all();
+        break;
     }
     return NULL;
 }
