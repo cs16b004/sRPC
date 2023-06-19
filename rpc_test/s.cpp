@@ -61,10 +61,10 @@ int main(int argc, char **argv) {
     CounterServiceImpl *csi = new CounterServiceImpl(time);
     rrr::PollMgr *pm = new rrr::PollMgr(1);
     base::ThreadPool *tp = new base::ThreadPool(1);
-    rrr::Server *server = new rrr::Server(pm, tp);
+    rrr::TCPServer *server = new rrr::TCPServer(pm, tp);
     server->reg(csi);
-    rrr::UDPServer *us = new rrr::UDPServer("0.0.0.0:8501");
-    us->start();
+    //rrr::UDPServer *us = new rrr::UDPServer("0.0.0.0:8501");
+    //us->start();
     server->start((std::string("0.0.0.0:") + argv[1]).c_str());
     
     pm->release();

@@ -26,101 +26,17 @@ char* DpdkTransport::getMacFromIp(std::string ip){
     return "02:de:ad:be:ef:60";
 }
 
-int Connection::poll_mode(){
- int mode = Pollable::READ;
-    out_l_.lock();
-    if (!out_.empty()) {
-        mode |= Pollable::WRITE;
-    }
-    out_l_.unlock();
-    return mode;
-}
-void Connection::handle_write(){
- 
- // For Server Reply and client request
- return;
-}
-void Connection::handle_read(){
-    if(status_ == CLOSED)
-        return;
-    
-    std::list<Request*> complete_requests;
-
-    
-    i32 packet_size;
-    int n_peek = in_.peek(&packet_size, sizeof(i32));
-    if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
-        // consume the packet size
-        verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
-
-        Request* req = new Request;
-        verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
-
-        v64 v_xid;
-        req->m >> v_xid;
-        req->xid = v_xid.get();
-        complete_requests.push_back(req);
-
-        } 
-
-#ifdef RPC_STATISTICS
-    stat_server_batching(complete_requests.size());
-#endif // RPC_STATISTICS
-
-    for (auto& req: complete_requests) {
-
-        if (req->m.content_size() < sizeof(i32)) {
-            // rpc id not provided
-            begin_reply(req, EINVAL);
-            end_reply();
-            delete req;
-            continue;
-        }
-        //req->print();
-        i32 rpc_id;
-        req->m >> rpc_id;
-
-#ifdef RPC_STATISTICS
-        stat_server_rpc_counting(rpc_id);
-#endif // RPC_STATISTICS
-
-        auto it = server_->handlers_.find(rpc_id);
-        if (it != server_->handlers_.end()) {
-            // the handler should delete req, and release server_connection refcopy.
-            it->second(req, (ServerConnection *) this->ref_copy());
-        } else {
-            rpc_id_missing_l_s.lock();
-            bool surpress_warning = false;
-            if (rpc_id_missing_s.find(rpc_id) == rpc_id_missing_s.end()) {
-                rpc_id_missing_s.insert(rpc_id);
-            } else {
-                surpress_warning = true;
-            }
-            rpc_id_missing_l_s.unlock();
-            if (!surpress_warning) {
-                Log_error("rrr::ServerConnection: no handler for rpc_id=0x%08x", rpc_id);
-            }
-            begin_reply(req, ENOENT);
-            end_reply();
-            delete req;
-        }
-    }
-}
-void Connection::handle_error(){
-
-}
-
 uint32_t DpdkTransport::connect(std::string server_ip,uint32_t port){
 
 
-    NetAddress *s_addr = new NetAddress(getMacFromIp(server_ip),server_ip.c_str(),port);
-    Connection *conn = new Connection(*s_addr);
+    // NetAddress *s_addr = new NetAddress(getMacFromIp(server_ip),server_ip.c_str(),port);
+    // UDPConnection *conn = new UDPConnection(*s_addr);
     uint32_t conn_id;
     conn_lock.lock();
     conn_counter++;
     conn_id = conn_counter;
     conn_lock.unlock();
-    this->connections_[conn_id] = conn;
+   // this->connections_[conn_id] = conn;
     return conn_id;
 }
 int DpdkTransport::dpdk_rx_loop(void* arg) {
