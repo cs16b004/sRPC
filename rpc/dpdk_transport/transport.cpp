@@ -81,8 +81,10 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         uint16_t src_port = ntohs(udp_hdr->src_port);
         
         
-        Log_debug("Packet matched for connection id : &d!!",src_port);
+        Log_debug("Packet matched for connection id : %d!!",src_port);
         
+        write(connections["192.168.2.53"],);
+
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
         if (prefetch_idx < rx_info->count)
             rte_prefetch0(rte_pktmbuf_mtod(rx_info->buf[prefetch_idx], uint8_t*));

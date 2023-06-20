@@ -8,80 +8,13 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/mman.h>
+#include<linux/memfd.h>
 #include "dpdk_transport/config.hpp"
 
 using namespace std;
 
 namespace rrr {
-
-
-#ifdef RPC_STATISTICS
-
-static const int g_stat_server_batching_size = 1000;
-static int g_stat_server_batching[g_stat_server_batching_size];
-static int g_stat_server_batching_idx;
-static uint64_t g_stat_server_batching_report_time = 0;
-static const uint64_t g_stat_server_batching_report_interval = 1000 * 1000 * 1000;
-
-static void stat_server_batching(size_t batch) {
-    g_stat_server_batching_idx = (g_stat_server_batching_idx + 1) % g_stat_server_batching_size;
-    g_stat_server_batching[g_stat_server_batching_idx] = batch;
-    uint64_t now = base::rdtsc();
-    if (now - g_stat_server_batching_report_time > g_stat_server_batching_report_interval) {
-        // do report
-        int min = numeric_limits<int>::max();
-        int max = 0;
-        int sum_count = 0;
-        int sum = 0;
-        for (int i = 0; i < g_stat_server_batching_size; i++) {
-            if (g_stat_server_batching[i] == 0) {
-                continue;
-            }
-            if (g_stat_server_batching[i] > max) {
-                max = g_stat_server_batching[i];
-            }
-            if (g_stat_server_batching[i] < min) {
-                min = g_stat_server_batching[i];
-            }
-            sum += g_stat_server_batching[i];
-            sum_count++;
-            g_stat_server_batching[i] = 0;
-        }
-        double avg = double(sum) / sum_count;
-        Log::info("* UDPServer BATCHING: min=%d avg=%.1lf max=%d", min, avg, max);
-        g_stat_server_batching_report_time = now;
-    }
-}
-
-// rpc_id -> <count, cumulative>
-static unordered_map<i32, pair<Counter, Counter>> g_stat_rpc_counter;
-static uint64_t g_stat_server_rpc_counting_report_time = 0;
-static const uint64_t g_stat_server_rpc_counting_report_interval = 1000 * 1000 * 1000;
-
-static void stat_server_rpc_counting(i32 rpc_id) {
-    g_stat_rpc_counter[rpc_id].first.next();
-
-    uint64_t now = base::rdtsc();
-    if (now - g_stat_server_rpc_counting_report_time > g_stat_server_rpc_counting_report_interval) {
-        // do report
-        for (auto& it: g_stat_rpc_counter) {
-            i32 counted_rpc_id = it.first;
-            i64 count = it.second.first.peek_next();
-            it.second.first.reset();
-            it.second.second.next(count);
-            i64 cumulative = it.second.second.peek_next();
-            Log::info("* RPC COUNT: id=%#08x count=%ld cumulative=%ld", counted_rpc_id, count, cumulative);
-        }
-        g_stat_server_rpc_counting_report_time = now;
-    }
-}
-
-#endif // RPC_STATISTICS
-
-
-std::unordered_set<i32> ServerConnection::rpc_id_missing_s;
-SpinLock ServerConnection::rpc_id_missing_l_s;
-
 
 UDPConnection::UDPConnection(UDPServer* server, int socket)
         : ServerConnection((Server*) server,socket) {
@@ -130,7 +63,7 @@ void UDPConnection::handle_read() {
         return;
     }
 
-    int bytes_read = in_.read_from_fd(socket_);
+    int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
     if (bytes_read == 0) {
         return;
     }
@@ -241,7 +174,7 @@ void UDPConnection::close() {
         Log_debug("rrr::UDPConnection: closed on fd=%d", socket_);
 
         status_ = CLOSED;
-        ::close(socket_);
+       
     }
 
     // this call might actually DELETE this object, so we put it at the end of function
@@ -280,6 +213,20 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
     if(transport_ == nullptr){
         transport_ = new DpdkTransport();
     }
+    //Test UDP Connection
+    int pipefd[2];
+    verify(pipe(pipefd)==0);
+
+    int fd = pipefd[0];
+    wfd = pipefd[1];
+    sconns_l_.lock();   
+    UDPConnection* sconn = new UDPConnection(this, fd);
+    sconns_.insert(sconn);
+    pollmgr_->add(sconn);
+    sconns_l_.unlock();
+    transport_->connLock.lock();
+    transport_->connections["192.168.2.53"]=wfd;
+    transport_->connLock.unlock();
 }
 
 UDPServer::~UDPServer() {
@@ -324,12 +271,6 @@ UDPServer::~UDPServer() {
     //Log_debug("rrr::UDPServer: destroyed");
 }
 
-struct start_server_loop_args_type {
-    UDPServer* server;
-    struct addrinfo* gai_result;
-    struct addrinfo* svr_addr;
-};
-
 void* UDPServer::start_server_loop(void* arg) {
     
 }
@@ -340,30 +281,16 @@ void UDPServer::server_loop(struct addrinfo* svr_addr) {
 
 void UDPServer::start(Config* config) {
 
-    int clnt_socket;
-    
-     UDPConnection* sconn = new UDPConnection(this, clnt_socket);
-            sconns_.insert(sconn);
-            pollmgr_->add(sconn);new UDPConnection(this, clnt_socket);
-
     this->transport_->init(config);
-
-
 }
 
-int Server::reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*)>& func) {
-    // disallow duplicate rpc_id
-    if (handlers_.find(rpc_id) != handlers_.end()) {
-        return EEXIST;
-    }
-
-    handlers_[rpc_id] = func;
-
-    return 0;
+void UDPServer::start() {
+    int argc = 5;
+    char* argv[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host.yml","-fconfig_files/network_catskill.yml"};
+     Config::create_config(argc, argv);
+    Config* config = Config::get_config(); 
+    this->transport_->init(config);
 }
 
-void Server::unreg(i32 rpc_id) {
-    handlers_.erase(rpc_id);
-}
 
 } // namespace rrr

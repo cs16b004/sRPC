@@ -16,7 +16,7 @@
 
 namespace rrr{
     struct Request;
-    class ServerConnection;
+    class UDPConnection;
     struct packet_stats {
         uint64_t pkt_count = 0;
 
@@ -51,7 +51,7 @@ namespace rrr{
     
     
     class DpdkTransport {
-        friend class UDPConnection;
+        friend class UDPServer;
     private:
         unsigned udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         Config* config_;
@@ -64,7 +64,9 @@ namespace rrr{
         struct rte_mempool **tx_mbuf_pool;
         struct rte_mempool **rx_mbuf_pool;
       //  std::map<uint16_t,rrr::Connection*> connections_;
-        
+        SpinLock connLock;
+
+        std::map<std::string, int> connections;
         std::map<std::string, NetAddress> src_addr_;
         std::map<std::string, NetAddress> dest_addr_;
 
@@ -73,6 +75,7 @@ namespace rrr{
         struct qdma_port_info *port_info_{nullptr};
       
         std::function<int(uint8_t*, int, int, int)> response_handler;
+        
         std::thread main_thread;
         bool force_quit{false};
         char * getMacFromIp(std::string ip);

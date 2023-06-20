@@ -16,6 +16,7 @@ struct addrinfo;
 namespace rrr {
 class TCPServer;
 class Server;
+class UDPServer;
 class ServerConnection;
 
 
@@ -211,7 +212,6 @@ public:
 
     int start(const char* bind_addr);
 
-
     /**
      * The svc_func need to do this:
      *
@@ -229,24 +229,6 @@ public:
      *     server_connection->release();
      *  }
      */
-    // int reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*)>& func);
-
-    // template<class S>
-    // int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request*, ServerConnection*)) {
-
-    //     // disallow duplicate rpc_id
-    //     if (handlers_.find(rpc_id) != handlers_.end()) {
-    //         return EEXIST;
-    //     }
-
-    //     handlers_[rpc_id] = [svc, svc_func] (Request* req, ServerConnection* sconn) {
-    //         (svc->*svc_func)(req, sconn);
-    //     };
-
-    //     return 0;
-    // }
-
-    // void unreg(i32 rpc_id);
    
 };
 class DeferredReply: public NoCopy {
@@ -296,11 +278,13 @@ class UDPConnection: public ServerConnection {
     friend class UDPServer;
   
     friend class DpdkTransport;
+
+    
     
     void close();
 
 protected:
-
+    NetAddress toAddress;
     // Protected destructor as required by RefCounted.
 
     ~UDPConnection();
@@ -310,7 +294,7 @@ public:
     UDPConnection(UDPServer* server, int socket);
     int run_async(const std::function<void()>& f);
     
-
+    unsigned char buf[1000];
     int fd() {
         return socket_;
     }
@@ -323,11 +307,12 @@ public:
     void end_reply();
 };
 class UDPServer : public Server{
-        friend class UDPConnection;
-        DpdkTransport* transport_;
+    friend class UDPConnection;
+    DpdkTransport* transport_;
     
 
     protected:
+        int wfd;
         ~UDPServer();
         int server_sock_;
 
@@ -340,6 +325,7 @@ class UDPServer : public Server{
         pthread_t loop_th_;
     public:
         void start(Config* config);
+        void start();
         static void* start_server_loop(void* arg);
         void server_loop(struct addrinfo* svr_addr);
 

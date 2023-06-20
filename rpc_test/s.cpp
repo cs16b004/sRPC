@@ -63,8 +63,11 @@ int main(int argc, char **argv) {
     base::ThreadPool *tp = new base::ThreadPool(1);
     rrr::TCPServer *server = new rrr::TCPServer(pm, tp);
     server->reg(csi);
-    //rrr::UDPServer *us = new rrr::UDPServer("0.0.0.0:8501");
-    //us->start();
+    rrr::PollMgr *pm_udp = new rrr::PollMgr(1);
+    base::ThreadPool *tp_udp = new base::ThreadPool(1);
+    rrr::UDPServer *us = new rrr::UDPServer(pm_udp,tp_udp);
+    us->reg(csi);
+    us->start();
     server->start((std::string("0.0.0.0:") + argv[1]).c_str());
     
     pm->release();
