@@ -59,20 +59,26 @@ void UDPConnection::end_reply() {
 }
 
 void UDPConnection::handle_read() {
+   
     if (status_ == CLOSED) {
+       
         return;
     }
 
     int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
     if (bytes_read == 0) {
+      
         return;
     }
-
+  //  Log_info("Bytes Read %d",bytes_read);
     list<Request*> complete_requests;
 
-    for (;;) {
+       // in_.print();
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
+        //  Log_debug("Packet Size %d",packet_size);
+        //     Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
+        //     Log_debug("packet not complete or there's no more packet to process");
         if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
             // consume the packet size
             verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
@@ -86,11 +92,10 @@ void UDPConnection::handle_read() {
             complete_requests.push_back(req);
 
         } else {
-            // packet not complete or there's no more packet to process
-            break;
+            return;
         }
-    }
-
+    
+      //  Log_info("Request read");
 #ifdef RPC_STATISTICS
     stat_server_batching(complete_requests.size());
 #endif // RPC_STATISTICS
@@ -115,7 +120,9 @@ void UDPConnection::handle_read() {
         auto it = server_->handlers_.find(rpc_id);
         if (it != server_->handlers_.end()) {
             // the handler should delete req, and release server_connection refcopy.
+          //  Log_debug("RPC Triggered");
             it->second(req, (UDPConnection *) this->ref_copy());
+            
         } else {
             rpc_id_missing_l_s.lock();
             bool surpress_warning = false;
@@ -220,6 +227,7 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
     int fd = pipefd[0];
     wfd = pipefd[1];
     sconns_l_.lock();   
+    verify(set_nonblocking(fd, true) == 0);
     UDPConnection* sconn = new UDPConnection(this, fd);
     sconns_.insert(sconn);
     pollmgr_->add(sconn);

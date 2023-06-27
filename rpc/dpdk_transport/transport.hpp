@@ -12,7 +12,7 @@
 #include <rte_eth_ctrl.h>
 #include <rte_flow.h>
 #include <rte_ip.h>
-
+#include <sys/time.h>
 
 namespace rrr{
     struct Request;
@@ -73,7 +73,8 @@ namespace rrr{
         struct dpdk_thread_info *thread_rx_info{nullptr};
         struct dpdk_thread_info *thread_tx_info{nullptr};
         struct qdma_port_info *port_info_{nullptr};
-      
+        struct timeval start_clock, current;
+        
         std::function<int(uint8_t*, int, int, int)> response_handler;
         
         std::thread main_thread;

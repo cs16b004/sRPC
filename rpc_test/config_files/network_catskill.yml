@@ -26,7 +26,7 @@ network:
   - catskill:
       id: 4
       mac: e4:1d:2d:f2:9e:5c
-      ip: 172.19.0.121
+      ip: 192.168.2.52 #172.19.0.121
       port: 8501
 
   - greenport:

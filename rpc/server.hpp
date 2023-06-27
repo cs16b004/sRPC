@@ -65,7 +65,9 @@ protected:
    
 public:
     // ~ServerConnection();
-    ServerConnection(Server* server, int socket): server_(server),socket_(socket) {};
+    ServerConnection(Server* server, int socket): server_(server),socket_(socket) {
+        status_ = CONNECTED;
+    };
     virtual void begin_reply(Request* req, i32 error_code = 0) = 0;
     virtual void end_reply() = 0;
     virtual int run_async(const std::function<void()>& f) = 0;

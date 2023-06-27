@@ -48,7 +48,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
 
     Log_info("Enter receive thread %d on core %d on port_id %d on queue %d",
              rx_info->thread_id, lcore_id, port_id, rx_info->queue_id);
-   
+    
     while (!dpdk_th->force_quit) {
         struct rte_mbuf **bufs = rx_info->buf;
         const uint16_t max_size = rx_info->max_size;
@@ -77,13 +77,33 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         
         
         struct rte_udp_hdr* udp_hdr = reinterpret_cast<struct rte_udp_hdr*> (pkt_ptr + udp_hdr_offset);
-
+        
         uint16_t src_port = ntohs(udp_hdr->src_port);
         
+        uint16_t pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
+        //Log_debug("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
         
-        Log_debug("Packet matched for connection id : %d!!",src_port);
-        
-        write(connections["192.168.2.53"],);
+        uint8_t* data_ptr = pkt_ptr + udp_hdr_offset + sizeof(rte_udp_hdr);
+        //   for (int i=0; i < pkt_size; ++i) {
+        //         if (! (i % 16) && i)
+        //                 printf("\n");
+
+        //         printf("0x%02x ", data_ptr[i]);
+        // }
+        // printf("\n\n");
+        int n = write(connections["192.168.2.53"],data_ptr,pkt_size);
+        rx_info->stat.pkt_count++;
+        gettimeofday(&current, NULL);
+         int elapsed_sec = current.tv_sec - start_clock.tv_sec;
+
+        if (elapsed_sec >= 100) {
+            gettimeofday(&start_clock,NULL);
+            rx_info->stat.show_statistics();
+        }
+        //Log_info("Byres Written %d",n);
+        if(n < 0 ){
+            perror("Message: ");
+        }
 
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
         if (prefetch_idx < rx_info->count)
@@ -175,7 +195,7 @@ void DpdkTransport::init(Config* config) {
 
     /* TODO: remove this */
     tx_threads_ = rx_threads_;
-
+    gettimeofday(&start_clock, NULL);
     main_thread = std::thread([this, argv_str](){
         this->init_dpdk_main_thread(argv_str);
     });
@@ -592,7 +612,7 @@ void packet_stats::show_statistics() {
         if (pair.second > 0)
             Log_info("Number of Packets from server %d: %ld", 
                      pair.first, pair.second);
-
+    Log_info("Packets Received Total= %d", pkt_count);
     if (pkt_error == 0) return;
 
     Log_info("Total Errors: %ld", pkt_error);
