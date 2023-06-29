@@ -64,7 +64,7 @@ void Future::notify_ready() {
     }
 }
 
-void Client::invalidate_pending_futures() {
+void TCPClient::invalidate_pending_futures() {
     list<Future*> futures;
     pending_fu_l_.lock();
     for (auto& it: pending_fu_) {
@@ -84,7 +84,7 @@ void Client::invalidate_pending_futures() {
     }
 }
 
-void Client::close() {
+void TCPClient::close() {
     if (status_ == CONNECTED) {
         pollmgr_->remove(this);
         ::close(sock_);
@@ -93,12 +93,12 @@ void Client::close() {
     invalidate_pending_futures();
 }
 
-int Client::connect(const char* addr) {
+int TCPClient::connect(const char* addr) {
     verify(status_ != CONNECTED);
     string addr_str(addr);
     size_t idx = addr_str.find(":");
     if (idx == string::npos) {
-        Log_error("rrr::Client: bad connect address: %s", addr);
+        Log_error("rrr::TCPClient: bad connect address: %s", addr);
         return EINVAL;
     }
     string host = addr_str.substr(0, idx);
@@ -112,7 +112,7 @@ int Client::connect(const char* addr) {
 
     int r = getaddrinfo(host.c_str(), port.c_str(), &hints, &result);
     if (r != 0) {
-        Log_error("rrr::Client: getaddrinfo(): %s", gai_strerror(r));
+        Log_error("rrr::TCPClient: getaddrinfo(): %s", gai_strerror(r));
         return EINVAL;
     }
 
@@ -136,12 +136,12 @@ int Client::connect(const char* addr) {
 
     if (rp == nullptr) {
         // failed to connect
-        Log_error("rrr::Client: connect(%s): %s", addr, strerror(errno));
+        Log_error("rrr::TCPClient: connect(%s): %s", addr, strerror(errno));
         return ENOTCONN;
     }
 
     verify(set_nonblocking(sock_, true) == 0);
-    Log_debug("rrr::Client: connected to %s", addr);
+    Log_debug("rrr::TCPClient: connected to %s", addr);
 
     status_ = CONNECTED;
     pollmgr_->add(this);
@@ -149,11 +149,11 @@ int Client::connect(const char* addr) {
     return 0;
 }
 
-void Client::handle_error() {
+void TCPClient::handle_error() {
     close();
 }
 
-void Client::handle_write() {
+void TCPClient::handle_write() {
     if (status_ != CONNECTED) {
         return;
     }
@@ -167,7 +167,7 @@ void Client::handle_write() {
     out_l_.unlock();
 }
 
-void Client::handle_read() {
+void TCPClient::handle_read() {
     if (status_ != CONNECTED) {
         return;
     }
@@ -216,7 +216,7 @@ void Client::handle_read() {
     }
 }
 
-int Client::poll_mode() {
+int TCPClient::poll_mode() {
     int mode = Pollable::READ;
     out_l_.lock();
     if (!out_.empty()) {
@@ -226,7 +226,7 @@ int Client::poll_mode() {
     return mode;
 }
 
-Future* Client::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) {
+Future* TCPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) {
     out_l_.lock();
 
     if (status_ != CONNECTED) {
@@ -260,7 +260,7 @@ Future* Client::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) {
     return (Future *) fu->ref_copy();
 }
 
-void Client::end_request() {
+void TCPClient::end_request() {
     // set reply size in packet
     if (bmark_ != nullptr) {
         i32 request_size = out_.get_and_reset_write_cnt();
@@ -308,7 +308,11 @@ Client* ClientPool::get_client(const string& addr) {
         int i;
         bool ok = true;
         for (i = 0; i < parallel_connections_; i++) {
-            parallel_clients[i] = new Client(this->pollmgr_);
+            #ifdef DPDK
+                parallel_connections[i] = (Client*) new UDPClient(this->pollmgr_);
+            #else
+                parallel_clients[i] = (Client*) new TCPClient(this->pollmgr_);
+            #endif
             if (parallel_clients[i]->connect(addr.c_str()) != 0) {
                 ok = false;
                 break;

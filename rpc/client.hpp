@@ -8,7 +8,7 @@
 namespace rrr {
 
 class Future;
-class Client;
+class TCPClient;
 
 struct FutureAttr {
     FutureAttr(const std::function<void(Future*)>& cb = std::function<void(Future*)>()) : callback(cb) { }
@@ -18,7 +18,7 @@ struct FutureAttr {
 };
 
 class Future: public RefCounted {
-    friend class Client;
+    friend class TCPClient;
 
     i64 xid_;
     i32 error_code_;
@@ -105,20 +105,18 @@ public:
     }
 };
 
-class Client: public Pollable {
-    Marshal in_, out_;
 
-    /**
-     * NOT a refcopy! This is intended to avoid circular reference, which prevents everything from being released correctly.
-     */
+
+class Client: public Pollable {
+
+protected:
+    Marshal in_, out_;
     PollMgr* pollmgr_;
 
     int sock_;
     enum {
         NEW, CONNECTED, CLOSED
     } status_;
-
-    Marshal::bookmark* bmark_;
 
     Counter xid_counter_;
     std::unordered_map<i64, Future*> pending_fu_;
@@ -127,14 +125,13 @@ class Client: public Pollable {
     SpinLock out_l_;
 
     // reentrant, could be called multiple times before releasing
-    void close();
+    virtual void close();
 
-    void invalidate_pending_futures();
+    virtual void invalidate_pending_futures();
 
     // prevent direct usage, use close_and_release() instead
     using RefCounted::release;
 
-protected:
 
     virtual ~Client() {
         invalidate_pending_futures();
@@ -142,16 +139,16 @@ protected:
 
 public:
 
-    Client(PollMgr* pollmgr): pollmgr_(pollmgr), sock_(-1), status_(NEW), bmark_(nullptr) { }
+    Client(PollMgr* pollmgr): pollmgr_(pollmgr), sock_(-1), status_(NEW) { }
 
     /**
      * Start a new request. Must be paired with end_request(), even if nullptr returned.
      *
      * The request packet format is: <size> <xid> <rpc_id> <arg1> <arg2> ... <argN>
      */
-    Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
+    virtual Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
 
-    void end_request();
+    virtual void end_request();
 
     template<class T>
     Client& operator <<(const T& v) {
@@ -163,6 +160,70 @@ public:
 
     // NOTE: this function is used *internally* by Python extension
     Client& operator <<(Marshal& m) {
+        if (status_ == CONNECTED) {
+            this->out_.read_from_marshal(m, m.content_size());
+        }
+        return *this;
+    }
+
+    virtual int connect(const char* addr);
+
+    void close_and_release() {
+        close();
+        release();
+    }
+
+    int fd() {
+        return sock_;
+    }
+
+    
+};
+
+class TCPClient: public Client {
+   
+    int sock_;
+   
+    Marshal::bookmark* bmark_;
+
+   
+    // reentrant, could be called multiple times before releasing
+    void close();
+
+    void invalidate_pending_futures();
+
+    // prevent direct usage, use close_and_release() instead
+    using RefCounted::release;
+
+protected:
+
+    virtual ~TCPClient() {
+        invalidate_pending_futures();
+    }
+
+public:
+
+    TCPClient(PollMgr* pollmgr): Client(pollmgr), bmark_(nullptr) { }
+
+    /**
+     * Start a new request. Must be paired with end_request(), even if nullptr returned.
+     *
+     * The request packet format is: <size> <xid> <rpc_id> <arg1> <arg2> ... <argN>
+     */
+    Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
+
+    void end_request();
+
+    template<class T>
+    TCPClient& operator <<(const T& v) {
+        if (status_ == CONNECTED) {
+            this->out_ << v;
+        }
+        return *this;
+    }
+
+    // NOTE: this function is used *internally* by Python extension
+    TCPClient& operator <<(Marshal& m) {
         if (status_ == CONNECTED) {
             this->out_.read_from_marshal(m, m.content_size());
         }
