@@ -14,9 +14,9 @@ CounterProxy **get_proxy() {
     CounterProxy **ret = (CounterProxy **)malloc(sizeof(CounterProxy *) * ns);
     for (; i < ns; i++) {
         pm[i] = new rrr::PollMgr();
-        rrr::Client *client = new rrr::Client(pm[i]);
+        rrr::UDPClient *client = new rrr::UDPClient(pm[i]);
         client->connect(servers[i]);
-        ret[i] = new CounterProxy(client);
+        ret[i] = new CounterProxy((Client*)client);
     }
     return ret;
 }

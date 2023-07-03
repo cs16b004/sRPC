@@ -4,12 +4,12 @@
 
 #include "misc/marshal.hpp"
 #include "polling.hpp"
-
+#include "dpdk_transport/transport.hpp"
 namespace rrr {
 
 class Future;
 class TCPClient;
-
+class UDPClient;
 struct FutureAttr {
     FutureAttr(const std::function<void(Future*)>& cb = std::function<void(Future*)>()) : callback(cb) { }
 
@@ -18,8 +18,9 @@ struct FutureAttr {
 };
 
 class Future: public RefCounted {
+    friend class Client;
     friend class TCPClient;
-
+    friend class UDPClient;
     i64 xid_;
     i32 error_code_;
 
@@ -112,8 +113,6 @@ class Client: public Pollable {
 protected:
     Marshal in_, out_;
     PollMgr* pollmgr_;
-
-    int sock_;
     enum {
         NEW, CONNECTED, CLOSED
     } status_;
@@ -127,19 +126,19 @@ protected:
     // reentrant, could be called multiple times before releasing
     virtual void close();
 
-    virtual void invalidate_pending_futures();
+    void invalidate_pending_futures();
 
     // prevent direct usage, use close_and_release() instead
     using RefCounted::release;
 
 
     virtual ~Client() {
-        invalidate_pending_futures();
+        //invalidate_pending_futures();
     }
 
 public:
 
-    Client(PollMgr* pollmgr): pollmgr_(pollmgr), sock_(-1), status_(NEW) { }
+    Client(PollMgr* pollmgr): pollmgr_(pollmgr), status_(NEW) { }
 
     /**
      * Start a new request. Must be paired with end_request(), even if nullptr returned.
@@ -149,6 +148,7 @@ public:
     virtual Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
 
     virtual void end_request();
+    
 
     template<class T>
     Client& operator <<(const T& v) {
@@ -173,13 +173,59 @@ public:
         release();
     }
 
-    int fd() {
-        return sock_;
-    }
+   virtual int fd();
 
     
 };
+class UDPClient: public Client{
+    protected:
+        int sock_;
+        int wfd;
+        Marshal* out_ptr_;
+        uint32_t conn_id;
+        Marshal::bookmark* bmark_;
+        DpdkTransport* transport_;
+        using RefCounted::release;
 
+    public:
+        void handle_read(){
+            verify(0);
+        }
+        void handle_write(){
+            verify(0);
+        }
+        Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
+         UDPClient(PollMgr* pollmgr): Client(pollmgr), bmark_(nullptr) {
+            int pipefd[2];
+            verify(pipe(pipefd)==0);
+
+            sock_ = pipefd[0];
+
+            wfd = pipefd[1];
+            out_ptr_ = &out_;
+          }
+        void end_request();
+        int connect(const char* addr);
+        int fd(){
+            return sock_;
+        }
+        template<class T>
+    UDPClient& operator <<(const T& v) {
+        if (status_ == CONNECTED) {
+            (*out_ptr_)<< v;
+        }
+        return *this;
+    }
+
+    // NOTE: this function is used *internally* by Python extension
+    UDPClient& operator <<(Marshal& m) {
+        if (status_ == CONNECTED) {
+            (*out_ptr_).read_from_marshal(m, m.content_size());
+        }
+        return *this;
+    }
+
+};
 class TCPClient: public Client {
    
     int sock_;
@@ -190,7 +236,8 @@ class TCPClient: public Client {
     // reentrant, could be called multiple times before releasing
     void close();
 
-    void invalidate_pending_futures();
+    
+    
 
     // prevent direct usage, use close_and_release() instead
     using RefCounted::release;
@@ -214,24 +261,6 @@ public:
 
     void end_request();
 
-    template<class T>
-    TCPClient& operator <<(const T& v) {
-        if (status_ == CONNECTED) {
-            this->out_ << v;
-        }
-        return *this;
-    }
-
-    // NOTE: this function is used *internally* by Python extension
-    TCPClient& operator <<(Marshal& m) {
-        if (status_ == CONNECTED) {
-            this->out_.read_from_marshal(m, m.content_size());
-        }
-        return *this;
-    }
-
-    int connect(const char* addr);
-
     void close_and_release() {
         close();
         release();
@@ -245,6 +274,7 @@ public:
     void handle_read();
     void handle_write();
     void handle_error();
+    int connect(const char* addr);
 
 };
 

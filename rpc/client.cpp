@@ -51,7 +51,6 @@ void Future::timed_wait(double sec) {
         }
     }
 }
-
 void Future::notify_ready() {
     Pthread_mutex_lock(&ready_m_);
     if (!timed_out_) {
@@ -64,7 +63,68 @@ void Future::notify_ready() {
     }
 }
 
-void TCPClient::invalidate_pending_futures() {
+/**
+ * UDP Client implementation with DPDK
+ * 
+ * 
+*/
+int UDPClient::connect(const char * addr){
+    conn_id = transport_->connect(addr);
+    transport_->out_connections[conn_id]->in_fd_=wfd;
+    status_=CONNECTED;
+    return 0;
+}
+
+Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
+     if (status_ != CONNECTED) {
+        return nullptr;
+    }
+
+    Future* fu = new Future(xid_counter_.next(), attr);
+    pending_fu_l_.lock();
+    pending_fu_[fu->xid_] = fu;
+    pending_fu_l_.unlock();
+
+    // check if the client gets closed in the meantime
+    if (status_ != CONNECTED) {
+        pending_fu_l_.lock();
+        unordered_map<i64, Future*>::iterator it = pending_fu_.find(fu->xid_);
+        if (it != pending_fu_.end()) {
+            it->second->release();
+            pending_fu_.erase(it);
+        }
+        pending_fu_l_.unlock();
+
+        return nullptr;
+    }
+
+    bmark_ = (*out_ptr_).set_bookmark(sizeof(i32)); // will fill packet size later
+
+    *this << v64(fu->xid_);
+    *this << rpc_id;
+
+    // one ref is already in pending_fu_
+    return (Future *) fu->ref_copy();
+}
+void UDPClient::end_request(){
+     if (bmark_ != nullptr) {
+        i32 request_size = (*out_ptr_).get_and_reset_write_cnt();
+        (*out_ptr_).write_bookmark(bmark_, &request_size);
+        delete bmark_;
+        bmark_ = nullptr;
+    }
+
+    // always enable write events since the code above gauranteed there
+    // will be some data to send
+    pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
+    transport_->out_connections[conn_id]->out_messages.push(*out_ptr_);
+
+    out_l_.unlock();
+}
+/*TCP Client Implementation
+
+*/
+void Client::invalidate_pending_futures() {
     list<Future*> futures;
     pending_fu_l_.lock();
     for (auto& it: pending_fu_) {

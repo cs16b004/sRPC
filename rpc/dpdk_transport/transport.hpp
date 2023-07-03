@@ -17,6 +17,7 @@
 namespace rrr{
     struct Request;
     class UDPConnection;
+    class UDPClient;
     struct packet_stats {
         uint64_t pkt_count = 0;
 
@@ -49,9 +50,15 @@ namespace rrr{
         NetAddress& operator=(const NetAddress& other);
     };
     
-    
+    struct TransportConnection{
+        int in_fd_;
+        std::mutex outl;
+        std::queue<Marshal> out_messages;
+        NetAddress out_addr;
+    };
     class DpdkTransport {
         friend class UDPServer;
+        friend class UDPClient;
     private:
         unsigned udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         Config* config_;
@@ -67,6 +74,9 @@ namespace rrr{
         SpinLock connLock;
 
         std::map<std::string, int> connections;
+
+        std::map<uint32_t, TransportConnection*> out_connections;
+
         std::map<std::string, NetAddress> src_addr_;
         std::map<std::string, NetAddress> dest_addr_;
 
@@ -74,8 +84,6 @@ namespace rrr{
         struct dpdk_thread_info *thread_tx_info{nullptr};
         struct qdma_port_info *port_info_{nullptr};
         struct timeval start_clock, current;
-        
-        std::function<int(uint8_t*, int, int, int)> response_handler;
         
         std::thread main_thread;
         bool force_quit{false};
@@ -91,19 +99,23 @@ namespace rrr{
         void install_flow_rule(size_t phy_port);
 
         static int dpdk_rx_loop(void* arg);
+        static int dpdk_tx_loop();
+        void tx_loop_one();
+
+        
         void process_incoming_packets(dpdk_thread_info* rx_buf_info);
 
         int make_pkt_header(uint8_t *pkt, int payload_len,
                         int src_id, std::string dest_id, int port_offset);
         int isolate(uint8_t phy_port);
-
+        void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
 
 public:
     void init(Config* config);
    // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
-    uint32_t connect (std::string server_ip,uint32_t port);
+    uint32_t connect (const char* addr);
     int connect(std::string addr);
-    // int accept (); For Server Implementation;
+  
     void shutdown();
     void trigger_shutdown();
 

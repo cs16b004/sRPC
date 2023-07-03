@@ -26,17 +26,29 @@ char* DpdkTransport::getMacFromIp(std::string ip){
     return "02:de:ad:be:ef:60";
 }
 
-uint32_t DpdkTransport::connect(std::string server_ip,uint32_t port){
+uint32_t DpdkTransport::connect(const char* addr_str){
 
+    std::string addr(addr_str);
+    size_t idx = addr.find(":");
+    if (idx == std::string::npos) {
+        Log_error("rrr::Client: bad connect address: %s", addr);
+        return EINVAL;
+    }
+    std::string server_ip = addr.substr(0, idx);
+    uint16_t port = atoi(addr.substr(idx + 1).c_str());
 
-    // NetAddress *s_addr = new NetAddress(getMacFromIp(server_ip),server_ip.c_str(),port);
+     NetAddress s_addr(getMacFromIp(server_ip),server_ip.c_str(),port);
     // UDPConnection *conn = new UDPConnection(*s_addr);
+    TransportConnection* oconn = new TransportConnection();
+    oconn->out_addr = s_addr;
     uint32_t conn_id;
     conn_lock.lock();
     conn_counter++;
     conn_id = conn_counter;
+    out_connections[conn_id] = oconn;
     conn_lock.unlock();
    // this->connections_[conn_id] = conn;
+   
     return conn_id;
 }
 int DpdkTransport::dpdk_rx_loop(void* arg) {
@@ -243,7 +255,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
     tx_mbuf_pool = new struct rte_mempool*[tx_threads_];
     for (int pool_idx = 0; pool_idx < tx_threads_; pool_idx++) {
         char pool_name[1024];
-        sprintf(pool_name, "TX_MBUF_POOL_%d", pool_idx);
+        sprintf(pool_name, "RRR_TX_MBUF_POOL_%d", pool_idx);
         /* TODO: Fix it for machines with more than one NUMA node */
         tx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, DPDK_NUM_MBUFS,
                                                          DPDK_MBUF_CACHE_SIZE, 0, 
@@ -256,7 +268,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
     rx_mbuf_pool = new struct rte_mempool*[rx_threads_];
     for (int pool_idx = 0; pool_idx < rx_threads_; pool_idx++) {
         char pool_name[1024];
-        sprintf(pool_name, "RX_MBUF_POOL_%d", pool_idx);
+        sprintf(pool_name, "RRR_RX_MBUF_POOL_%d", pool_idx);
         /* TODO: Fix it for machines with more than one NUMA node */
         rx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, DPDK_NUM_MBUFS,
                                                          DPDK_MBUF_CACHE_SIZE, 0, 
@@ -289,7 +301,12 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
         if (retval < 0)
             rte_exit(EXIT_FAILURE, "Couldn't lunch core %d\n", lcore);
     }
-
+     for (lcore = rx_threads_; lcore < rx_threads_+tx_threads_; lcore++) {
+        Log_info("Launching TX Thread");
+        int retval = rte_eal_remote_launch(dpdk_tx_loop, &thread_rx_info[lcore], lcore);
+        if (retval < 0)
+            rte_exit(EXIT_FAILURE, "Couldn't lunch core %d\n", lcore);
+    }
     lcore = 0;
     dpdk_rx_loop(&thread_rx_info[lcore]);
 }
@@ -625,6 +642,32 @@ void packet_stats::show_statistics() {
     if (pkt_app_err > 0)
         Log_info("Error on Application: %ld", pkt_app_err);
 }
+
+inline void DpdkTransport::tx_loop_one(){
+    // Cycle through all Netconnections and send packets
+     for (std::pair<std::string, TransportConnection*> conn : out_connections){
+        conn.second->outl
+
+     }
+}
+
+inline void DpdkTransport::do_dpdk_send(
+    int port_num, int queue_id, void** bufs, uint64_t num_pkts) {
+    uint64_t retry_count = 0;
+    uint64_t ret = 0;
+    struct rte_mbuf** buffers = (struct rte_mbuf**)bufs;
+    Log_debug("do_dpdk_send port %d, queue_id %d", port_num, queue_id);
+    ret = rte_eth_tx_burst(port_num, queue_id, buffers, num_pkts);
+    if (unlikely(ret < 0)) rte_panic("Can't send burst\n");
+    while (ret != num_pkts) {
+      ret += rte_eth_tx_burst(port_num, queue_id, &buffers[ret], num_pkts - ret);
+      retry_count++;
+      if (unlikely(retry_count == 1000000)) {
+        Log_info("stuck in rte_eth_tx_burst in port %u queue %u", port_num, queue_id);
+        retry_count = 0;
+      }
+    }
+  }
 int  DpdkTransport::isolate(uint8_t phy_port){ 
 	 	struct rte_flow_error* error = (struct rte_flow_error*) malloc(sizeof(struct rte_flow_error));
 		int ret = rte_flow_isolate(phy_port, 1,error);
@@ -634,6 +677,9 @@ int  DpdkTransport::isolate(uint8_t phy_port){
              Log_info("Flow isolation enabled for port %d\n", phy_port);
 		return ret; 
 }
+
+
+
 void DpdkTransport::install_flow_rule(size_t phy_port){
     
   
