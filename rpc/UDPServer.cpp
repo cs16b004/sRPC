@@ -72,7 +72,7 @@ void UDPConnection::handle_read() {
     }
   //  Log_info("Bytes Read %d",bytes_read);
     list<Request*> complete_requests;
-
+        for(;;){
        // in_.print();
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
@@ -92,7 +92,8 @@ void UDPConnection::handle_read() {
             complete_requests.push_back(req);
 
         } else {
-            return;
+            break;
+        }
         }
     
       //  Log_info("Request read");
@@ -120,7 +121,7 @@ void UDPConnection::handle_read() {
         auto it = server_->handlers_.find(rpc_id);
         if (it != server_->handlers_.end()) {
             // the handler should delete req, and release server_connection refcopy.
-          //  Log_debug("RPC Triggered");
+           // Log_debug("RPC Triggered");
             it->second(req, (UDPConnection *) this->ref_copy());
             
         } else {

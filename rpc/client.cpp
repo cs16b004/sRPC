@@ -67,8 +67,27 @@ void Future::notify_ready() {
  * UDP Client implementation with DPDK
  * 
  * 
+ * 
 */
+int UDPClient::poll_mode(){
+    
+    int mode = Pollable::READ;
+    out_l_.lock();
+    if (!out_.empty()) {
+        mode |= Pollable::WRITE;
+    }
+    out_l_.unlock();
+    return mode;
+        
+}
 int UDPClient::connect(const char * addr){
+        int argc = 5;
+     char* argv[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host.yml","-fconfig_files/network_greenport.yml"};
+     Config::create_config(argc, argv);
+    Config* config = Config::get_config(); 
+    this->transport_->init(config);
+
+
     conn_id = transport_->connect(addr);
     transport_->out_connections[conn_id]->in_fd_=wfd;
     status_=CONNECTED;
@@ -97,8 +116,8 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
 
         return nullptr;
     }
-
-    bmark_ = (*out_ptr_).set_bookmark(sizeof(i32)); // will fill packet size later
+    out_l_.lock();
+    bmark_ = out_.set_bookmark(sizeof(i32)); // will fill packet size later
 
     *this << v64(fu->xid_);
     *this << rpc_id;
@@ -108,7 +127,7 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
 }
 void UDPClient::end_request(){
      if (bmark_ != nullptr) {
-        i32 request_size = (*out_ptr_).get_and_reset_write_cnt();
+        i32 request_size = out_.get_and_reset_write_cnt();
         (*out_ptr_).write_bookmark(bmark_, &request_size);
         delete bmark_;
         bmark_ = nullptr;
@@ -117,7 +136,11 @@ void UDPClient::end_request(){
     // always enable write events since the code above gauranteed there
     // will be some data to send
     pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
-    transport_->out_connections[conn_id]->out_messages.push(*out_ptr_);
+    Marshal *new_request = new Marshal() ;
+    new_request->read_from_marshal(out_,out_.content_size());
+
+    Log_debug("Request content size : %d, out_ size: %d",new_request->content_size(),out_.content_size());
+    transport_->out_connections[conn_id]->out_messages.push(new_request);
 
     out_l_.unlock();
 }

@@ -49,8 +49,8 @@ lib/libbase.a: basetypes.o logging.o misc.o strop.o threading.o unittest.o
 	ar rcs lib/libbase.a basetypes.o logging.o misc.o strop.o threading.o unittest.o
 	rm -f basetypes.o logging.o misc.o strop.o threading.o unittest.o
 
-client.o: ../rpc/client.cpp ../rpc/client.hpp
-	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/client.cpp -o client.o
+client.o: ../rpc/client.cpp ../rpc/client.hpp  transport.o
+	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/client.cpp transport.o -o client.o
 
 marshal.o: ../misc/marshal.cpp ../misc/marshal.hpp
 	${CXX} ${CXXFLAGS} ${INC} -c ../misc/marshal.cpp -o marshal.o

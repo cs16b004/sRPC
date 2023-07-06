@@ -56,6 +56,12 @@ static constexpr uint16_t IPHdrProtocol = 0x11;
 static constexpr uint16_t EtherTypeIP = 0x800;
 static constexpr uint16_t IPProtUDP = 0x11;
 static uint64_t BUFFER_HEADROOM = 0;
+#define IP_DEFTTL 64 /* from RFC 1340. */
+#define IP_VERSION 0x40
+#define IP_HDRLEN 0x05 /* default IP header length == five 32-bits words. */
+#define IP_VHL_DEF (IP_VERSION | IP_HDRLEN)
+#define IP_ADDR_FMT_SIZE 15
+
 
 /// Check a condition at runtime. If the condition is false, throw exception.
 static inline void rt_assert(bool condition, std::string throw_str, char* s) {
@@ -176,15 +182,50 @@ static std::string frame_header_to_string(uint8_t* buf) {
          udp_hdr->to_string();
 }
 
+static void gen_eth_header(rte_ether_hdr* eth_header, const uint8_t* src_mac,
+                           const uint8_t* dst_mac) {
+  
+  rte_ether_addr s_adr ;
+  rte_ether_addr d_adr ;
+  memcpy(s_adr.addr_bytes, src_mac, 6);
+  memcpy(d_adr.addr_bytes, dst_mac, 6);
+  memcpy(&(eth_header->d_addr),&d_adr,sizeof(rte_ether_addr));
+  memcpy(&(eth_header->s_addr),&s_adr,sizeof(rte_ether_addr));
+   eth_header->ether_type = rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4);
+}
+
 static void gen_eth_header(eth_hdr_t* eth_header, const uint8_t* src_mac,
                            const uint8_t* dst_mac) {
   memcpy(eth_header->src_mac, src_mac, 6);
   memcpy(eth_header->dst_mac, dst_mac, 6);
   eth_header->eth_type = htons(IPEtherType);
+ 
 }
 
 /// Format the IPv4 header for a UDP packet. Note that \p data_size is the
 /// payload size in the UDP packet.
+
+static void gen_ipv4_header(rte_ipv4_hdr* ipv4_hdr, uint32_t src_ip,
+                            uint32_t dst_ip, uint16_t data_size) {
+
+  	/**< type of service */
+	ipv4_hdr->total_length = htons(sizeof(rte_ipv4_hdr) + sizeof(rte_udp_hdr) + data_size);	/**< length of packet */
+	
+	
+    ipv4_hdr->version_ihl = IP_VHL_DEF;
+    ipv4_hdr->type_of_service = 0;
+   ipv4_hdr->fragment_offset = rte_cpu_to_be_16(RTE_IPV4_HDR_DF_FLAG);
+    ipv4_hdr->time_to_live = IP_DEFTTL;
+    ipv4_hdr->next_proto_id = IPPROTO_UDP;
+    ipv4_hdr->packet_id = 4;
+
+
+	  ipv4_hdr->src_addr = src_ip;		/**< source address */
+	  ipv4_hdr->dst_addr = dst_ip;	                 
+
+    ipv4_hdr->total_length = rte_cpu_to_be_16(sizeof(rte_ipv4_hdr) + sizeof(rte_udp_hdr) + data_size);
+}
+
 static void gen_ipv4_header(ipv4_hdr_t* ipv4_hdr, uint32_t src_ip,
                             uint32_t dst_ip, uint16_t data_size) {
   ipv4_hdr->version = 4;
@@ -203,6 +244,16 @@ static void gen_ipv4_header(ipv4_hdr_t* ipv4_hdr, uint32_t src_ip,
 
 /// Format the UDP header for a UDP packet. Note that \p data_size is the
 /// payload size in the UDP packet.
+static void gen_udp_header(rte_udp_hdr* udp_hdr, uint16_t src_port,
+                           uint16_t dst_port, uint16_t data_size) {
+  udp_hdr->src_port = htons(src_port);
+  udp_hdr->dst_port = htons(dst_port);
+  udp_hdr->dgram_len = rte_cpu_to_be_16(sizeof(rte_udp_hdr) + data_size);
+
+ 
+}
+
+
 static void gen_udp_header(udp_hdr_t* udp_hdr, uint16_t src_port,
                            uint16_t dst_port, uint16_t data_size) {
   udp_hdr->src_port = htons(src_port);

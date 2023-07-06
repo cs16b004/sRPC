@@ -8,6 +8,7 @@
 namespace rrr {
 
 class Future;
+class Client;
 class TCPClient;
 class UDPClient;
 struct FutureAttr {
@@ -106,8 +107,6 @@ public:
     }
 };
 
-
-
 class Client: public Pollable {
 
 protected:
@@ -124,20 +123,13 @@ protected:
     SpinLock out_l_;
 
     // reentrant, could be called multiple times before releasing
-    virtual void close();
+  
 
     void invalidate_pending_futures();
 
     // prevent direct usage, use close_and_release() instead
     using RefCounted::release;
-
-
-    virtual ~Client() {
-        //invalidate_pending_futures();
-    }
-
 public:
-
     Client(PollMgr* pollmgr): pollmgr_(pollmgr), status_(NEW) { }
 
     /**
@@ -145,9 +137,12 @@ public:
      *
      * The request packet format is: <size> <xid> <rpc_id> <arg1> <arg2> ... <argN>
      */
-    virtual Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
-
-    virtual void end_request();
+    virtual Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr()) = 0;
+    virtual void close() = 0;
+    virtual void end_request() = 0;
+    virtual int connect(const char* addr) = 0;
+    virtual void close_and_release() = 0;
+    virtual int fd()=0;
     
 
     template<class T>
@@ -164,18 +159,7 @@ public:
             this->out_.read_from_marshal(m, m.content_size());
         }
         return *this;
-    }
-
-    virtual int connect(const char* addr);
-
-    void close_and_release() {
-        close();
-        release();
-    }
-
-   virtual int fd();
-
-    
+    }    
 };
 class UDPClient: public Client{
     protected:
@@ -194,8 +178,15 @@ class UDPClient: public Client{
         void handle_write(){
             verify(0);
         }
+        void handle_error(){
+            verify(0);
+        }
+        void close(){
+            verify(0);
+        }
+        int poll_mode();
         Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
-         UDPClient(PollMgr* pollmgr): Client(pollmgr), bmark_(nullptr) {
+        UDPClient(PollMgr* pollmgr): Client(pollmgr), bmark_(nullptr) {
             int pipefd[2];
             verify(pipe(pipefd)==0);
 
@@ -203,27 +194,34 @@ class UDPClient: public Client{
 
             wfd = pipefd[1];
             out_ptr_ = &out_;
-          }
+            verify(set_nonblocking(sock_, true) == 0);
+            if(transport_ == nullptr)
+                transport_ = new DpdkTransport();
+        }
         void end_request();
         int connect(const char* addr);
         int fd(){
             return sock_;
         }
-        template<class T>
-    UDPClient& operator <<(const T& v) {
-        if (status_ == CONNECTED) {
-            (*out_ptr_)<< v;
+        void close_and_release() {
+            close();
+            release();
         }
-        return *this;
-    }
+    //    template<class T>
+    // UDPClient& operator <<(const T& v) {
+    //     if (status_ == CONNECTED) {
+    //         (*out_ptr_)<< v;
+    //     }
+    //     return *this;
+    // }
 
-    // NOTE: this function is used *internally* by Python extension
-    UDPClient& operator <<(Marshal& m) {
-        if (status_ == CONNECTED) {
-            (*out_ptr_).read_from_marshal(m, m.content_size());
-        }
-        return *this;
-    }
+    // // NOTE: this function is used *internally* by Python extension
+    // UDPClient& operator <<(Marshal& m) {
+    //     if (status_ == CONNECTED) {
+    //         (*out_ptr_).read_from_marshal(m, m.content_size());
+    //     }
+    //     return *this;
+    // }
 
 };
 class TCPClient: public Client {
@@ -249,7 +247,10 @@ protected:
     }
 
 public:
-
+    void close_and_release() {
+        close();
+        release();
+    }
     TCPClient(PollMgr* pollmgr): Client(pollmgr), bmark_(nullptr) { }
 
     /**
@@ -260,11 +261,6 @@ public:
     Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
 
     void end_request();
-
-    void close_and_release() {
-        close();
-        release();
-    }
 
     int fd() {
         return sock_;

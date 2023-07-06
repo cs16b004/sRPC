@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <cstdint>
 #include <map>
@@ -6,14 +7,14 @@
 #include <string>
 #include "../../misc/marshal.hpp"
 #include "config.hpp"
-#include "utils.hpp"
+
 #include "../polling.hpp"
 #include <rte_ethdev.h>
 #include <rte_eth_ctrl.h>
 #include <rte_flow.h>
 #include <rte_ip.h>
 #include <sys/time.h>
-
+#include <mutex>
 namespace rrr{
     struct Request;
     class UDPConnection;
@@ -48,12 +49,13 @@ namespace rrr{
         void init(const char* mac_i, const char* ip_i, const int port);
         bool operator==(const NetAddress& other);
         NetAddress& operator=(const NetAddress& other);
+        std::string to_string();
     };
     
     struct TransportConnection{
         int in_fd_;
         std::mutex outl;
-        std::queue<Marshal> out_messages;
+        std::queue<Marshal*> out_messages;
         NetAddress out_addr;
     };
     class DpdkTransport {
@@ -72,7 +74,8 @@ namespace rrr{
         struct rte_mempool **rx_mbuf_pool;
       //  std::map<uint16_t,rrr::Connection*> connections_;
         SpinLock connLock;
-
+        SpinLock init_lock;
+        bool initiated=false;
         std::map<std::string, int> connections;
 
         std::map<uint32_t, TransportConnection*> out_connections;
@@ -99,16 +102,18 @@ namespace rrr{
         void install_flow_rule(size_t phy_port);
 
         static int dpdk_rx_loop(void* arg);
-        static int dpdk_tx_loop();
-        void tx_loop_one();
+        static int dpdk_tx_loop(void* arg);
+        void tx_loop_one(dpdk_thread_info * arg);
+        void initialize_tx_mbufs(void* args);
 
         
         void process_incoming_packets(dpdk_thread_info* rx_buf_info);
 
-        int make_pkt_header(uint8_t *pkt, int payload_len,
-                        int src_id, std::string dest_id, int port_offset);
+        int make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id);
         int isolate(uint8_t phy_port);
         void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
+        void send(uint8_t* payload, unsigned length,
+                      uint16_t conn_id, dpdk_thread_info* tx_info);
 
 public:
     void init(Config* config);
@@ -118,8 +123,6 @@ public:
   
     void shutdown();
     void trigger_shutdown();
-
-    void register_resp_callback();
 
     ~DpdkTransport() {
         
@@ -144,7 +147,7 @@ public:
         int port_id;
         int queue_id;
         int count = 0;
-        int max_size;
+        int max_size=100;
         packet_stats stat;
         int udp_port_id = 0;
         struct rte_mbuf **buf{nullptr};

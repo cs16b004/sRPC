@@ -1,7 +1,8 @@
 
+#pragma once
 #include <cstdint>
 #include "transport.hpp"
-
+#include "utils.hpp"
 
 
 #define DPDK_RX_DESC_SIZE           1024
@@ -51,6 +52,56 @@ uint32_t DpdkTransport::connect(const char* addr_str){
    
     return conn_id;
 }
+void DpdkTransport::initialize_tx_mbufs(void* arg){
+      auto rx_info = reinterpret_cast<dpdk_thread_info*>(arg);
+    auto dpdk_th = rx_info->dpdk_th;
+    unsigned lcore_id = rte_lcore_id();
+    std::vector<Marshal*> requests;
+    dpdk_thread_info* tx_info = &(thread_tx_info[rte_lcore_id()%tx_threads_]);
+    
+    if (tx_info->count == 0) {
+         Log_debug("Mbuf Pool Initialized at index %d, name: %s",tx_info->thread_id%tx_threads_,tx_mbuf_pool[tx_info->thread_id%tx_threads_]->name);
+         int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
+         if (ret < 0)
+             rte_panic("couldn't allocate mbufs");
+        
+    }
+}
+int DpdkTransport::dpdk_tx_loop(void* arg){
+    auto tx_info = reinterpret_cast<dpdk_thread_info*>(arg);
+    auto dpdk_th = tx_info->dpdk_th;
+    Log_info("Entering TX Loop at lcore %d",rte_lcore_id());
+    dpdk_th->initialize_tx_mbufs(arg);
+    while(!dpdk_th->force_quit){
+        dpdk_th->tx_loop_one(reinterpret_cast<dpdk_thread_info*>(arg));
+    }
+    return 0;
+}
+void DpdkTransport::tx_loop_one(dpdk_thread_info *arg){
+      auto rx_info = reinterpret_cast<dpdk_thread_info*>(arg);
+    auto dpdk_th = rx_info->dpdk_th;
+    unsigned lcore_id = rte_lcore_id();
+    std::vector<Marshal*> requests;
+    dpdk_thread_info* tx_info = &(thread_tx_info[rte_lcore_id()%tx_threads_]);
+    
+    for(std::pair<uint32_t,TransportConnection*> entry:out_connections){
+        if(entry.second->outl.try_lock()){
+            if(!entry.second->out_messages.empty()){
+                 Marshal* req = entry.second->out_messages.front();
+                 size_t n_bytes = req->content_size();
+                 uint8_t payload[n_bytes];
+                 req->read(payload,n_bytes);
+                 send(payload,n_bytes,entry.first,tx_info);
+                 
+                entry.second->out_messages.pop();
+            }
+            entry.second->outl.unlock();
+        }
+    }
+    
+    
+    return;
+}
 int DpdkTransport::dpdk_rx_loop(void* arg) {
     auto rx_info = reinterpret_cast<dpdk_thread_info*>(arg);
     auto dpdk_th = rx_info->dpdk_th;
@@ -76,6 +127,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
 
         dpdk_th->process_incoming_packets(rx_info);
     }
+
     return 0;
 }
 
@@ -126,64 +178,66 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         rte_pktmbuf_free(rx_info->buf[i]);
 }
 
-// void DpdkTransport::send(uint8_t* payload, unsigned length,
-//                       int server_id, int client_id) {
-//     dpdk_thread_info* tx_info = &(thread_tx_info[client_id]);
-//     if (tx_info->count == 0) {
-//         int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id]);
-//         if (ret < 0)
-//             rte_panic("couldn't allocate mbufs");
-//     }
+void DpdkTransport::send(uint8_t* payload, unsigned length,
+                      uint16_t conn_id, dpdk_thread_info* tx_info) {
+    
+    if (tx_info->count == 0) {
+        int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
+        if (ret < 0)
+            rte_panic("couldn't allocate mbufs");
+    }
 
-//     uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
+    uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
 
-//     int hdr_len = make_pkt_header(pkt_buf, length, tx_info->port_id,
-//                                   server_id, tx_info->udp_port_id);
-//     /* We want to have uniform distribution accross all of rx threads */
-//     /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
-//     memcpy(pkt_buf + hdr_len, payload, length);
+    int hdr_len = make_pkt_header(pkt_buf, length, conn_id);
+    /* We want to have uniform distribution accross all of rx threads */
+    /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
+    memcpy(pkt_buf + hdr_len, payload, length);
 
-//     int data_size = hdr_len + length;
-//     tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4);
-//     tx_info->buf[tx_info->count]->nb_segs = 1;
-//     tx_info->buf[tx_info->count]->pkt_len = data_size;
-//     tx_info->buf[tx_info->count]->data_len = data_size;
-//     Log_debug("Thread %d send packet to server %d with size of %d",
-//               client_id, server_id, data_size);
+    int data_size = hdr_len + length;
+    tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4| PKT_TX_IP_CKSUM | PKT_TX_UDP_CKSUM);
+    tx_info->buf[tx_info->count]->nb_segs = 1;
+    tx_info->buf[tx_info->count]->pkt_len = data_size;
+     tx_info->buf[tx_info->count]->l2_len = sizeof(struct rte_ether_hdr);
+     tx_info->buf[tx_info->count]->l3_len = sizeof(struct rte_ipv4_hdr);
+     tx_info->buf[tx_info->count]->l4_len = sizeof(struct rte_udp_hdr);
+    tx_info->buf[tx_info->count]->data_len = data_size;
+    Log_debug("send packet to server %s with size of %d",out_connections[conn_id]->out_addr.to_string().c_str(), data_size);
 
-//     tx_info->count++;
-//     if (unlikely(tx_info->count == tx_info->max_size)) {
-//         int ret = rte_eth_tx_burst(tx_info->port_id, tx_info->queue_id,
-//                                    tx_info->buf, tx_info->count);
-//         if (unlikely(ret < 0))
-//             rte_panic("Tx couldn't send\n");
+    tx_info->count++;
+    if (unlikely(tx_info->count == tx_info->max_size)) {
+        int ret = rte_eth_tx_burst(tx_info->port_id, tx_info->queue_id,
+                                   tx_info->buf, tx_info->count);
+        if (unlikely(ret < 0))
+            Log_error("Tx couldn't send\n");
 
-//         if (unlikely(ret != tx_info->count))
-//             rte_panic("Couldn't send all packets\n");
+        if (unlikely(ret != tx_info->count))
+            Log_error("Couldn't send all packets");
 
-//         tx_info->stat.pkt_count += tx_info->count;
-//         tx_info->count = 0;
-//     }
-//     else
-//         tx_info->stat.pkt_error += tx_info->count;
-// }
+        tx_info->stat.pkt_count += tx_info->count;
+        tx_info->count = 0;
+    }
+    else
+        tx_info->stat.pkt_error += tx_info->count;
+}
 
-int DpdkTransport::make_pkt_header(uint8_t *pkt, int payload_len,
-                                int src_id, std::string dest_name, int port_offset) {
+int DpdkTransport::make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id) {
     NetAddress& src_addr = src_addr_[config_->host_name_];
-    NetAddress& dest_addr = dest_addr_[dest_name]; 
+    if(out_connections.find(conn_id) == out_connections.end())
+        return -1; 
+    NetAddress& dest_addr = out_connections[conn_id]->out_addr; 
 
     unsigned pkt_offset = 0;
-    eth_hdr_t* eth_hdr = reinterpret_cast<eth_hdr_t*>(pkt);
+    rte_ether_hdr* eth_hdr = reinterpret_cast<rte_ether_hdr*>(pkt);
     gen_eth_header(eth_hdr, src_addr.mac, dest_addr.mac);
 
-    pkt_offset += sizeof(eth_hdr_t);
-    ipv4_hdr_t* ipv4_hdr = reinterpret_cast<ipv4_hdr_t*>(pkt + pkt_offset);
-    gen_ipv4_header(ipv4_hdr, src_addr.ip, dest_addr.ip, payload_len);
+    pkt_offset += sizeof(rte_ether_hdr);
+    rte_ipv4_hdr* ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(pkt + pkt_offset);
+    gen_ipv4_header(ipv4_hdr, src_addr.ip, (dest_addr.ip), payload_len);
 
     pkt_offset += sizeof(ipv4_hdr_t);
-    udp_hdr_t* udp_hdr = reinterpret_cast<udp_hdr_t*>(pkt + pkt_offset);
-    int client_port_addr = src_addr.port + port_offset;
+    rte_udp_hdr* udp_hdr = reinterpret_cast<rte_udp_hdr*>(pkt + pkt_offset);
+    int client_port_addr = src_addr.port;
     gen_udp_header(udp_hdr, client_port_addr, dest_addr.port, payload_len);
 
     pkt_offset += sizeof(udp_hdr_t);
@@ -192,25 +246,31 @@ int DpdkTransport::make_pkt_header(uint8_t *pkt, int payload_len,
 
 void DpdkTransport::init(Config* config) {
    // src_addr_ = new NetAddress();
-    config_= config;
-    addr_config(config->host_name_, config->get_net_info());
+    init_lock.lock();
+    if(!initiated){
+        config_= config;
+        addr_config(config->host_name_, config->get_net_info());
 
-    Config::CpuInfo cpu_info = config->get_cpu_info();
-    const char* argv_str = config->get_dpdk_options();
-    tx_threads_ = config->get_host_threads();
-    rx_threads_ = (int) (config->get_dpdk_rxtx_thread_ratio() * (float) tx_threads_);
-    if ((rx_threads_ > cpu_info.max_rx_threads) || (rx_threads_ < 1)) {
-        Log_error("Total number of threads %d cannot be more than %d or less than 1. "
+        Config::CpuInfo cpu_info = config->get_cpu_info();
+        const char* argv_str = config->get_dpdk_options();
+        tx_threads_ = config->get_host_threads();
+        rx_threads_ = (int) (config->get_dpdk_rxtx_thread_ratio() * (float) tx_threads_);
+        if ((rx_threads_ > cpu_info.max_rx_threads) || (rx_threads_ < 1)) {
+            Log_error("Total number of threads %d cannot be more than %d or less than 1. "
                   "Change the rxtx_threads", rx_threads_, cpu_info.max_rx_threads);
-        assert(false);
-    }
+            assert(false);
+        }
 
-    /* TODO: remove this */
-    tx_threads_ = rx_threads_;
-    gettimeofday(&start_clock, NULL);
-    main_thread = std::thread([this, argv_str](){
-        this->init_dpdk_main_thread(argv_str);
-    });
+        /* TODO: remove this */
+        tx_threads_ = rx_threads_;
+        gettimeofday(&start_clock, NULL);
+        main_thread = std::thread([this, argv_str](){
+            this->init_dpdk_main_thread(argv_str);
+        });
+    }
+    initiated=true;
+    init_lock.unlock();
+
     
     //sleep(200);
 }
@@ -259,7 +319,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
         /* TODO: Fix it for machines with more than one NUMA node */
         tx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, DPDK_NUM_MBUFS,
                                                          DPDK_MBUF_CACHE_SIZE, 0, 
-                                                         RTE_MBUF_DEFAULT_BUF_SIZE, 
+                                                         1000*RTE_MBUF_DEFAULT_BUF_SIZE, 
                                                          rte_socket_id());
         if (tx_mbuf_pool[pool_idx] == NULL)
             rte_exit(EXIT_FAILURE, "Cannot create tx mbuf pool %d\n", pool_idx);
@@ -272,7 +332,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
         /* TODO: Fix it for machines with more than one NUMA node */
         rx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, DPDK_NUM_MBUFS,
                                                          DPDK_MBUF_CACHE_SIZE, 0, 
-                                                         RTE_MBUF_DEFAULT_BUF_SIZE, 
+                                                         1000*RTE_MBUF_DEFAULT_BUF_SIZE, 
                                                          rte_socket_id());
         if (rx_mbuf_pool[pool_idx] == NULL)
             rte_exit(EXIT_FAILURE, "Cannot create rx mbuf pool %d\n", pool_idx);
@@ -299,13 +359,13 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
         Log_info("Launching RX Thread");
         int retval = rte_eal_remote_launch(dpdk_rx_loop, &thread_rx_info[lcore], lcore);
         if (retval < 0)
-            rte_exit(EXIT_FAILURE, "Couldn't lunch core %d\n", lcore);
+            rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore);
     }
      for (lcore = rx_threads_; lcore < rx_threads_+tx_threads_; lcore++) {
         Log_info("Launching TX Thread");
-        int retval = rte_eal_remote_launch(dpdk_tx_loop, &thread_rx_info[lcore], lcore);
+        int retval = rte_eal_remote_launch(dpdk_tx_loop, &thread_tx_info[lcore%tx_threads_], lcore);
         if (retval < 0)
-            rte_exit(EXIT_FAILURE, "Couldn't lunch core %d\n", lcore);
+            rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore);
     }
     lcore = 0;
     dpdk_rx_loop(&thread_rx_info[lcore]);
@@ -532,14 +592,7 @@ void DpdkTransport::trigger_shutdown() {
     force_quit = true;
 }
 
-void DpdkTransport::register_resp_callback() {
-    response_handler = [&](uint8_t* data, int data_len,
-                          int server_id, int client_id) -> int {
-        Log_debug("client %d got xid %ld", client_id, *reinterpret_cast<uint64_t*>(data));
-        //this->send(data, data_len, server_id, client_id);
-        return data_len;
-    };
-}
+
 
 /* void DpdkTransport::register_resp_callback(Workload* app) { */
 /*     response_handler = [app](uint8_t* data, int data_len, int id) -> int { */
@@ -577,7 +630,11 @@ NetAddress::NetAddress(const uint8_t* mac_i, const uint32_t ip_i, const int port
     ip = ip_i;
     port = port_i;
 }
-
+std::string NetAddress::to_string(){
+            std::stringstream ss;
+            ss<<"\n[ IP: "<<ipv4_to_string((ip))<<"\n  "<<"mac: "<<mac_to_string(mac)<<"\n ]";
+            return ss.str();
+} 
 bool NetAddress::operator==(const NetAddress& other) {
     if (&other == this)
         return true;
@@ -641,14 +698,6 @@ void packet_stats::show_statistics() {
         Log_info("Error on Port Number: %ld", pkt_port_num_err);
     if (pkt_app_err > 0)
         Log_info("Error on Application: %ld", pkt_app_err);
-}
-
-inline void DpdkTransport::tx_loop_one(){
-    // Cycle through all Netconnections and send packets
-     for (std::pair<std::string, TransportConnection*> conn : out_connections){
-        conn.second->outl
-
-     }
 }
 
 inline void DpdkTransport::do_dpdk_send(
