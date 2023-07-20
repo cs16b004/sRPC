@@ -323,16 +323,12 @@ TCPServer::~TCPServer() {
     //Log_debug("rrr::TCPServer: destroyed");
 }
 
-struct start_server_loop_args_type {
-    TCPServer* server;
-    struct addrinfo* gai_result;
-    struct addrinfo* svr_addr;
-};
+
 
 void* TCPServer::start_server_loop(void* arg) {
     start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
-
-    start_server_loop_args->server->server_loop(start_server_loop_args->svr_addr);
+    TCPServer* svr = (TCPServer*)(start_server_loop_args->server);
+    svr->server_loop(start_server_loop_args->svr_addr);
 
     freeaddrinfo(start_server_loop_args->gai_result);
     delete start_server_loop_args;

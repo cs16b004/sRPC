@@ -16,9 +16,11 @@ using namespace std;
 
 namespace rrr {
 
+
 UDPConnection::UDPConnection(UDPServer* server, int socket)
-        : ServerConnection((Server*) server,socket) {
+        : ServerConnection((Server*) server,server->transport_->out_connections[socket]->in_fd_),connId(socket) {
     // increase number of open connections
+
     server_->sconns_ctr_.next(1);
 }
 
@@ -54,8 +56,14 @@ void UDPConnection::end_reply() {
     // always enable write events since the code above gauranteed there
     // will be some data to send
     server_->pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
+     Marshal *new_reply = new Marshal() ;
+     new_reply->read_from_marshal(out_,out_.content_size());
+
+    Log_debug("Request content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
+    ((UDPServer*)server_)->transport_->out_connections[connId]->out_messages.push(new_reply);
 
     out_l_.unlock();
+
 }
 
 void UDPConnection::handle_read() {
@@ -220,22 +228,17 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
     }
     if(transport_ == nullptr){
         transport_ = new DpdkTransport();
-    }
-    //Test UDP Connection
-    int pipefd[2];
-    verify(pipe(pipefd)==0);
 
-    int fd = pipefd[0];
-    wfd = pipefd[1];
-    sconns_l_.lock();   
-    verify(set_nonblocking(fd, true) == 0);
-    UDPConnection* sconn = new UDPConnection(this, fd);
-    sconns_.insert(sconn);
-    pollmgr_->add(sconn);
-    sconns_l_.unlock();
-    transport_->connLock.lock();
-    transport_->connections["192.168.2.53"]=wfd;
-    transport_->connLock.unlock();
+    }
+    /**
+     * 
+     * This will be replaced by a thread making out connection
+    */
+    //Test UDP Connection
+
+    transport_->init(Config::get_config());
+    
+  
 }
 
 UDPServer::~UDPServer() {
@@ -281,7 +284,17 @@ UDPServer::~UDPServer() {
 }
 
 void* UDPServer::start_server_loop(void* arg) {
-    
+    Config* conf = Config::get_config();
+
+    rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
+    UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
+    uint32_t connId = svr->transport_->accept();
+    svr->sconns_l_.lock();   
+    verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
+    UDPConnection* sconn = new UDPConnection(svr, connId);
+    svr->sconns_.insert(sconn);
+    svr->pollmgr_->add(sconn);
+    svr->sconns_l_.unlock();
 }
 
 void UDPServer::server_loop(struct addrinfo* svr_addr) {
@@ -294,9 +307,7 @@ void UDPServer::start(Config* config) {
 }
 
 void UDPServer::start() {
-    int argc = 5;
-    char* argv[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host.yml","-fconfig_files/network_catskill.yml"};
-     Config::create_config(argc, argv);
+   
     Config* config = Config::get_config(); 
     this->transport_->init(config);
 }

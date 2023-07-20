@@ -23,16 +23,40 @@
 #define DPDK_PREFETCH_NUM           2
 namespace rrr{
     struct Request;
-char* DpdkTransport::getMacFromIp(std::string ip){
+
+
+//DpdkTransport* DpdkTransport::transport = nullptr;
+const char* DpdkTransport::getMacFromIp(std::string ip){
+      for(rrr::Config::NetworkInfo it: config_->get_net_info()){
+        if (it.ip == ip){
+            Log_debug("Found the Mac for IP: %s",ip.c_str());
+            return it.mac.c_str();
+            
+        }
+    }
     return "02:de:ad:be:ef:60";
 }
+
+// DpdkTransport* DpdkTransport::getTransport(){
+//     assert(transport != nullptr);
+//     return transport;
+// }
+
+// int DpdkTransport::createTransport(){
+//     if(transport != nullptr)
+//             return -1;
+//         else{
+//             transport = new DpdkTransport();
+//             return 0;
+//         }
+// }
 
 uint32_t DpdkTransport::connect(const char* addr_str){
 
     std::string addr(addr_str);
     size_t idx = addr.find(":");
     if (idx == std::string::npos) {
-        Log_error("rrr::Client: bad connect address: %s", addr);
+        Log_error("rrr::Transport: bad connect address: %s", addr);
         return EINVAL;
     }
     std::string server_ip = addr.substr(0, idx);
@@ -41,12 +65,18 @@ uint32_t DpdkTransport::connect(const char* addr_str){
      NetAddress s_addr(getMacFromIp(server_ip),server_ip.c_str(),port);
     // UDPConnection *conn = new UDPConnection(*s_addr);
     TransportConnection* oconn = new TransportConnection();
+    int pipefd[2];
+    verify(pipe(pipefd)==0);
+    
     oconn->out_addr = s_addr;
+    oconn->in_fd_  = pipefd[0];
+    oconn->wfd = pipefd[1];
     uint32_t conn_id;
     conn_lock.lock();
     conn_counter++;
     conn_id = conn_counter;
     out_connections[conn_id] = oconn;
+    addr_lookup[addr] = conn_id;
     conn_lock.unlock();
    // this->connections_[conn_id] = conn;
    
@@ -91,7 +121,7 @@ void DpdkTransport::tx_loop_one(dpdk_thread_info *arg){
                  size_t n_bytes = req->content_size();
                  uint8_t payload[n_bytes];
                  req->read(payload,n_bytes);
-                 send(payload,n_bytes,entry.first,tx_info);
+                 send(payload,n_bytes,entry.first,tx_info,rrr::RR);
                  
                 entry.second->out_messages.pop();
             }
@@ -155,20 +185,28 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         //         printf("0x%02x ", data_ptr[i]);
         // }
         // printf("\n\n");
-        int n = write(connections["192.168.2.53"],data_ptr,pkt_size);
-        rx_info->stat.pkt_count++;
-        gettimeofday(&current, NULL);
-         int elapsed_sec = current.tv_sec - start_clock.tv_sec;
+        uint8_t pkt_type;
+        mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
+        data_ptr += sizeof(uint8_t); 
+        if(pkt_type == rrr::RR){
+            int n = write(out_connections[addr_lookup[src_addr_[config_->host_name_].getAddr()]]->wfd,data_ptr,pkt_size);
+            rx_info->stat.pkt_count++;
+            gettimeofday(&current, NULL);
+            int elapsed_sec = current.tv_sec - start_clock.tv_sec;
 
-        if (elapsed_sec >= 100) {
-            gettimeofday(&start_clock,NULL);
-            rx_info->stat.show_statistics();
-        }
+            if (elapsed_sec >= 100) {
+                gettimeofday(&start_clock,NULL);
+                rx_info->stat.show_statistics();
+            }
+        
         //Log_info("Byres Written %d",n);
-        if(n < 0 ){
-            perror("Message: ");
+            if(n < 0 ){
+                perror("Message: ");
+            }
+        }else{
+            Log_debug("Session Management Packet received pkt type %2x",pkt_type);
+            
         }
-
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
         if (prefetch_idx < rx_info->count)
             rte_prefetch0(rte_pktmbuf_mtod(rx_info->buf[prefetch_idx], uint8_t*));
@@ -179,22 +217,24 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
 }
 
 void DpdkTransport::send(uint8_t* payload, unsigned length,
-                      uint16_t conn_id, dpdk_thread_info* tx_info) {
+                      uint16_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type) {
     
     if (tx_info->count == 0) {
         int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
         if (ret < 0)
             rte_panic("couldn't allocate mbufs");
     }
-
+    
     uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
 
     int hdr_len = make_pkt_header(pkt_buf, length, conn_id);
     /* We want to have uniform distribution accross all of rx threads */
     /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
-    memcpy(pkt_buf + hdr_len, payload, length);
+    /** Copy Packet Type*/
+    memcpy(pkt_buf+hdr_len,&pkt_type,sizeof(uint8_t));
+    memcpy(pkt_buf + hdr_len + sizeof(uint8_t), payload, length);
 
-    int data_size = hdr_len + length;
+    int data_size = hdr_len + sizeof(uint8_t)  + length;
     tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4| PKT_TX_IP_CKSUM | PKT_TX_UDP_CKSUM);
     tx_info->buf[tx_info->count]->nb_segs = 1;
     tx_info->buf[tx_info->count]->pkt_len = data_size;
@@ -202,7 +242,7 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
      tx_info->buf[tx_info->count]->l3_len = sizeof(struct rte_ipv4_hdr);
      tx_info->buf[tx_info->count]->l4_len = sizeof(struct rte_udp_hdr);
     tx_info->buf[tx_info->count]->data_len = data_size;
-    Log_debug("send packet to server %s with size of %d",out_connections[conn_id]->out_addr.to_string().c_str(), data_size);
+    Log_debug("send packet to server %s with size of %d, pkt type 0x%2x",out_connections[conn_id]->out_addr.to_string().c_str(), data_size,pkt_type);
 
     tx_info->count++;
     if (unlikely(tx_info->count == tx_info->max_size)) {
@@ -630,6 +670,13 @@ NetAddress::NetAddress(const uint8_t* mac_i, const uint32_t ip_i, const int port
     ip = ip_i;
     port = port_i;
 }
+
+std::string NetAddress::getAddr(){
+    std::stringstream ss;
+    ss<<ipv4_to_string(ip)<<":"<<std::to_string(port);
+    return ss.str();
+}
+
 std::string NetAddress::to_string(){
             std::stringstream ss;
             ss<<"\n[ IP: "<<ipv4_to_string((ip))<<"\n  "<<"mac: "<<mac_to_string(mac)<<"\n ]";

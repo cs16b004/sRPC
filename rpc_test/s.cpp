@@ -63,6 +63,13 @@ int main(int argc, char **argv) {
     base::ThreadPool *tp = new base::ThreadPool(1);
     rrr::TCPServer *server = new rrr::TCPServer(pm, tp);
     server->reg(csi);
+
+
+
+    char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_catskill.yml","-fconfig_files/network_catskill.yml"};
+     rrr::Config::create_config(5, argv2);
+      
+
     rrr::PollMgr *pm_udp = new rrr::PollMgr(1);
     base::ThreadPool *tp_udp = new base::ThreadPool(1);
     rrr::UDPServer *us = new rrr::UDPServer(pm_udp,tp_udp);

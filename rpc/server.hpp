@@ -14,6 +14,14 @@
 struct addrinfo;
 #define MAX_BUFFER_SIZE 12000
 namespace rrr {
+
+
+struct start_server_loop_args_type {
+    Server* server;
+    struct addrinfo* gai_result;
+    struct addrinfo* svr_addr;
+};
+
 class TCPServer;
 class Server;
 class UDPServer;
@@ -284,9 +292,11 @@ class UDPConnection: public ServerConnection {
     
     
     void close();
+    uint32_t connId;
 
 protected:
     NetAddress toAddress;
+    
     // Protected destructor as required by RefCounted.
 
     ~UDPConnection();
@@ -317,6 +327,7 @@ class UDPServer : public Server{
         int wfd;
         ~UDPServer();
         int server_sock_;
+
 
         std::unordered_set<ServerConnection*> sconns_;
 

@@ -16,9 +16,15 @@
 #include <sys/time.h>
 #include <mutex>
 namespace rrr{
+
+
     struct Request;
     class UDPConnection;
     class UDPClient;
+    // Pakcet Type    
+    const uint8_t SM = 0x07;
+    const uint8_t RR = 0x08;
+    
     struct packet_stats {
         uint64_t pkt_count = 0;
 
@@ -49,19 +55,24 @@ namespace rrr{
         void init(const char* mac_i, const char* ip_i, const int port);
         bool operator==(const NetAddress& other);
         NetAddress& operator=(const NetAddress& other);
+        std::string getAddr();
         std::string to_string();
     };
     
     struct TransportConnection{
         int in_fd_;
+        int wfd;
         std::mutex outl;
         std::queue<Marshal*> out_messages;
         NetAddress out_addr;
     };
+       
     class DpdkTransport {
         friend class UDPServer;
         friend class UDPClient;
+        friend class UDPConnection;
     private:
+       // static DpdkTransport* transport;
         unsigned udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         Config* config_;
         int port_num_ = 0;
@@ -76,12 +87,14 @@ namespace rrr{
         SpinLock connLock;
         SpinLock init_lock;
         bool initiated=false;
-        std::map<std::string, int> connections;
-
+        
+        std::map<std::string,uint32_t> addr_lookup;
         std::map<uint32_t, TransportConnection*> out_connections;
-
         std::map<std::string, NetAddress> src_addr_;
         std::map<std::string, NetAddress> dest_addr_;
+        std::queue<Marshal*> sm_queue;
+ 
+        
 
         struct dpdk_thread_info *thread_rx_info{nullptr};
         struct dpdk_thread_info *thread_tx_info{nullptr};
@@ -90,7 +103,7 @@ namespace rrr{
         
         std::thread main_thread;
         bool force_quit{false};
-        char * getMacFromIp(std::string ip);
+        const char * getMacFromIp(std::string ip);
         void addr_config(std::string host_name,
         std::vector<Config::NetworkInfo> net_info);
         void init_dpdk_main_thread(const char* argv_str);
@@ -108,14 +121,16 @@ namespace rrr{
 
         
         void process_incoming_packets(dpdk_thread_info* rx_buf_info);
-
+        uint32_t accept();
         int make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id);
         int isolate(uint8_t phy_port);
         void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
         void send(uint8_t* payload, unsigned length,
-                      uint16_t conn_id, dpdk_thread_info* tx_info);
+                      uint16_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type);
 
 public:
+   // static int createTransport();
+   // static DpdkTransport* getTransport();
     void init(Config* config);
    // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
     uint32_t connect (const char* addr);

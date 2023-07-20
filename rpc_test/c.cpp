@@ -72,6 +72,11 @@ void *do_add_short(void *) {
 }
 
 int main(int argc, char **argv) {
+
+     char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_greenport.yml","-fconfig_files/network_greenport.yml"};
+     rrr::Config::create_config(5, argv2);
+   
+
     if (argc < 5)
         return -1;
 
