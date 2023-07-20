@@ -169,14 +169,16 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
     for (int i = 0; i < rx_info->count; i++) {
         uint8_t* pkt_ptr = rte_pktmbuf_mtod((struct rte_mbuf*)rx_info->buf[i], uint8_t*);
         
-        
+        struct rte_ipv4_hdr* ip_hdr = reinterpret_cast<struct rte_ipv4_hdr*>(pkt_ptr + ip_hdr_offset);
+        uint32_t src_ip = ip_hdr->src_addr;
+
         struct rte_udp_hdr* udp_hdr = reinterpret_cast<struct rte_udp_hdr*> (pkt_ptr + udp_hdr_offset);
         
         uint16_t src_port = ntohs(udp_hdr->src_port);
         
         uint16_t pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
         //Log_debug("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
-        
+        std::string src_addr = ipv4_to_string(src_ip) + ":" + std::to_string(src_port);
         uint8_t* data_ptr = pkt_ptr + udp_hdr_offset + sizeof(rte_udp_hdr);
         //   for (int i=0; i < pkt_size; ++i) {
         //         if (! (i % 16) && i)
@@ -188,23 +190,40 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         uint8_t pkt_type;
         mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
         data_ptr += sizeof(uint8_t); 
-        if(pkt_type == rrr::RR){
-            int n = write(out_connections[addr_lookup[src_addr_[config_->host_name_].getAddr()]]->wfd,data_ptr,pkt_size);
-            rx_info->stat.pkt_count++;
-            gettimeofday(&current, NULL);
-            int elapsed_sec = current.tv_sec - start_clock.tv_sec;
+        if(pkt_type == rrr::RR ){
+            if(addr_lookup.find(src_addr)!=addr_lookup.end()){
+                int n = write(out_connections[addr_lookup[src_addr]]->wfd,data_ptr,pkt_size-sizeof(uint8_t));
+                #ifdef TRANSPORT_STATS
+                rx_info->stat.pkt_count++;
+                gettimeofday(&current, NULL);
+                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
 
-            if (elapsed_sec >= 100) {
-                gettimeofday(&start_clock,NULL);
-                rx_info->stat.show_statistics();
-            }
-        
-        //Log_info("Byres Written %d",n);
-            if(n < 0 ){
+                if (elapsed_sec >= 100) {
+                    gettimeofday(&start_clock,NULL);
+                    rx_info->stat.show_statistics();
+                }
+                #endif
+                if(n < 0 ){
                 perror("Message: ");
             }
+            }else{
+                Log_debug("Packet Dropped as connection not found");
+                #ifdef TRANSPORT_STATS
+                rx_info->stat.pkt_error++;
+                gettimeofday(&current, NULL);
+                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
+
+                if (elapsed_sec >= 100) {
+                    gettimeofday(&start_clock,NULL);
+                    rx_info->stat.show_statistics();
+                }
+                #endif
+            }
+        //Log_info("Byres Written %d",n);
+            
         }else{
             Log_debug("Session Management Packet received pkt type %2x",pkt_type);
+            Marshal * sm_req = new Marshal();
             
         }
         int prefetch_idx = i + DPDK_PREFETCH_NUM;

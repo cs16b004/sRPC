@@ -74,6 +74,7 @@ namespace rrr{
     private:
        // static DpdkTransport* transport;
         unsigned udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
+        unsigned ip_hdr_offset = sizeof(struct rte_ether_hdr);
         Config* config_;
         int port_num_ = 0;
         int tx_threads_ = 0;
