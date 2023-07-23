@@ -83,9 +83,12 @@ int UDPClient::poll_mode(){
 int UDPClient::connect(const char * addr){
         
     
-    Config* config = Config::get_config(); 
-    this->transport_->init(config);
-
+    // Config* config = Config::get_config(); 
+    // this->transport_->init(config);
+    // while(!transport_->initiated){
+    //     Log_debug("Waiting for transport to initialize");
+    //     usleep(2);
+    // }
 
     conn_id = transport_->connect(addr);
     sock_ = transport_->out_connections[conn_id]->in_fd_;

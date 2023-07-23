@@ -50,7 +50,36 @@ const char* DpdkTransport::getMacFromIp(std::string ip){
 //             return 0;
 //         }
 // }
+uint32_t DpdkTransport::accept(const char* addr_str){
+    std::string addr(addr_str);
+    size_t idx = addr.find(":");
+    if (idx == std::string::npos) {
+        Log_error("rrr::Transport: bad connect address: %s", addr);
+        return EINVAL;
+    }
+    std::string server_ip = addr.substr(0, idx);
+    uint16_t port = atoi(addr.substr(idx + 1).c_str());
 
+     NetAddress s_addr(getMacFromIp(server_ip),server_ip.c_str(),port);
+    // UDPConnection *conn = new UDPConnection(*s_addr);
+    TransportConnection* oconn = new TransportConnection();
+    int pipefd[2];
+    verify(pipe(pipefd)==0);
+    
+    oconn->out_addr = s_addr;
+    oconn->in_fd_  = pipefd[0];
+    oconn->wfd = pipefd[1];
+    uint32_t conn_id;
+    conn_lock.lock();
+    conn_counter++;
+    conn_id = conn_counter;
+    out_connections[conn_id] = oconn;
+    addr_lookup[addr] = conn_id;
+    conn_lock.unlock();
+   // this->connections_[conn_id] = conn;
+   
+    return conn_id;
+}
 uint32_t DpdkTransport::connect(const char* addr_str){
 
     std::string addr(addr_str);
@@ -79,7 +108,15 @@ uint32_t DpdkTransport::connect(const char* addr_str){
     addr_lookup[addr] = conn_id;
     conn_lock.unlock();
    // this->connections_[conn_id] = conn;
-   
+    uint8_t con_req = rrr::CON;
+    while(!initiated){
+        // Log_debug("Wating for intialization");
+        // usleep(2);
+        ;
+    }
+    Log_debug("Added %s",s_addr.to_string().c_str());
+    send(&con_req,sizeof(uint8_t),conn_id,&thread_tx_info[rx_threads_%tx_threads_],rrr::SM);
+    sleep(1);
     return conn_id;
 }
 void DpdkTransport::initialize_tx_mbufs(void* arg){
@@ -221,9 +258,29 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
             }
         //Log_info("Byres Written %d",n);
             
-        }else{
+        }else if (pkt_type == rrr::SM){
             Log_debug("Session Management Packet received pkt type %2x",pkt_type);
             Marshal * sm_req = new Marshal();
+            uint8_t req_type;
+            mempcpy(&req_type,data_ptr,sizeof(uint8_t));
+            *(sm_req)<<req_type;
+            *(sm_req)<<src_addr;
+            sm_queue_l.lock();
+            sm_queue.push(sm_req);
+            sm_queue_l.unlock();
+              #ifdef TRANSPORT_STATS
+                rx_info->stat.pkt_count++;
+                gettimeofday(&current, NULL);
+                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
+
+                if (elapsed_sec >= 100) {
+                    gettimeofday(&start_clock,NULL);
+                    rx_info->stat.show_statistics();
+                }
+                #endif
+               
+            
+        }else{
             
         }
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
@@ -249,7 +306,7 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
     int hdr_len = make_pkt_header(pkt_buf, length, conn_id);
     /* We want to have uniform distribution accross all of rx threads */
     /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
-    /** Copy Packet Type*/
+    /** Copy Packet Type*/ 
     memcpy(pkt_buf+hdr_len,&pkt_type,sizeof(uint8_t));
     memcpy(pkt_buf + hdr_len + sizeof(uint8_t), payload, length);
 
@@ -327,7 +384,7 @@ void DpdkTransport::init(Config* config) {
             this->init_dpdk_main_thread(argv_str);
         });
     }
-    initiated=true;
+    
     init_lock.unlock();
 
     
@@ -427,6 +484,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
             rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore);
     }
     lcore = 0;
+    initiated = true;
     dpdk_rx_loop(&thread_rx_info[lcore]);
 }
 

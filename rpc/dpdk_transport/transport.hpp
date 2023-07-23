@@ -24,6 +24,8 @@ namespace rrr{
     // Pakcet Type    
     const uint8_t SM = 0x07;
     const uint8_t RR = 0x08;
+    const uint8_t DIS = 0x01;
+    const uint8_t CON = 0x02;
     
     struct packet_stats {
         uint64_t pkt_count = 0;
@@ -93,6 +95,7 @@ namespace rrr{
         std::map<uint32_t, TransportConnection*> out_connections;
         std::map<std::string, NetAddress> src_addr_;
         std::map<std::string, NetAddress> dest_addr_;
+        SpinLock sm_queue_l;
         std::queue<Marshal*> sm_queue;
  
         
@@ -122,7 +125,7 @@ namespace rrr{
 
         
         void process_incoming_packets(dpdk_thread_info* rx_buf_info);
-        uint32_t accept();
+      
         int make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id);
         int isolate(uint8_t phy_port);
         void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
@@ -135,6 +138,7 @@ public:
     void init(Config* config);
    // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
     uint32_t connect (const char* addr);
+      uint32_t accept(const char* addr);
     int connect(std::string addr);
   
     void shutdown();

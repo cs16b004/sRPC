@@ -16,18 +16,18 @@ struct addrinfo;
 namespace rrr {
 
 
-struct start_server_loop_args_type {
-    Server* server;
-    struct addrinfo* gai_result;
-    struct addrinfo* svr_addr;
-};
+
 
 class TCPServer;
 class Server;
 class UDPServer;
 class ServerConnection;
 
-
+struct start_server_loop_args_type {
+    Server* server;
+    struct addrinfo* gai_result;
+    struct addrinfo* svr_addr;
+};
 /**
  * The raw packet sent from client will be like this:
  * <size> <xid> <rpc_id> <arg1> <arg2> ... <argN>
@@ -340,7 +340,7 @@ class UDPServer : public Server{
         void start(Config* config);
         void start();
         static void* start_server_loop(void* arg);
-        void server_loop(struct addrinfo* svr_addr);
+        void server_loop(void* arg);
 
     public:
 

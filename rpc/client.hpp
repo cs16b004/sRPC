@@ -190,6 +190,7 @@ class UDPClient: public Client{
             
             if(transport_ == nullptr)
                 transport_=  new DpdkTransport();
+            transport_->init(Config::get_config());
         }
         void end_request();
         int connect(const char* addr);

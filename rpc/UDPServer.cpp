@@ -288,22 +288,55 @@ void* UDPServer::start_server_loop(void* arg) {
 
     rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
     UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
-    uint32_t connId = svr->transport_->accept();
-    svr->sconns_l_.lock();   
-    verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
-    UDPConnection* sconn = new UDPConnection(svr, connId);
-    svr->sconns_.insert(sconn);
-    svr->pollmgr_->add(sconn);
-    svr->sconns_l_.unlock();
+    svr->server_loop(arg);
+   
+     freeaddrinfo(start_server_loop_args->gai_result);
+    delete start_server_loop_args;
+
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
-void UDPServer::server_loop(struct addrinfo* svr_addr) {
+void UDPServer::server_loop(void* arg) {
+    rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
+    UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
+
+    while(svr->status_ == RUNNING){
+        svr->transport_->sm_queue_l.lock();
+        Marshal* sm_req = svr->transport_->sm_queue.front();
+        svr->transport_->sm_queue.pop();
+        uint8_t req_type;
+        verify(sm_req->read(&req_type, sizeof(uint8_t)) == sizeof(uint8_t));
+        if(req_type == rrr::CON){
+            std::string src_addr;
+            *(sm_req)>>src_addr;
+            Log_debug("SM REQ to connect %s",src_addr.c_str());
+            uint32_t connId = svr->transport_->accept(src_addr.c_str());
+            svr->sconns_l_.lock();   
+            verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
+            UDPConnection* sconn = new UDPConnection(svr, connId);
+            svr->sconns_.insert(sconn);
+            svr->pollmgr_->add(sconn);
+            svr->sconns_l_.unlock();
+        }
+
+    }
+    server_sock_ = -1;
+    status_ = STOPPED;
     
+
 }
 
 void UDPServer::start(Config* config) {
 
     this->transport_->init(config);
+
+     start_server_loop_args_type* start_server_loop_args = new start_server_loop_args_type();
+    start_server_loop_args->server = (Server*)this;
+    start_server_loop_args->gai_result = nullptr;
+    start_server_loop_args->svr_addr = nullptr;
+    Pthread_create(&loop_th_, nullptr, UDPServer::start_server_loop, start_server_loop_args);
+
 }
 
 void UDPServer::start() {

@@ -431,7 +431,7 @@ int TCPServer::start(const char* bind_addr) {
     Log_info("rrr::TCPServer: started on %s", bind_addr);
 
     start_server_loop_args_type* start_server_loop_args = new start_server_loop_args_type();
-    start_server_loop_args->server = this;
+    start_server_loop_args->server = (Server*)this;
     start_server_loop_args->gai_result = result;
     start_server_loop_args->svr_addr = rp;
     Pthread_create(&loop_th_, nullptr, TCPServer::start_server_loop, start_server_loop_args);
