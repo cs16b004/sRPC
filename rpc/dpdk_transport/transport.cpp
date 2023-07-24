@@ -506,7 +506,8 @@ void DpdkTransport::addr_config(std::string host_name,
         /*     addr = &dest_addr_; */
 
         auto it = addr->find(host_name);
-        assert(it == addr->end());
+        
+        verify(it == addr->end());
         Log_info("Adding a host with name %s : info :\n %s",net.name.c_str(),net.to_string().c_str());
         addr->emplace(std::piecewise_construct,
                       std::forward_as_tuple(net.name),
