@@ -78,7 +78,7 @@ void UDPConnection::handle_read() {
       
         return;
     }
-  //  Log_info("Bytes Read %d",bytes_read);
+    Log_info("%d Bytes Read from fd %d",bytes_read,socket_);
     list<Request*> complete_requests;
         for(;;){
        // in_.print();

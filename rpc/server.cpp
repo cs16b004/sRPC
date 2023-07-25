@@ -2,7 +2,7 @@
 #include <string>
 #include <sstream>
 
-#include <sys/select.h>
+
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>

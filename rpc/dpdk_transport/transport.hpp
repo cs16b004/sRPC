@@ -23,7 +23,7 @@ namespace rrr{
     class UDPClient;
     // Pakcet Type    
     const uint8_t SM = 0x07;
-    const uint8_t RR = 0x08;
+    const uint8_t RR = 0x09;
     const uint8_t DIS = 0x01;
     const uint8_t CON = 0x02;
     

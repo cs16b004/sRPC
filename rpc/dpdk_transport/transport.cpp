@@ -230,7 +230,7 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         data_ptr += sizeof(uint8_t); 
         if(pkt_type == rrr::RR ){
             if(rx_info->dpdk_th->addr_lookup.find(src_addr)!=addr_lookup.end()){
-                int n = write(rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,data_ptr,pkt_size-sizeof(uint8_t));
+                int n = write(rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,data_ptr,pkt_size);
                 #ifdef TRANSPORT_STATS
                 rx_info->stat.pkt_count++;
                 gettimeofday(&current, NULL);
@@ -241,6 +241,11 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
                     rx_info->stat.show_statistics();
                 }
                 #endif
+                if (n>0){
+                  Log_debug("%d butes written to fd %d, read end %d",
+                            n,rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,
+                            rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->in_fd_);
+                }
                 if(n < 0 ){
                 perror("Message: ");
             }
