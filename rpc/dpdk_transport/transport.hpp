@@ -64,7 +64,7 @@ namespace rrr{
     struct TransportConnection{
         int in_fd_;
         int wfd;
-        std::mutex outl;
+        SpinLock outl;
         std::queue<Marshal*> out_messages;
         NetAddress out_addr;
     };
@@ -107,7 +107,7 @@ namespace rrr{
         
         std::thread main_thread;
         bool force_quit{false};
-        const char * getMacFromIp(std::string ip);
+        std::string getMacFromIp(std::string ip);
         void addr_config(std::string host_name,
         std::vector<Config::NetworkInfo> net_info);
         void init_dpdk_main_thread(const char* argv_str);

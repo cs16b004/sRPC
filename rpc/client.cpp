@@ -444,7 +444,7 @@ Client* ClientPool::get_client(const string& addr) {
         bool ok = true;
         for (i = 0; i < parallel_connections_; i++) {
             #ifdef DPDK
-                parallel_connections[i] = (Client*) new UDPClient(this->pollmgr_);
+                parallel_clients[i] = (Client*) new UDPClient(this->pollmgr_);
             #else
                 parallel_clients[i] = (Client*) new TCPClient(this->pollmgr_);
             #endif

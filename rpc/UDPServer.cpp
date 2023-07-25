@@ -59,7 +59,7 @@ void UDPConnection::end_reply() {
      Marshal *new_reply = new Marshal() ;
      new_reply->read_from_marshal(out_,out_.content_size());
 
-    Log_debug("Request content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
+    Log_debug("Reply content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
     ((UDPServer*)server_)->transport_->out_connections[connId]->out_messages.push(new_reply);
 
     out_l_.unlock();
@@ -84,9 +84,9 @@ void UDPConnection::handle_read() {
        // in_.print();
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
-        //  Log_debug("Packet Size %d",packet_size);
-        //     Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
-        //     Log_debug("packet not complete or there's no more packet to process");
+         Log_debug("Packet Size %d",packet_size);
+            Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
+           
         if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
             // consume the packet size
             verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
@@ -100,6 +100,7 @@ void UDPConnection::handle_read() {
             complete_requests.push_back(req);
 
         } else {
+             Log_debug("packet not complete or there's no more packet to process");
             break;
         }
         }
@@ -305,8 +306,11 @@ void UDPServer::server_loop(void* arg) {
     while(svr->status_ == RUNNING ){
         if( !svr->transport_->sm_queue.empty()){
             svr->transport_->sm_queue_l.lock();
+            
             Marshal* sm_req = svr->transport_->sm_queue.front();
             svr->transport_->sm_queue.pop();
+            
+            svr->transport_->sm_queue_l.unlock();
             uint8_t req_type;
             verify(sm_req->read(&req_type, sizeof(uint8_t)) == sizeof(uint8_t));
             if(req_type == rrr::CON){
@@ -329,10 +333,8 @@ void UDPServer::server_loop(void* arg) {
 
 }
 
-void UDPServer::start(Config* config) {
-
-
-
+void UDPServer::start(const char* addr) {
+    start();
 }
 
 void UDPServer::start() {
