@@ -61,7 +61,11 @@ int main(int argc, char **argv) {
     CounterServiceImpl *csi = new CounterServiceImpl(time);
     rrr::PollMgr *pm = new rrr::PollMgr(1);
     base::ThreadPool *tp = new base::ThreadPool(1);
+    #ifdef DPDK
+    rrr::UDPServer *server = new rrr::UDPServer(pm,tp);
+    #else
     rrr::TCPServer *server = new rrr::TCPServer(pm, tp);
+    #endif
     server->reg(csi);
 
 
@@ -70,11 +74,9 @@ int main(int argc, char **argv) {
      rrr::Config::create_config(5, argv2);
       
 
-    rrr::PollMgr *pm_udp = new rrr::PollMgr(1);
-    base::ThreadPool *tp_udp = new base::ThreadPool(1);
-    rrr::UDPServer *us = new rrr::UDPServer(pm_udp,tp_udp);
-    us->reg(csi);
-    us->start();
+   
+    
+   
     server->start((std::string("0.0.0.0:") + argv[1]).c_str());
     
     pm->release();

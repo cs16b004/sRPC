@@ -14,7 +14,11 @@ CounterProxy **get_proxy() {
     CounterProxy **ret = (CounterProxy **)malloc(sizeof(CounterProxy *) * ns);
     for (; i < ns; i++) {
         pm[i] = new rrr::PollMgr();
+        #ifdef DPDK
         rrr::UDPClient *client = new rrr::UDPClient(pm[i]);
+        #else
+        rrr::TCPClient* client = new rrr::TCPClient(pm[i]);
+        #endif
         client->connect(servers[i]);
         ret[i] = new CounterProxy((rrr::Client*)client);
     }
@@ -59,14 +63,16 @@ void *do_add_short(void *) {
     CounterProxy **proxy = get_proxy();
     unsigned int start = rand() % ns;
     unsigned int i = 0;
-    while (1) {
+    unsigned int j = 0;
+    while (j<300*1000) {
         rrr::FutureGroup fg;
         for (i = 0; i < npg; i++) {
             fg.add(proxy[start++]->async_add_short((rrr::i64)1));
             start %= ns;
         }
+        j++;
         fg.wait_all();
-        break;
+       // break;
     }
     return NULL;
 }
