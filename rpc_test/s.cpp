@@ -13,7 +13,9 @@ private:
         struct timespec tv_buf;
         clock_gettime(CLOCK_REALTIME, &tv_buf);
         double time = (double)(tv_buf.tv_sec - csi_s->tv_.tv_sec) + ((double)(tv_buf.tv_nsec - csi_s->tv_.tv_nsec)) / 1000000000.0;
+        fprintf(stdout, "------------------------------------------------------------\n\n\n\n\n");
         fprintf(stdout, "time: %lf, count: %lu, rpc per sec: %lf\n", time, csi_s->count_ - csi_s->last_count_, (csi_s->count_ - csi_s->last_count_) / time);
+        fprintf(stdout, "n\n\n\n\n\n\n------------------------------------------------------------\n\n\n\n\n");
         csi_s->last_count_ = csi_s->count_;
         csi_s->tv_.tv_sec = tv_buf.tv_sec;
         csi_s->tv_.tv_nsec = tv_buf.tv_nsec;
@@ -61,13 +63,22 @@ int main(int argc, char **argv) {
     CounterServiceImpl *csi = new CounterServiceImpl(time);
     rrr::PollMgr *pm = new rrr::PollMgr(1);
     base::ThreadPool *tp = new base::ThreadPool(1);
+    #ifdef DPDK
+    rrr::UDPServer *server = new rrr::UDPServer(pm,tp);
+    #else
     rrr::TCPServer *server = new rrr::TCPServer(pm, tp);
+    #endif
     server->reg(csi);
-    rrr::PollMgr *pm_udp = new rrr::PollMgr(1);
-    base::ThreadPool *tp_udp = new base::ThreadPool(1);
-    rrr::UDPServer *us = new rrr::UDPServer(pm_udp,tp_udp);
-    us->reg(csi);
-    us->start();
+
+
+
+    char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_catskill.yml","-fconfig_files/network_catskill.yml"};
+     rrr::Config::create_config(5, argv2);
+      
+
+   
+    
+   
     server->start((std::string("0.0.0.0:") + argv[1]).c_str());
     
     pm->release();

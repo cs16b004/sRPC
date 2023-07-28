@@ -23,33 +23,115 @@
 #define DPDK_PREFETCH_NUM           2
 namespace rrr{
     struct Request;
-char* DpdkTransport::getMacFromIp(std::string ip){
+    const uint8_t padd[64] = {  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, };
+
+//DpdkTransport* DpdkTransport::transport = nullptr;
+std::string DpdkTransport::getMacFromIp(std::string ip){
+      for(rrr::Config::NetworkInfo it: config_->get_net_info()){
+        if (it.ip == ip){
+           // Log_debug("Found the Mac for IP: %s, MAC: %s",ip.c_str(),it.mac.c_str());
+            return (it.mac);
+            
+        }
+    }
     return "02:de:ad:be:ef:60";
 }
 
-uint32_t DpdkTransport::connect(const char* addr_str){
+// DpdkTransport* DpdkTransport::getTransport(){
+//     assert(transport != nullptr);
+//     return transport;
+// }
 
+// int DpdkTransport::createTransport(){
+//     if(transport != nullptr)
+//             return -1;
+//         else{
+//             transport = new DpdkTransport();
+//             return 0;
+//         }
+// }
+uint32_t DpdkTransport::accept(const char* addr_str){
     std::string addr(addr_str);
     size_t idx = addr.find(":");
     if (idx == std::string::npos) {
-        Log_error("rrr::Client: bad connect address: %s", addr);
-        return EINVAL;
+        Log_error("rrr::Transport: bad connect address: %s", addr);
+        return 0;
     }
     std::string server_ip = addr.substr(0, idx);
     uint16_t port = atoi(addr.substr(idx + 1).c_str());
 
-     NetAddress s_addr(getMacFromIp(server_ip),server_ip.c_str(),port);
+     
     // UDPConnection *conn = new UDPConnection(*s_addr);
     TransportConnection* oconn = new TransportConnection();
-    oconn->out_addr = s_addr;
+    int pipefd[2];
+    verify(pipe(pipefd)==0);
+    if (addr_lookup.find(addr)!= addr_lookup.end()){
+        return 0;
+    }
+    oconn->out_addr = NetAddress(getMacFromIp(server_ip).c_str(),server_ip.c_str(),port);
+    oconn->in_fd_  = pipefd[0];
+    oconn->wfd = pipefd[1];
     uint32_t conn_id;
     conn_lock.lock();
     conn_counter++;
     conn_id = conn_counter;
     out_connections[conn_id] = oconn;
+    addr_lookup[addr] = conn_id;
     conn_lock.unlock();
    // this->connections_[conn_id] = conn;
    
+    return conn_id;
+}
+uint32_t DpdkTransport::connect(const char* addr_str){
+
+    std::string addr(addr_str);
+    size_t idx = addr.find(":");
+    if (idx == std::string::npos) {
+        Log_error("rrr::Transport: bad connect address: %s", addr);
+        return EINVAL;
+    }
+    std::string server_ip = addr.substr(0, idx);
+    uint16_t port = atoi(addr.substr(idx + 1).c_str());
+
+ 
+    // UDPConnection *conn = new UDPConnection(*s_addr);
+    TransportConnection* oconn = new TransportConnection();
+    int pipefd[2];
+    verify(pipe(pipefd)==0);
+    Log_debug("Connecting with a server");
+    Log_debug("Mac: %s",getMacFromIp(server_ip).c_str());
+    oconn->out_addr =     NetAddress(getMacFromIp(server_ip).c_str(),server_ip.c_str(),port);
+    Log_debug("Network added");
+    oconn->in_fd_  = pipefd[0];
+    oconn->wfd = pipefd[1];
+    uint32_t conn_id;
+    conn_lock.lock();
+    conn_counter++;
+    conn_id = conn_counter;
+    out_connections[conn_id] = oconn;
+    addr_lookup[addr] = conn_id;
+    conn_lock.unlock();
+   // this->connections_[conn_id] = conn;
+    uint8_t con_req[30] = {rrr::CON, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0};
+    while(!initiated){
+        // Log_debug("Wating for intialization");
+        // usleep(2);
+        ;
+    }
+    Log_debug("Added %s, fd r: %d, w: %d",oconn->out_addr.to_string().c_str(),oconn->in_fd_,oconn->wfd);
+    send(con_req, 30*sizeof(uint8_t), conn_id, 
+            &thread_tx_info[rx_threads_%tx_threads_],rrr::SM);
+    sleep(1);
     return conn_id;
 }
 void DpdkTransport::initialize_tx_mbufs(void* arg){
@@ -78,25 +160,24 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
     return 0;
 }
 void DpdkTransport::tx_loop_one(dpdk_thread_info *arg){
-      auto rx_info = reinterpret_cast<dpdk_thread_info*>(arg);
-    auto dpdk_th = rx_info->dpdk_th;
+    
     unsigned lcore_id = rte_lcore_id();
     std::vector<Marshal*> requests;
     dpdk_thread_info* tx_info = &(thread_tx_info[rte_lcore_id()%tx_threads_]);
     
-    for(std::pair<uint32_t,TransportConnection*> entry:out_connections){
-        if(entry.second->outl.try_lock()){
+    for(std::pair<uint32_t,TransportConnection*> entry:tx_info->dpdk_th->out_connections){
+        entry.second->outl.lock();
             if(!entry.second->out_messages.empty()){
                  Marshal* req = entry.second->out_messages.front();
                  size_t n_bytes = req->content_size();
                  uint8_t payload[n_bytes];
                  req->read(payload,n_bytes);
-                 send(payload,n_bytes,entry.first,tx_info);
+                 send(payload,n_bytes,entry.first,tx_info,rrr::RR);
                  
                 entry.second->out_messages.pop();
             }
             entry.second->outl.unlock();
-        }
+        
     }
     
     
@@ -139,14 +220,16 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
     for (int i = 0; i < rx_info->count; i++) {
         uint8_t* pkt_ptr = rte_pktmbuf_mtod((struct rte_mbuf*)rx_info->buf[i], uint8_t*);
         
-        
+        struct rte_ipv4_hdr* ip_hdr = reinterpret_cast<struct rte_ipv4_hdr*>(pkt_ptr + ip_hdr_offset);
+        uint32_t src_ip = ip_hdr->src_addr;
+
         struct rte_udp_hdr* udp_hdr = reinterpret_cast<struct rte_udp_hdr*> (pkt_ptr + udp_hdr_offset);
         
         uint16_t src_port = ntohs(udp_hdr->src_port);
         
         uint16_t pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
         //Log_debug("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
-        
+        std::string src_addr = ipv4_to_string(src_ip) + ":" + std::to_string(src_port);
         uint8_t* data_ptr = pkt_ptr + udp_hdr_offset + sizeof(rte_udp_hdr);
         //   for (int i=0; i < pkt_size; ++i) {
         //         if (! (i % 16) && i)
@@ -155,20 +238,71 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         //         printf("0x%02x ", data_ptr[i]);
         // }
         // printf("\n\n");
-        int n = write(connections["192.168.2.53"],data_ptr,pkt_size);
-        rx_info->stat.pkt_count++;
-        gettimeofday(&current, NULL);
-         int elapsed_sec = current.tv_sec - start_clock.tv_sec;
+        uint8_t pkt_type;
+        mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
+        data_ptr += sizeof(uint8_t); 
+        if(pkt_type == rrr::RR ){
+            if(rx_info->dpdk_th->addr_lookup.find(src_addr)!=addr_lookup.end()){
+                int n = write(rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,data_ptr,pkt_size);
+                #ifdef TRANSPORT_STATS
+                rx_info->stat.pkt_count++;
+                gettimeofday(&current, NULL);
+                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
 
-        if (elapsed_sec >= 100) {
-            gettimeofday(&start_clock,NULL);
-            rx_info->stat.show_statistics();
-        }
+                if (elapsed_sec >= 100) {
+                    gettimeofday(&start_clock,NULL);
+                    rx_info->stat.show_statistics();
+                }
+                #endif
+                 if (n>0){
+                  Log_debug("%d bytes written to fd %d, read end %d",
+                            n,rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,
+                            rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->in_fd_);
+                }
+                if(n < 0 ){
+                perror("Message: ");
+            }
+            }else{
+                Log_debug("Packet Dropped as connection not found");
+                #ifdef TRANSPORT_STATS
+                rx_info->stat.pkt_error++;
+                gettimeofday(&current, NULL);
+                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
+
+                if (elapsed_sec >= 100) {
+                    gettimeofday(&start_clock,NULL);
+                    rx_info->stat.show_statistics();
+                }
+                #endif
+            }
         //Log_info("Byres Written %d",n);
-        if(n < 0 ){
-            perror("Message: ");
-        }
+            
+        }else if (pkt_type == rrr::SM){
+            Log_debug("Session Management Packet received pkt type 0x%2x",pkt_type);
+            Marshal * sm_req = new Marshal();
+            uint8_t req_type;
+            mempcpy(&req_type,data_ptr,sizeof(uint8_t));
+            *(sm_req)<<req_type;
+            *(sm_req)<<src_addr;
+            rx_info->dpdk_th->sm_queue_l.lock();
+            rx_info->dpdk_th->sm_queue.push(sm_req);
+            rx_info->dpdk_th->sm_queue_l.unlock();
+              #ifdef TRANSPORT_STATS
+                rx_info->stat.pkt_count++;
+                gettimeofday(&current, NULL);
+                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
 
+                if (elapsed_sec >= 100) {
+                    gettimeofday(&start_clock,NULL);
+                    rx_info->stat.show_statistics();
+                }
+                #endif
+               
+            
+        }else{
+            Log_debug("Packet Type Not found");
+            Log_debug("Src addr: %s",src_addr.c_str());
+        }
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
         if (prefetch_idx < rx_info->count)
             rte_prefetch0(rte_pktmbuf_mtod(rx_info->buf[prefetch_idx], uint8_t*));
@@ -179,22 +313,30 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
 }
 
 void DpdkTransport::send(uint8_t* payload, unsigned length,
-                      uint16_t conn_id, dpdk_thread_info* tx_info) {
+                      uint16_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type) {
     
     if (tx_info->count == 0) {
         int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
         if (ret < 0)
             rte_panic("couldn't allocate mbufs");
     }
-
+    
     uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
 
     int hdr_len = make_pkt_header(pkt_buf, length, conn_id);
     /* We want to have uniform distribution accross all of rx threads */
     /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
-    memcpy(pkt_buf + hdr_len, payload, length);
+    /** Copy Packet Type*/ 
+    memcpy(pkt_buf + hdr_len,&pkt_type,sizeof(uint8_t));
+    memcpy(pkt_buf + hdr_len + sizeof(uint8_t), payload, length);
 
-    int data_size = hdr_len + length;
+    int data_size = hdr_len + sizeof(uint8_t)  + length;
+    if(data_size < 64){
+        memcpy(pkt_buf + data_size, padd, 64-data_size);
+        Log_debug("Padding %d bytes because data_size: %d",64-data_size,data_size);
+    }
+    data_size = std::max(data_size,64);
+
     tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4| PKT_TX_IP_CKSUM | PKT_TX_UDP_CKSUM);
     tx_info->buf[tx_info->count]->nb_segs = 1;
     tx_info->buf[tx_info->count]->pkt_len = data_size;
@@ -202,7 +344,7 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
      tx_info->buf[tx_info->count]->l3_len = sizeof(struct rte_ipv4_hdr);
      tx_info->buf[tx_info->count]->l4_len = sizeof(struct rte_udp_hdr);
     tx_info->buf[tx_info->count]->data_len = data_size;
-    Log_debug("send packet to server %s with size of %d",out_connections[conn_id]->out_addr.to_string().c_str(), data_size);
+    Log_debug("send packet to server %s with size of %d, pkt type 0x%2x",out_connections[conn_id]->out_addr.to_string().c_str(), data_size,pkt_type);
 
     tx_info->count++;
     if (unlikely(tx_info->count == tx_info->max_size)) {
@@ -268,7 +410,7 @@ void DpdkTransport::init(Config* config) {
             this->init_dpdk_main_thread(argv_str);
         });
     }
-    initiated=true;
+    
     init_lock.unlock();
 
     
@@ -368,6 +510,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
             rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore);
     }
     lcore = 0;
+    initiated = true;
     dpdk_rx_loop(&thread_rx_info[lcore]);
 }
 
@@ -389,7 +532,8 @@ void DpdkTransport::addr_config(std::string host_name,
         /*     addr = &dest_addr_; */
 
         auto it = addr->find(host_name);
-        assert(it == addr->end());
+        
+        verify(it == addr->end());
         Log_info("Adding a host with name %s : info :\n %s",net.name.c_str(),net.to_string().c_str());
         addr->emplace(std::piecewise_construct,
                       std::forward_as_tuple(net.name),
@@ -630,9 +774,17 @@ NetAddress::NetAddress(const uint8_t* mac_i, const uint32_t ip_i, const int port
     ip = ip_i;
     port = port_i;
 }
+
+std::string NetAddress::getAddr(){
+    std::stringstream ss;
+    ss<<ipv4_to_string(ip)<<":"<<std::to_string(port);
+    return ss.str();
+}
+
 std::string NetAddress::to_string(){
             std::stringstream ss;
-            ss<<"\n[ IP: "<<ipv4_to_string((ip))<<"\n  "<<"mac: "<<mac_to_string(mac)<<"\n ]";
+            ss<<"\n[ IP: "<<ipv4_to_string((ip))<<"\n  "<<"mac: "<<mac_to_string(mac)<<"\n ";
+            ss<<"port: "<<std::to_string(port)<<"\n]";
             return ss.str();
 } 
 bool NetAddress::operator==(const NetAddress& other) {

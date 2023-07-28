@@ -14,7 +14,11 @@ CounterProxy **get_proxy() {
     CounterProxy **ret = (CounterProxy **)malloc(sizeof(CounterProxy *) * ns);
     for (; i < ns; i++) {
         pm[i] = new rrr::PollMgr();
+        #ifdef DPDK
         rrr::UDPClient *client = new rrr::UDPClient(pm[i]);
+        #else
+        rrr::TCPClient* client = new rrr::TCPClient(pm[i]);
+        #endif
         client->connect(servers[i]);
         ret[i] = new CounterProxy((rrr::Client*)client);
     }
@@ -34,7 +38,7 @@ void *do_add(void *) {
                 start %= ns;
             }
         }
-        fg.wait_all();
+     fg.wait_all();
         
     }
     return NULL;
@@ -59,19 +63,27 @@ void *do_add_short(void *) {
     CounterProxy **proxy = get_proxy();
     unsigned int start = rand() % ns;
     unsigned int i = 0;
-    while (1) {
+    unsigned int j = 0;
+    while (j<300*1000) {
         rrr::FutureGroup fg;
         for (i = 0; i < npg; i++) {
             fg.add(proxy[start++]->async_add_short((rrr::i64)1));
             start %= ns;
         }
+        //j++;
+       // Log_debug("req num %d",j);
         fg.wait_all();
-        break;
+       // break;
     }
     return NULL;
 }
 
 int main(int argc, char **argv) {
+
+     char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_greenport.yml","-fconfig_files/network_greenport.yml"};
+     rrr::Config::create_config(5, argv2);
+   
+
     if (argc < 5)
         return -1;
 

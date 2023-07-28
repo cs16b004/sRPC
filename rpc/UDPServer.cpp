@@ -16,9 +16,11 @@ using namespace std;
 
 namespace rrr {
 
+
 UDPConnection::UDPConnection(UDPServer* server, int socket)
-        : ServerConnection((Server*) server,socket) {
+        : ServerConnection((Server*) server,server->transport_->out_connections[socket]->in_fd_),connId(socket) {
     // increase number of open connections
+
     server_->sconns_ctr_.next(1);
 }
 
@@ -54,8 +56,14 @@ void UDPConnection::end_reply() {
     // always enable write events since the code above gauranteed there
     // will be some data to send
     server_->pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
+     Marshal *new_reply = new Marshal() ;
+     new_reply->read_from_marshal(out_,out_.content_size());
+
+    Log_debug("Reply content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
+    ((UDPServer*)server_)->transport_->out_connections[connId]->out_messages.push(new_reply);
 
     out_l_.unlock();
+
 }
 
 void UDPConnection::handle_read() {
@@ -70,15 +78,15 @@ void UDPConnection::handle_read() {
       
         return;
     }
-  //  Log_info("Bytes Read %d",bytes_read);
+   // Log_debug("%d Bytes Read from fd %d",bytes_read,socket_);
     list<Request*> complete_requests;
         for(;;){
        // in_.print();
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
-        //  Log_debug("Packet Size %d",packet_size);
-        //     Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
-        //     Log_debug("packet not complete or there's no more packet to process");
+       //  Log_debug("Packet Size %d",packet_size);
+       //     Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
+           
         if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
             // consume the packet size
             verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
@@ -92,6 +100,7 @@ void UDPConnection::handle_read() {
             complete_requests.push_back(req);
 
         } else {
+            // Log_debug("packet not complete or there's no more packet to process");
             break;
         }
         }
@@ -220,22 +229,17 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
     }
     if(transport_ == nullptr){
         transport_ = new DpdkTransport();
-    }
-    //Test UDP Connection
-    int pipefd[2];
-    verify(pipe(pipefd)==0);
 
-    int fd = pipefd[0];
-    wfd = pipefd[1];
-    sconns_l_.lock();   
-    verify(set_nonblocking(fd, true) == 0);
-    UDPConnection* sconn = new UDPConnection(this, fd);
-    sconns_.insert(sconn);
-    pollmgr_->add(sconn);
-    sconns_l_.unlock();
-    transport_->connLock.lock();
-    transport_->connections["192.168.2.53"]=wfd;
-    transport_->connLock.unlock();
+    }
+    /**
+     * 
+     * This will be replaced by a thread making out connection
+    */
+    //Test UDP Connection
+
+    
+    
+  
 }
 
 UDPServer::~UDPServer() {
@@ -281,24 +285,76 @@ UDPServer::~UDPServer() {
 }
 
 void* UDPServer::start_server_loop(void* arg) {
+    Config* conf = Config::get_config();
+
+    rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
+    UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
+    svr->server_loop(arg);
     
+     freeaddrinfo(start_server_loop_args->gai_result);
+    delete start_server_loop_args;
+
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
-void UDPServer::server_loop(struct addrinfo* svr_addr) {
-    
+void UDPServer::server_loop(void* arg) {
+    rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
+    UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
+    Log_info("Starting Server Loop");
+
+    while(svr->status_ == RUNNING ){
+        if( !svr->transport_->sm_queue.empty()){
+            svr->transport_->sm_queue_l.lock();
+            
+            Marshal* sm_req = svr->transport_->sm_queue.front();
+            svr->transport_->sm_queue.pop();
+            
+            svr->transport_->sm_queue_l.unlock();
+            uint8_t req_type;
+            verify(sm_req->read(&req_type, sizeof(uint8_t)) == sizeof(uint8_t));
+            if(req_type == rrr::CON){
+                std::string src_addr;
+                *(sm_req)>>src_addr;
+                Log_info("SM REQ to connect %s",src_addr.c_str());
+                uint32_t connId = svr->transport_->accept(src_addr.c_str());
+                   
+                if (connId > 0){
+                    svr->sconns_l_.lock();
+                    verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
+                    UDPConnection* sconn = new UDPConnection(svr, connId);
+                    svr->sconns_.insert(sconn);
+                    svr->pollmgr_->add(sconn);
+                    svr->sconns_l_.unlock();
+                }
+            }
+        }
+    }
+    Log_info("Server loop end");
+    server_sock_ = -1;
+    status_ = STOPPED;
+
 }
 
-void UDPServer::start(Config* config) {
-
-    this->transport_->init(config);
+void UDPServer::start(const char* addr) {
+    start();
 }
 
 void UDPServer::start() {
-    int argc = 5;
-    char* argv[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host.yml","-fconfig_files/network_catskill.yml"};
-     Config::create_config(argc, argv);
+    status_ = RUNNING;
     Config* config = Config::get_config(); 
     this->transport_->init(config);
+
+    while(!transport_->initiated){
+        usleep(2);
+    }
+
+    start_server_loop_args_type* start_server_loop_args = new start_server_loop_args_type();
+    start_server_loop_args->server = (Server*)this;
+    start_server_loop_args->gai_result = nullptr;
+    start_server_loop_args->svr_addr = nullptr;
+    Pthread_create(&loop_th_, nullptr, UDPServer::start_server_loop, start_server_loop_args);
+    
 }
 
 

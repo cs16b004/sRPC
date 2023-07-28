@@ -1,0 +1,4 @@
+host:
+  name: catskill
+  threads: 1 # Number of tx threads. we will use the ratio to determine rx.
+

@@ -81,16 +81,21 @@ int UDPClient::poll_mode(){
         
 }
 int UDPClient::connect(const char * addr){
-        int argc = 5;
-     char* argv[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host.yml","-fconfig_files/network_greenport.yml"};
-     Config::create_config(argc, argv);
-    Config* config = Config::get_config(); 
-    this->transport_->init(config);
-
+        
+    
+    // Config* config = Config::get_config(); 
+    // this->transport_->init(config);
+    // while(!transport_->initiated){
+    //     Log_debug("Waiting for transport to initialize");
+    //     usleep(2);
+    // }
 
     conn_id = transport_->connect(addr);
-    transport_->out_connections[conn_id]->in_fd_=wfd;
+    sock_ = transport_->out_connections[conn_id]->in_fd_;
     status_=CONNECTED;
+    verify(set_nonblocking(sock_, true) == 0);
+    pollmgr_->add(this);
+
     return 0;
 }
 
@@ -135,15 +140,65 @@ void UDPClient::end_request(){
 
     // always enable write events since the code above gauranteed there
     // will be some data to send
-    pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
+    
     Marshal *new_request = new Marshal() ;
     new_request->read_from_marshal(out_,out_.content_size());
 
     Log_debug("Request content size : %d, out_ size: %d",new_request->content_size(),out_.content_size());
     transport_->out_connections[conn_id]->out_messages.push(new_request);
-
+    pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
     out_l_.unlock();
 }
+
+void UDPClient::handle_read(){
+     if (status_ != CONNECTED) {
+        return;
+    }
+
+    int bytes_read = in_.read_from_fd(sock_);
+    if (bytes_read == 0) {
+        return;
+    }
+    Log_debug("bytes road %d",bytes_read);
+    for (;;) {
+        i32 packet_size;
+        int n_peek = in_.peek(&packet_size, sizeof(i32));
+        if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
+            // consume the packet size
+            verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
+
+            v64 v_reply_xid;
+            v32 v_error_code;
+
+            in_ >> v_reply_xid >> v_error_code;
+
+            pending_fu_l_.lock();
+            unordered_map<i64, Future*>::iterator it = pending_fu_.find(v_reply_xid.get());
+            if (it != pending_fu_.end()) {
+                Future* fu = it->second;
+                verify(fu->xid_ == v_reply_xid.get());
+                pending_fu_.erase(it);
+                pending_fu_l_.unlock();
+
+                fu->error_code_ = v_error_code.get();
+                fu->reply_.read_from_marshal(in_, packet_size - v_reply_xid.val_size() - v_error_code.val_size());
+
+                fu->notify_ready();
+                Log_debug("Running reply future for %d",v_reply_xid);
+                // since we removed it from pending_fu_
+                fu->release();
+            } else {
+                // the future might timed out
+                pending_fu_l_.unlock();
+            }
+
+        } else {
+            // packet incomplete or no more packets to process
+            break;
+        }
+    }
+}
+
 /*TCP Client Implementation
 
 */
@@ -392,7 +447,7 @@ Client* ClientPool::get_client(const string& addr) {
         bool ok = true;
         for (i = 0; i < parallel_connections_; i++) {
             #ifdef DPDK
-                parallel_connections[i] = (Client*) new UDPClient(this->pollmgr_);
+                parallel_clients[i] = (Client*) new UDPClient(this->pollmgr_);
             #else
                 parallel_clients[i] = (Client*) new TCPClient(this->pollmgr_);
             #endif

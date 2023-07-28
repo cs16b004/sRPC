@@ -172,9 +172,7 @@ class UDPClient: public Client{
         using RefCounted::release;
 
     public:
-        void handle_read(){
-            verify(0);
-        }
+        void handle_read();
         void handle_write(){
             verify(0);
         }
@@ -187,16 +185,12 @@ class UDPClient: public Client{
         int poll_mode();
         Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
         UDPClient(PollMgr* pollmgr): Client(pollmgr), bmark_(nullptr) {
-            int pipefd[2];
-            verify(pipe(pipefd)==0);
-
-            sock_ = pipefd[0];
-
-            wfd = pipefd[1];
+           
             out_ptr_ = &out_;
-            verify(set_nonblocking(sock_, true) == 0);
+            
             if(transport_ == nullptr)
-                transport_ = new DpdkTransport();
+                transport_=  new DpdkTransport();
+            transport_->init(Config::get_config());
         }
         void end_request();
         int connect(const char* addr);
