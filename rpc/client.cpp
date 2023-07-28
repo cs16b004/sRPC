@@ -93,6 +93,9 @@ int UDPClient::connect(const char * addr){
     conn_id = transport_->connect(addr);
     sock_ = transport_->out_connections[conn_id]->in_fd_;
     status_=CONNECTED;
+    verify(set_nonblocking(sock_, true) == 0);
+    pollmgr_->add(this);
+
     return 0;
 }
 
@@ -137,13 +140,13 @@ void UDPClient::end_request(){
 
     // always enable write events since the code above gauranteed there
     // will be some data to send
-    pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
+    
     Marshal *new_request = new Marshal() ;
     new_request->read_from_marshal(out_,out_.content_size());
 
     Log_debug("Request content size : %d, out_ size: %d",new_request->content_size(),out_.content_size());
     transport_->out_connections[conn_id]->out_messages.push(new_request);
-
+    pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
     out_l_.unlock();
 }
 
@@ -156,7 +159,7 @@ void UDPClient::handle_read(){
     if (bytes_read == 0) {
         return;
     }
-
+    Log_debug("bytes road %d",bytes_read);
     for (;;) {
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));

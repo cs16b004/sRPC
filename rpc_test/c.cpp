@@ -38,7 +38,7 @@ void *do_add(void *) {
                 start %= ns;
             }
         }
-        fg.wait_all();
+     fg.wait_all();
         
     }
     return NULL;
@@ -70,7 +70,8 @@ void *do_add_short(void *) {
             fg.add(proxy[start++]->async_add_short((rrr::i64)1));
             start %= ns;
         }
-        j++;
+        //j++;
+       // Log_debug("req num %d",j);
         fg.wait_all();
        // break;
     }

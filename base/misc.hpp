@@ -51,7 +51,7 @@ template <typename T, size_t N>
 char (&ArraySizeHelper(const T (&array)[N]))[N];
 #endif
 
-#define arraysize(array) (sizeof(base::ArraySizeHelper(array)))
+#define arraysize(array) (sizeof(rrr::ArraySizeHelper(array)))
 
 template <class K, class V, class Map>
 inline void insert_into_map(Map& map, const K& key, const V& value) {

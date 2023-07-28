@@ -10,8 +10,11 @@ CXXFLAGS=-std=c++0x -g -Wall $(CFLAG_DPDK)
 .PHONY: all
 all: clean bin/server bin/client bin/client_share_n bin/client_share_one
 
-debug: CXXFLAGS += -g3 -O0 -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTCS -DDPDK
+debug: CXXFLAGS += -g3 -O0 -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS
 debug: all
+
+dpdk: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS -DTRANSPORT_STATS
+dpdk: all
 
 .PHONY: clean
 clean:

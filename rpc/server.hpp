@@ -34,13 +34,13 @@ static uint64_t g_stat_server_batching_report_time = 0;
 static const uint64_t g_stat_server_batching_report_interval = 1000 * 1000 * 1000;
 
 static void stat_server_batching(size_t batch) {
-    Log_info("Server Batching started");
+   // Log_info("Server Batching started");
     g_stat_server_batching_idx = (g_stat_server_batching_idx + 1) % g_stat_server_batching_size;
     g_stat_server_batching[g_stat_server_batching_idx] = batch;
-    uint64_t now = base::rdtsc();
+    uint64_t now = rrr::rdtsc();
     if (now - g_stat_server_batching_report_time > g_stat_server_batching_report_interval) {
         // do report
-        int min = numeric_limits<int>::max();
+        int min = std::numeric_limits<int>::max();
         int max = 0;
         int sum_count = 0;
         int sum = 0;
@@ -65,14 +65,14 @@ static void stat_server_batching(size_t batch) {
 }
 
 // rpc_id -> <count, cumulative>
-static unordered_map<i32, pair<Counter, Counter>> g_stat_rpc_counter;
+static std::unordered_map<i32, std::pair<Counter, Counter>> g_stat_rpc_counter;
 static uint64_t g_stat_server_rpc_counting_report_time = 0;
 static const uint64_t g_stat_server_rpc_counting_report_interval = 1000 * 1000 * 1000;
 
 static void stat_server_rpc_counting(i32 rpc_id) {
     g_stat_rpc_counter[rpc_id].first.next();
 
-    uint64_t now = base::rdtsc();
+    uint64_t now = rrr::rdtsc();
     if (now - g_stat_server_rpc_counting_report_time > g_stat_server_rpc_counting_report_interval) {
         // do report
         for (auto& it: g_stat_rpc_counter) {

@@ -23,13 +23,20 @@
 #define DPDK_PREFETCH_NUM           2
 namespace rrr{
     struct Request;
-
+    const uint8_t padd[64] = {  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, };
 
 //DpdkTransport* DpdkTransport::transport = nullptr;
 std::string DpdkTransport::getMacFromIp(std::string ip){
       for(rrr::Config::NetworkInfo it: config_->get_net_info()){
         if (it.ip == ip){
-            Log_debug("Found the Mac for IP: %s, MAC: %s",ip.c_str(),it.mac.c_str());
+           // Log_debug("Found the Mac for IP: %s, MAC: %s",ip.c_str(),it.mac.c_str());
             return (it.mac);
             
         }
@@ -55,7 +62,7 @@ uint32_t DpdkTransport::accept(const char* addr_str){
     size_t idx = addr.find(":");
     if (idx == std::string::npos) {
         Log_error("rrr::Transport: bad connect address: %s", addr);
-        return EINVAL;
+        return 0;
     }
     std::string server_ip = addr.substr(0, idx);
     uint16_t port = atoi(addr.substr(idx + 1).c_str());
@@ -65,7 +72,9 @@ uint32_t DpdkTransport::accept(const char* addr_str){
     TransportConnection* oconn = new TransportConnection();
     int pipefd[2];
     verify(pipe(pipefd)==0);
-    
+    if (addr_lookup.find(addr)!= addr_lookup.end()){
+        return 0;
+    }
     oconn->out_addr = NetAddress(getMacFromIp(server_ip).c_str(),server_ip.c_str(),port);
     oconn->in_fd_  = pipefd[0];
     oconn->wfd = pipefd[1];
@@ -110,14 +119,18 @@ uint32_t DpdkTransport::connect(const char* addr_str){
     addr_lookup[addr] = conn_id;
     conn_lock.unlock();
    // this->connections_[conn_id] = conn;
-    uint8_t con_req = rrr::CON;
+    uint8_t con_req[30] = {rrr::CON, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0};
     while(!initiated){
         // Log_debug("Wating for intialization");
         // usleep(2);
         ;
     }
-    Log_debug("Added %s",oconn->out_addr.to_string().c_str());
-    send(&con_req,sizeof(uint8_t),conn_id,&thread_tx_info[rx_threads_%tx_threads_],rrr::SM);
+    Log_debug("Added %s, fd r: %d, w: %d",oconn->out_addr.to_string().c_str(),oconn->in_fd_,oconn->wfd);
+    send(con_req, 30*sizeof(uint8_t), conn_id, 
+            &thread_tx_info[rx_threads_%tx_threads_],rrr::SM);
     sleep(1);
     return conn_id;
 }
@@ -241,8 +254,8 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
                     rx_info->stat.show_statistics();
                 }
                 #endif
-                if (n>0){
-                  Log_debug("%d butes written to fd %d, read end %d",
+                 if (n>0){
+                  Log_debug("%d bytes written to fd %d, read end %d",
                             n,rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,
                             rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->in_fd_);
                 }
@@ -288,6 +301,7 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
             
         }else{
             Log_debug("Packet Type Not found");
+            Log_debug("Src addr: %s",src_addr.c_str());
         }
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
         if (prefetch_idx < rx_info->count)
@@ -313,10 +327,16 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
     /* We want to have uniform distribution accross all of rx threads */
     /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
     /** Copy Packet Type*/ 
-    memcpy(pkt_buf+hdr_len,&pkt_type,sizeof(uint8_t));
+    memcpy(pkt_buf + hdr_len,&pkt_type,sizeof(uint8_t));
     memcpy(pkt_buf + hdr_len + sizeof(uint8_t), payload, length);
 
     int data_size = hdr_len + sizeof(uint8_t)  + length;
+    if(data_size < 64){
+        memcpy(pkt_buf + data_size, padd, 64-data_size);
+        Log_debug("Padding %d bytes because data_size: %d",64-data_size,data_size);
+    }
+    data_size = std::max(data_size,64);
+
     tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4| PKT_TX_IP_CKSUM | PKT_TX_UDP_CKSUM);
     tx_info->buf[tx_info->count]->nb_segs = 1;
     tx_info->buf[tx_info->count]->pkt_len = data_size;
@@ -763,7 +783,8 @@ std::string NetAddress::getAddr(){
 
 std::string NetAddress::to_string(){
             std::stringstream ss;
-            ss<<"\n[ IP: "<<ipv4_to_string((ip))<<"\n  "<<"mac: "<<mac_to_string(mac)<<"\n ]";
+            ss<<"\n[ IP: "<<ipv4_to_string((ip))<<"\n  "<<"mac: "<<mac_to_string(mac)<<"\n ";
+            ss<<"port: "<<std::to_string(port)<<"\n]";
             return ss.str();
 } 
 bool NetAddress::operator==(const NetAddress& other) {

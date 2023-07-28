@@ -13,7 +13,9 @@ private:
         struct timespec tv_buf;
         clock_gettime(CLOCK_REALTIME, &tv_buf);
         double time = (double)(tv_buf.tv_sec - csi_s->tv_.tv_sec) + ((double)(tv_buf.tv_nsec - csi_s->tv_.tv_nsec)) / 1000000000.0;
+        fprintf(stdout, "------------------------------------------------------------\n\n\n\n\n");
         fprintf(stdout, "time: %lf, count: %lu, rpc per sec: %lf\n", time, csi_s->count_ - csi_s->last_count_, (csi_s->count_ - csi_s->last_count_) / time);
+        fprintf(stdout, "n\n\n\n\n\n\n------------------------------------------------------------\n\n\n\n\n");
         csi_s->last_count_ = csi_s->count_;
         csi_s->tv_.tv_sec = tv_buf.tv_sec;
         csi_s->tv_.tv_nsec = tv_buf.tv_nsec;

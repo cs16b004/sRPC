@@ -78,14 +78,14 @@ void UDPConnection::handle_read() {
       
         return;
     }
-    Log_info("%d Bytes Read from fd %d",bytes_read,socket_);
+   // Log_debug("%d Bytes Read from fd %d",bytes_read,socket_);
     list<Request*> complete_requests;
         for(;;){
        // in_.print();
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
-         Log_debug("Packet Size %d",packet_size);
-            Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
+       //  Log_debug("Packet Size %d",packet_size);
+       //     Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
            
         if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
             // consume the packet size
@@ -100,7 +100,7 @@ void UDPConnection::handle_read() {
             complete_requests.push_back(req);
 
         } else {
-             Log_debug("packet not complete or there's no more packet to process");
+            // Log_debug("packet not complete or there's no more packet to process");
             break;
         }
         }
@@ -301,7 +301,7 @@ void* UDPServer::start_server_loop(void* arg) {
 void UDPServer::server_loop(void* arg) {
     rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
     UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
-    Log_debug("Starting Server Loop");
+    Log_info("Starting Server Loop");
 
     while(svr->status_ == RUNNING ){
         if( !svr->transport_->sm_queue.empty()){
@@ -316,18 +316,21 @@ void UDPServer::server_loop(void* arg) {
             if(req_type == rrr::CON){
                 std::string src_addr;
                 *(sm_req)>>src_addr;
-                Log_debug("SM REQ to connect %s",src_addr.c_str());
+                Log_info("SM REQ to connect %s",src_addr.c_str());
                 uint32_t connId = svr->transport_->accept(src_addr.c_str());
-                svr->sconns_l_.lock();   
-                verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
-                UDPConnection* sconn = new UDPConnection(svr, connId);
-                svr->sconns_.insert(sconn);
-                svr->pollmgr_->add(sconn);
-                svr->sconns_l_.unlock();
+                   
+                if (connId > 0){
+                    svr->sconns_l_.lock();
+                    verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
+                    UDPConnection* sconn = new UDPConnection(svr, connId);
+                    svr->sconns_.insert(sconn);
+                    svr->pollmgr_->add(sconn);
+                    svr->sconns_l_.unlock();
+                }
             }
         }
     }
-    Log_debug("Server loop end");
+    Log_info("Server loop end");
     server_sock_ = -1;
     status_ = STOPPED;
 

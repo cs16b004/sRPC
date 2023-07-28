@@ -83,7 +83,7 @@ void stat_marshal_in(int fd, const void* buf, size_t nbytes, ssize_t ret) {
         g_marshal_in_stat[11].next();
     }
 
-    uint64_t now = base::rdtsc();
+    uint64_t now = rrr::rdtsc();
     if (now - g_marshal_stat_report_time > g_marshal_stat_report_interval) {
         stat_marshal_report();
         g_marshal_stat_report_time = now;
@@ -117,7 +117,7 @@ void stat_marshal_out(int fd, const void* buf, size_t nbytes, ssize_t ret) {
         g_marshal_out_stat[11].next();
     }
 
-    uint64_t now = base::rdtsc();
+    uint64_t now = rrr::rdtsc();
     if (now - g_marshal_stat_report_time > g_marshal_stat_report_interval) {
         stat_marshal_report();
         g_marshal_stat_report_time = now;
