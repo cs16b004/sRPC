@@ -13,6 +13,9 @@ all: clean bin/server bin/client bin/client_share_n bin/client_share_one
 debug: CXXFLAGS += -g3 -O0 -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS
 debug: all
 
+stat: CXXFLAGS += -g3 -O0 -DRPC_STATISTICS
+stat: all 
+
 dpdk: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS -DTRANSPORT_STATS
 dpdk: all
 
