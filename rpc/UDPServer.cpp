@@ -74,6 +74,9 @@ void UDPConnection::handle_read() {
     }
 
     int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
+    #ifdef RPC_STATISTICS
+    g_stat_bytes_in += bytes_read;
+    #endif
     if (bytes_read == 0) {
       
         return;

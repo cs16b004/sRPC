@@ -126,7 +126,9 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
 
     *this << v64(fu->xid_);
     *this << rpc_id;
-
+    #ifdef RPC_STATISTICS
+        g_stat_latency_keeper->start_timer(fu->xid_);
+    #endif
     // one ref is already in pending_fu_
     return (Future *) fu->ref_copy();
 }
@@ -146,6 +148,7 @@ void UDPClient::end_request(){
 
     Log_debug("Request content size : %d, out_ size: %d",new_request->content_size(),out_.content_size());
     transport_->out_connections[conn_id]->out_messages.push(new_request);
+    
     pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
     out_l_.unlock();
 }
@@ -182,7 +185,9 @@ void UDPClient::handle_read(){
 
                 fu->error_code_ = v_error_code.get();
                 fu->reply_.read_from_marshal(in_, packet_size - v_reply_xid.val_size() - v_error_code.val_size());
-
+                #ifdef RPC_STATISTICS
+                g_stat_latency_keeper->end_timer(fu->xid_);
+                #endif
                 fu->notify_ready();
                 Log_debug("Running reply future for %d",v_reply_xid);
                 // since we removed it from pending_fu_
@@ -339,7 +344,10 @@ void TCPClient::handle_read() {
                 fu->reply_.read_from_marshal(in_, packet_size - v_reply_xid.val_size() - v_error_code.val_size());
 
                 fu->notify_ready();
-
+                #ifdef RPC_STATISTICS
+               // Log_info("latency_keeper pointer %p",g_stat_latency_keeper);
+                g_stat_latency_keeper->end_timer(fu->xid_);
+                #endif 
                 // since we removed it from pending_fu_
                 fu->release();
             } else {
@@ -393,7 +401,9 @@ Future* TCPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) 
 
     *this << v64(fu->xid_);
     *this << rpc_id;
-
+    #ifdef RPC_STATISTICS
+        g_stat_latency_keeper->start_timer(fu->xid_);
+    #endif
     // one ref is already in pending_fu_
     return (Future *) fu->ref_copy();
 }
@@ -409,6 +419,7 @@ void TCPClient::end_request() {
 
     // always enable write events since the code above gauranteed there
     // will be some data to send
+    
     pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
 
     out_l_.unlock();

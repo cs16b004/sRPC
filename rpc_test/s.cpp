@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <pthread.h>
 
 class CounterServiceImpl : public CounterService {
 private:
@@ -56,6 +57,7 @@ public:
 
 CounterServiceImpl *CounterServiceImpl::csi_s = NULL;
 
+
 int main(int argc, char **argv) {
     if (argc != 3)
         return -1;
@@ -81,6 +83,7 @@ int main(int argc, char **argv) {
    
     server->start((std::string("0.0.0.0:") + argv[1]).c_str());
     
+
     pm->release();
     tp->release();
 

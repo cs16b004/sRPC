@@ -8,7 +8,7 @@ using namespace std;
 
 namespace rrr {
 
-#ifdef RPC_STATISTICS
+#ifdef MARSHAL_STATISTICS
 
 // -1, 0~15, 16~31, 32~63, 64~127, 128~255, 256~511, 512~1023, 1024~2047, 2048~4095, 4096~8191, 8192~
 static Counter g_marshal_in_stat[12];
@@ -124,7 +124,7 @@ void stat_marshal_out(int fd, const void* buf, size_t nbytes, ssize_t ret) {
     }
 }
 
-#endif // RPC_STATISTICS
+#endif // MARSHAL_STATISTICS
 
 void Marshal::print(){
     chunk* temp = this->head_;

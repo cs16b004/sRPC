@@ -17,10 +17,10 @@
 
 namespace rrr {
 
-#ifdef RPC_STATISTICS
+#ifdef MARSHAL_STATISTICS
 void stat_marshal_in(int fd, const void* buf, size_t nbytes, ssize_t ret);
 void stat_marshal_out(int fd, const void* buf, size_t nbytes, ssize_t ret);
-#endif // RPC_STATISTICS
+#endif // MARSHAL_STATISTICS
 
 // not thread safe, for better performance
 class Marshal: public NoCopy {
@@ -165,9 +165,9 @@ class Marshal: public NoCopy {
       assert(write_idx <= data->size);
       int cnt = ::write(fd, data->ptr + read_idx, write_idx - read_idx);
 
-#ifdef RPC_STATISTICS
+#ifdef MARSHAL_STATISTICS
       stat_marshal_out(fd, data->ptr + write_idx, data->size - write_idx, cnt);
-#endif // RPC_STATISTICS
+#endif // MARSHAL_STATISTICS
 
       if (cnt > 0) {
         read_idx += cnt;
@@ -185,9 +185,9 @@ class Marshal: public NoCopy {
       if (write_idx < data->size) {
         cnt = ::read(fd, data->ptr + write_idx, data->size - write_idx);
 
-#ifdef RPC_STATISTICS
+#ifdef MARSHAL_STATISTICS
         stat_marshal_in(fd, data->ptr + write_idx, data->size - write_idx, cnt);
-#endif // RPC_STATISTICS
+#endif // MARSHAL_STATISTICS
 
         if (cnt > 0) {
           write_idx += cnt;

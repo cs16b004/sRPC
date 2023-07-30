@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <sys/select.h>
 #include "misc/marshal.hpp"
+#include "misc/stat.hpp"
 #include "polling.hpp"
 #include "dpdk_transport/transport.hpp"
 
@@ -32,6 +33,28 @@ static int g_stat_server_batching[g_stat_server_batching_size];
 static int g_stat_server_batching_idx;
 static uint64_t g_stat_server_batching_report_time = 0;
 static const uint64_t g_stat_server_batching_report_interval = 1000 * 1000 * 1000;
+static uint64_t g_stat_bytes_in = 0;
+static uint64_t get_and_set_bytes(){
+    uint64_t copy = g_stat_bytes_in;
+    g_stat_bytes_in=0;
+    return copy;
+}
+
+
+static void* report_throughput (void*){
+    uint64_t count=0;
+    while(1){
+       sleep(10); //10 seconds
+        fprintf(stdout,"%d\n",rrr::g_stat_bytes_in);
+        fprintf(stdout,"****************************\n %lf \n**********************************\n",
+        ((double_t)rrr::get_and_set_bytes()/10));
+        count++;
+        if(count > 30){
+            break;
+        }
+    }
+}
+
 
 static void stat_server_batching(size_t batch) {
    // Log_info("Server Batching started");
@@ -220,6 +243,9 @@ public:
 };
 
 class Server: public NoCopy{
+    #ifdef RPC_STATISTICS
+    pthread_t *ph;
+    #endif
     friend class TCPConnection;
     friend class ServerConnection;
     friend class UDPConnection;
@@ -237,11 +263,22 @@ class Server: public NoCopy{
 
     pthread_t loop_th_;
     protected:
-        ~Server() {};
+        ~Server() {
+            #ifdef RPC_STATISTICS
+              pthread_join(*ph, NULL);
+            #endif
+        };
 
 public:
 
-    Server(PollMgr* pollmgr = nullptr, ThreadPool* thrpool = nullptr):pollmgr_(pollmgr),threadpool_(thrpool){};
+    Server(PollMgr* pollmgr = nullptr, ThreadPool* thrpool = nullptr):pollmgr_(pollmgr),threadpool_(thrpool){
+        #ifdef RPC_STATISTICS
+        ph = (pthread_t *)malloc(sizeof(pthread_t));
+        pthread_create(ph, NULL, report_throughput, NULL);
+       
+      
+        #endif
+    };
     
    
 

@@ -74,7 +74,10 @@ void TCPConnection::handle_read() {
     if (bytes_read == 0) {
         return;
     }
-
+    #ifdef RPC_STATISTICS
+        g_stat_bytes_in += bytes_read;
+       // Log_info("%d Bytes added to g_stat_bytes: %d",bytes_read,g_stat_bytes_in);
+    #endif
     list<Request*> complete_requests;
 
     for (;;) {

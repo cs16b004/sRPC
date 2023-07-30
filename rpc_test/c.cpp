@@ -70,14 +70,19 @@ void *do_add_short(void *) {
             fg.add(proxy[start++]->async_add_short((rrr::i64)1));
             start %= ns;
         }
+        
         //j++;
        // Log_debug("req num %d",j);
         fg.wait_all();
-       // break;
+        while(1){
+            sleep(1);
+        }
     }
     return NULL;
 }
+#ifdef RPC_STATISTICS
 
+#endif
 int main(int argc, char **argv) {
 
      char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_greenport.yml","-fconfig_files/network_greenport.yml"};
@@ -123,5 +128,7 @@ int main(int argc, char **argv) {
     for (i = 0; i < nt; i++)
         pthread_join(ph[i], NULL);
 
+   
+    
     return 0;
 }

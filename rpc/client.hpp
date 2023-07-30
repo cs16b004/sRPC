@@ -4,8 +4,31 @@
 
 #include "misc/marshal.hpp"
 #include "polling.hpp"
+#include "misc/stat.hpp"
+#include <pthread.h>
 #include "dpdk_transport/transport.hpp"
 namespace rrr {
+
+#ifdef RPC_STATISTICS
+static StopWatch* g_stat_latency_keeper = new StopWatch();
+
+
+static void* report_latency (void*){
+    uint64_t count=0;
+    while(1){
+        sleep(10); //10 seconds
+         fprintf(stdout,"****************************\n %p \n**********************************\n",g_stat_latency_keeper);
+        fprintf(stdout,"****************************\n %lf \n**********************************\n",
+        g_stat_latency_keeper->dur_avg());
+        count++;
+        if(count > 30){
+            break;
+        }
+    }
+}
+#endif
+
+
 
 class Future;
 class Client;
@@ -110,6 +133,9 @@ public:
 class Client: public Pollable {
 
 protected:
+    #ifdef RPC_STATISTICS
+    pthread_t *ph_report_latency;
+    #endif
     Marshal in_, out_;
     PollMgr* pollmgr_;
     enum {
@@ -130,8 +156,18 @@ protected:
     // prevent direct usage, use close_and_release() instead
     using RefCounted::release;
 public:
-    Client(PollMgr* pollmgr): pollmgr_(pollmgr), status_(NEW) { }
-
+    Client(PollMgr* pollmgr): pollmgr_(pollmgr), status_(NEW) { 
+        #ifdef RPC_STATISTICS
+         ph_report_latency = (pthread_t *)malloc(sizeof(pthread_t));
+         pthread_create(ph_report_latency, NULL, report_latency, NULL);
+       
+        #endif
+    }
+    ~Client(){
+        #ifdef RPC_STATISTICS
+          pthread_join(*ph_report_latency, NULL);
+        #endif
+    }
     /**
      * Start a new request. Must be paired with end_request(), even if nullptr returned.
      *
