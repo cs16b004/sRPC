@@ -7,29 +7,56 @@
 #include "misc/stat.hpp"
 #include <pthread.h>
 #include "dpdk_transport/transport.hpp"
+#include <chrono>
+#include <ctime> 
+#include <unordered_map>
 namespace rrr {
 
 #ifdef RPC_STATISTICS
-static StopWatch* g_stat_latency_keeper = new StopWatch();
-
-
-static void* report_latency (void*){
-    uint64_t count=0;
-    while(1){
-        sleep(10); //10 seconds
-         fprintf(stdout,"****************************\n %p \n**********************************\n",g_stat_latency_keeper);
-        fprintf(stdout,"****************************\n %lf \n**********************************\n",
-        g_stat_latency_keeper->dur_avg());
-        count++;
-        if(count > 30){
-            break;
+class ReportLatencyJob: public FrequentJob{
+    public:
+        std::unordered_map<uint64_t, std::timespec> start_book;
+        std::unordered_map<uint64_t, std::timespec> end_book;
+        ReportLatencyJob(){
+            #ifdef DPDK
+            set_period(100*100);
+            #else
+            set_period(1*1000*1000);
+            #endif
         }
-    }
-}
+        double diff_timespec(const struct timespec &time1, const struct timespec &time0) {
+        if (time1.tv_sec - time0.tv_sec ==0)
+            return (time1.tv_nsec - time0.tv_nsec);
+        else{
+            Log_info("Difference in seconds !!!! %d",time1.tv_sec - time0.tv_sec);
+            return 0.0;
+        }
+        }
+        void run(){
+            uint64_t count=0;
+          
+                double_t nano_diff_sum = 0;
+                uint64_t freq = 0;
+               // Log_info("Read from %p",&end_book);
+               if(end_book.empty()){
+                return;
+               }
+                for(auto rec : end_book){
+                    if(start_book.find(rec.first) != start_book.end()){
+                        nano_diff_sum+= diff_timespec(rec.second,start_book[rec.first])/end_book.size(); 
+                        freq++;
+                    }
+                }
+                double_t avg_lat= nano_diff_sum;
+                Log_info("Sample Size : %d Average Latency in nano sec: %lf",freq,avg_lat);
+                
+                start_book.clear();
+                end_book.clear();
+            return;
+        }
+};
+
 #endif
-
-
-
 class Future;
 class Client;
 class TCPClient;
@@ -134,7 +161,7 @@ class Client: public Pollable {
 
 protected:
     #ifdef RPC_STATISTICS
-    pthread_t *ph_report_latency;
+        ReportLatencyJob* rJob;
     #endif
     Marshal in_, out_;
     PollMgr* pollmgr_;
@@ -158,14 +185,10 @@ protected:
 public:
     Client(PollMgr* pollmgr): pollmgr_(pollmgr), status_(NEW) { 
         #ifdef RPC_STATISTICS
-         ph_report_latency = (pthread_t *)malloc(sizeof(pthread_t));
-         pthread_create(ph_report_latency, NULL, report_latency, NULL);
+        rJob = new rrr::ReportLatencyJob();
+        pollmgr_->add(rJob);
+        Log_info("Job Added");
        
-        #endif
-    }
-    ~Client(){
-        #ifdef RPC_STATISTICS
-          pthread_join(*ph_report_latency, NULL);
         #endif
     }
     /**

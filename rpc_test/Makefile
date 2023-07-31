@@ -5,7 +5,7 @@ INC=-I.. -I. -I../rpc -I../base -I../rpc/dpdk_transport
 LIB_DPDK=$(shell pkg-config --libs libdpdk) -lrte_net_qdma
 CFLAG_DPDK=$(shell pkg-config --cflags libdpdk)
 LIB=-Llib -lrpc -lbase -lpthread -lyaml-cpp $(LIB_DPDK)
-CXXFLAGS=-std=c++0x -g -Wall $(CFLAG_DPDK)
+CXXFLAGS=-std=c++17 -g -Wall $(CFLAG_DPDK)
 
 .PHONY: all
 all: clean bin/server bin/client bin/client_share_n bin/client_share_one

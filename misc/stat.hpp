@@ -6,6 +6,8 @@
 #include <chrono>
 #include <unordered_map>
 #include <map>
+#include <iomanip>
+#include <ctime> 
 namespace rrr {
 
 class AvgStat {
@@ -53,10 +55,10 @@ class StopWatch {
 
 
 
-    std::map<uint64_t, std::chrono::high_resolution_clock::time_point> start_book;
-    std::map<uint64_t, std::chrono::high_resolution_clock::time_point> end_book;
+    std::map<uint64_t, std::timespec> start_book;
+    std::map<uint64_t, std::timespec> end_book;
 
-
+    
 
     public:
     StopWatch(){
@@ -68,12 +70,15 @@ class StopWatch {
         uint64_t total_freq = 0;
       
         double_t diff_sum = 0.0;
+        Log_info("Pointer comparison %p : %p", end_book.begin(),end_book.end());
         for(auto it = end_book.begin(); it != end_book.end(); ++it){
+            Log_info("entering diff loop");
+            if(it->second.tv_sec - start_book[it->first].tv_sec   == 0){
+            double_t duration = it->second.tv_nsec - start_book[it->first].tv_nsec ;
 
-            std::chrono::duration<double> duration = it->second - start_book[it->first] ;
-
-            diff_sum+=duration.count();
+            diff_sum+=duration;
             total_freq++;
+            }
         }
           Log_info("this pointer %p Sample size for latency: %d",this,total_freq);
         return diff_sum/total_freq;
@@ -81,11 +86,18 @@ class StopWatch {
     }
     void start_timer(uint64_t id){
         Log_info("Entry Added with id 0x%8x",id);
-        start_book[id] = std::chrono::high_resolution_clock::now();
+        std::timespec ts;
+        std::timespec_get(&ts, TIME_UTC);
+       start_book.insert(std::make_pair(id, ts));
+       
     }
     void end_timer(uint64_t id){
+
         Log_info("Entry ended with id 0x%8x",id);
-        end_book[id] = std::chrono::high_resolution_clock::now();
+         std::timespec ts;
+        std::timespec_get(&ts, TIME_UTC);
+        end_book.insert(std::make_pair(id,ts));
+        
     }
 };
 

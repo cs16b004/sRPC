@@ -45,8 +45,8 @@ static void* report_throughput (void*){
     uint64_t count=0;
     while(1){
        sleep(10); //10 seconds
-        fprintf(stdout,"%d\n",rrr::g_stat_bytes_in);
-        fprintf(stdout,"****************************\n %lf \n**********************************\n",
+       // fprintf(stdout,"%d\n",rrr::g_stat_bytes_in);
+        fprintf(stdout,"****************************\n ThroughPut:  %lf \n**********************************\n",
         ((double_t)rrr::get_and_set_bytes()/10));
         count++;
         if(count > 30){

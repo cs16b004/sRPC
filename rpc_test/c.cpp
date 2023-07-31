@@ -74,9 +74,7 @@ void *do_add_short(void *) {
         //j++;
        // Log_debug("req num %d",j);
         fg.wait_all();
-        while(1){
-            sleep(1);
-        }
+        
     }
     return NULL;
 }
