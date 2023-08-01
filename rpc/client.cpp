@@ -207,7 +207,16 @@ void UDPClient::handle_read(){
         }
     }
 }
-
+void UDPClient::close() {
+    if (status_ == CONNECTED) {
+        pollmgr_->remove(this);
+      
+    }
+    status_ = CLOSED;
+    invalidate_pending_futures();
+    transport_->trigger_shutdown();
+    transport_->shutdown();
+}
 /*TCP Client Implementation
 
 */

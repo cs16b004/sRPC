@@ -82,13 +82,18 @@ int main(int argc, char **argv) {
     
    
     server->start((std::string("0.0.0.0:") + argv[1]).c_str());
+    printf("djajskjhdfjksdfh");
+      int i=0;
+    while (i < 100){
+        usleep(100000);
+        i++;
+    }
+    server->stop();
+    //pm->release();
+    //tp->release();
+  
     
-
-    pm->release();
-    tp->release();
-
-    while (1)
-        sleep(10000);
     delete server;
     delete csi;
+    return 0;
 }

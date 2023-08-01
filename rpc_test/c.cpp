@@ -7,7 +7,7 @@
 char **servers;
 unsigned int ns;
 unsigned int npg;
-
+bool fg_quit = false;
 CounterProxy **get_proxy() {
     unsigned int i = 0;
     rrr::PollMgr **pm = (rrr::PollMgr **)malloc(sizeof(rrr::PollMgr *) * ns);
@@ -30,7 +30,7 @@ void *do_add(void *) {
     CounterProxy **proxy = get_proxy();
     unsigned int start = rand() % ns;
     unsigned int i = 0, j;
-    while (1) {
+    while (!fg_quit) {
         rrr::FutureGroup fg;
         for (i = 0; i < ns; i++) {
             for (j = 0; j < npg; j++) {
@@ -48,7 +48,7 @@ void *do_add_long(void *) {
     CounterProxy **proxy = get_proxy();
     unsigned int start = rand() % ns;
     unsigned int i = 0;
-    while (1) {
+    while (!fg_quit) {
         rrr::FutureGroup fg;
         for (i = 0; i < npg; i++) {
             fg.add(proxy[start++]->async_add_long(1, 2, 3, 4, 5, std::vector<rrr::i64>(2, 1)));
@@ -64,7 +64,7 @@ void *do_add_short(void *) {
     unsigned int start = rand() % ns;
     unsigned int i = 0;
     unsigned int j = 0;
-    while (j<300*1000) {
+    while (!fg_quit) {
         rrr::FutureGroup fg;
         for (i = 0; i < npg; i++) {
             fg.add(proxy[start++]->async_add_short((rrr::i64)1));
@@ -122,11 +122,14 @@ int main(int argc, char **argv) {
     pthread_t *ph = (pthread_t *)malloc(sizeof(pthread_t) * nt);
     for (i = 0; i < nt; i++)
         pthread_create(ph + i, NULL, func, NULL);
-
+    
+    i=0;
+    while(i <10){
+        usleep(100*1000);
+        i++;
+    }
+    fg_quit=true;
     for (i = 0; i < nt; i++)
         pthread_join(ph[i], NULL);
-
-   
-    
     return 0;
 }

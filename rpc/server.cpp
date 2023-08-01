@@ -223,6 +223,10 @@ TCPServer::TCPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */)
 }
 
 TCPServer::~TCPServer() {
+   stop();
+}
+
+void TCPServer::stop(){
     if (status_ == RUNNING) {
         status_ = STOPPING;
         // wait till accepting thread done
@@ -257,14 +261,14 @@ TCPServer::~TCPServer() {
         usleep(50 * 1000);
     }
     verify(sconns_ctr_.peek_next() == 0);
-
+    #ifdef RPC_STATISTICS
+        pollmgr_->remove(rJob);
+    #endif
     threadpool_->release();
     pollmgr_->release();
-
+    status_ = STOPPED;
     //Log_debug("rrr::TCPServer: destroyed");
 }
-
-
 
 void* TCPServer::start_server_loop(void* arg) {
     start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;

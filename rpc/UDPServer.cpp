@@ -75,7 +75,7 @@ void UDPConnection::handle_read() {
 
     int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
     #ifdef RPC_STATISTICS
-    g_stat_bytes_in += bytes_read;
+        g_stat_bytes_in += bytes_read;
     #endif
     if (bytes_read == 0) {
       
@@ -244,9 +244,8 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
     
   
 }
-
-UDPServer::~UDPServer() {
-    if (status_ == RUNNING) {
+void UDPServer::stop(){
+     if (status_ == RUNNING) {
         status_ = STOPPING;
         // wait till accepting thread done
         Pthread_join(loop_th_, nullptr);
@@ -280,11 +279,19 @@ UDPServer::~UDPServer() {
         usleep(50 * 1000);
     }
     verify(sconns_ctr_.peek_next() == 0);
-
+    #ifdef RPC_STATISTICS
+        pollmgr_->remove(rJob);
+    #endif
+    transport_->trigger_shutdown();
+    transport_->shutdown();
     threadpool_->release();
     pollmgr_->release();
 
+   
+}
+UDPServer::~UDPServer() {
     //Log_debug("rrr::UDPServer: destroyed");
+    stop();
 }
 
 void* UDPServer::start_server_loop(void* arg) {

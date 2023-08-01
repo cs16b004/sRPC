@@ -238,9 +238,7 @@ class UDPClient: public Client{
         void handle_error(){
             verify(0);
         }
-        void close(){
-            verify(0);
-        }
+        void close();
         int poll_mode();
         Future* begin_request(i32 rpc_id, const FutureAttr& attr = FutureAttr());
         UDPClient(PollMgr* pollmgr): Client(pollmgr), bmark_(nullptr) {
