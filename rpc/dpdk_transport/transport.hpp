@@ -16,8 +16,7 @@
 #include <sys/time.h>
 #include <mutex>
 namespace rrr{
-
-
+    
     struct Request;
     class UDPConnection;
     class UDPClient;
@@ -74,7 +73,7 @@ namespace rrr{
         friend class UDPClient;
         friend class UDPConnection;
     private:
-       // static DpdkTransport* transport;
+        static DpdkTransport* transport_l;
         unsigned udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         unsigned ip_hdr_offset = sizeof(struct rte_ether_hdr);
         Config* config_;
@@ -136,6 +135,8 @@ public:
    // static int createTransport();
    // static DpdkTransport* getTransport();
     void init(Config* config);
+    static void create_transport(Config* config);
+    static DpdkTransport* get_transport();
    // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
     uint32_t connect (const char* addr);
       uint32_t accept(const char* addr);

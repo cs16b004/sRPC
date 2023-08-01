@@ -246,8 +246,12 @@ class UDPClient: public Client{
             out_ptr_ = &out_;
             
             if(transport_ == nullptr)
-                transport_=  new DpdkTransport();
-            transport_->init(Config::get_config());
+                transport_=  DpdkTransport::get_transport();
+            //transport_->init(Config::get_config());
+            while(!transport_->initiated){
+                Log_debug("Waiting for transport to initialize");
+                usleep(2);
+            }
         }
         void end_request();
         int connect(const char* addr);

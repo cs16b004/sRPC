@@ -231,7 +231,7 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
         threadpool_ = (ThreadPool *) thrpool->ref_copy();
     }
     if(transport_ == nullptr){
-        transport_ = new DpdkTransport();
+        transport_ = DpdkTransport::get_transport();
 
     }
     /**
@@ -282,10 +282,10 @@ void UDPServer::stop(){
     #ifdef RPC_STATISTICS
         pollmgr_->remove(rJob);
     #endif
-    transport_->trigger_shutdown();
-    transport_->shutdown();
-    threadpool_->release();
-    pollmgr_->release();
+    // transport_->trigger_shutdown();
+    // transport_->shutdown();
+   // threadpool_->release();
+   // pollmgr_->release();
 
    
 }
@@ -353,8 +353,8 @@ void UDPServer::start(const char* addr) {
 void UDPServer::start() {
     status_ = RUNNING;
     Config* config = Config::get_config(); 
-    this->transport_->init(config);
-
+    //this->transport_->init(config);
+    verify(transport_!=nullptr);
     while(!transport_->initiated){
         usleep(2);
     }

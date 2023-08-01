@@ -59,36 +59,43 @@ CounterServiceImpl *CounterServiceImpl::csi_s = NULL;
 
 
 int main(int argc, char **argv) {
-    if (argc != 3)
+    if (argc < 3)
         return -1;
+  
+
+
+
+    char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_catskill.yml","-fconfig_files/network_catskill.yml"};
+    rrr::Config::create_config(5, argv2);
+    
     unsigned int time = atoi(argv[2]);
     CounterServiceImpl *csi = new CounterServiceImpl(time);
     rrr::PollMgr *pm = new rrr::PollMgr(1);
     base::ThreadPool *tp = new base::ThreadPool(1);
     #ifdef DPDK
+    rrr::DpdkTransport::create_transport(rrr::Config::get_config());
     rrr::UDPServer *server = new rrr::UDPServer(pm,tp);
     #else
     rrr::TCPServer *server = new rrr::TCPServer(pm, tp);
     #endif
     server->reg(csi);
 
-
-
-    char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_catskill.yml","-fconfig_files/network_catskill.yml"};
-     rrr::Config::create_config(5, argv2);
-      
-
    
     
    
     server->start((std::string("0.0.0.0:") + argv[1]).c_str());
-    printf("djajskjhdfjksdfh");
+   // printf("djajskjhdfjksdfh");
       int i=0;
-    while (i < 100){
-        usleep(100000);
+    while (i < atoi(argv[3])){
+        usleep(1000);
         i++;
     }
+
     server->stop();
+    #ifdef DPDK
+    rrr::DpdkTransport::get_transport()->trigger_shutdown();
+    rrr::DpdkTransport::get_transport()->shutdown();
+    #endif
     //pm->release();
     //tp->release();
   

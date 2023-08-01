@@ -31,6 +31,7 @@ namespace rrr{
                                 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                                 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                                 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, };
+    DpdkTransport* DpdkTransport::transport_l = nullptr;
 
 //DpdkTransport* DpdkTransport::transport = nullptr;
 std::string DpdkTransport::getMacFromIp(std::string ip){
@@ -416,7 +417,16 @@ void DpdkTransport::init(Config* config) {
     
     //sleep(200);
 }
-
+void DpdkTransport::create_transport(Config* config){
+    if (transport_l == nullptr){
+        transport_l = new DpdkTransport;
+    }
+    transport_l->init(config);
+}
+DpdkTransport* DpdkTransport::get_transport(){
+    verify(transport_l != nullptr);
+    return transport_l;
+}
 void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
     std::vector<const char*> dpdk_argv;
     char* tmp_arg = const_cast<char*>(argv_str);
