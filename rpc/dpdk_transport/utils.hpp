@@ -207,7 +207,7 @@ static void gen_eth_header(eth_hdr_t* eth_header, const uint8_t* src_mac,
 /// Format the IPv4 header for a UDP packet. Note that \p data_size is the
 /// payload size in the UDP packet.
 
-static void gen_ipv4_header(rte_ipv4_hdr* ipv4_hdr, uint32_t src_ip,
+static void inline gen_ipv4_header(rte_ipv4_hdr* ipv4_hdr, uint32_t src_ip,
                             uint32_t dst_ip, uint16_t data_size) {
 
   	/**< type of service */

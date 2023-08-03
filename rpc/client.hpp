@@ -19,7 +19,7 @@ class ReportLatencyJob: public FrequentJob{
         std::unordered_map<uint64_t, std::timespec> end_book;
         ReportLatencyJob(){
             #ifdef DPDK
-            set_period(100*100);
+            set_period(100*100*100);
             #else
             set_period(1*1000*1000);
             #endif
@@ -28,8 +28,8 @@ class ReportLatencyJob: public FrequentJob{
         if (time1.tv_sec - time0.tv_sec ==0)
             return (time1.tv_nsec - time0.tv_nsec);
         else{
-            Log_info("Difference in seconds !!!! %d",time1.tv_sec - time0.tv_sec);
-            return 0.0;
+            //Log_info("Difference in seconds !!!! %d",time1.tv_sec - time0.tv_sec);
+            return 1000*1000*1000.0 + time1.tv_nsec - time0.tv_nsec ;
         }
         }
         void run(){
@@ -249,8 +249,8 @@ class UDPClient: public Client{
                 transport_=  DpdkTransport::get_transport();
             //transport_->init(Config::get_config());
             while(!transport_->initiated){
-                Log_debug("Waiting for transport to initialize");
-                usleep(2);
+                //Log_debug("Waiting for transport to initialize");
+                usleep(2000);
             }
         }
         void end_request();

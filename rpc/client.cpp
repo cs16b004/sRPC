@@ -145,7 +145,7 @@ void UDPClient::end_request(){
     Marshal *new_request = new Marshal() ;
     new_request->read_from_marshal(out_,out_.content_size());
 
-    Log_debug("Request content size : %d, out_ size: %d",new_request->content_size(),out_.content_size());
+   // Log_debug("Request content size : %d, out_ size: %d",new_request->content_size(),out_.content_size());
     transport_->out_connections[conn_id]->out_messages.push(new_request);
     
     pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
@@ -161,7 +161,7 @@ void UDPClient::handle_read(){
     if (bytes_read == 0) {
         return;
     }
-    Log_debug("bytes road %d",bytes_read);
+  //  Log_debug("bytes read %d",bytes_read);
     for (;;) {
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
@@ -190,7 +190,7 @@ void UDPClient::handle_read(){
                 rJob->end_book.insert(std::make_pair(fu->xid_,ts));
                 #endif
                 fu->notify_ready();
-                Log_debug("Running reply future for %d",v_reply_xid);
+               // Log_debug("Running reply future for %d",v_reply_xid);
                 // since we removed it from pending_fu_
                 fu->release();
             } else {

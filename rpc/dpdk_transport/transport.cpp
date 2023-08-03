@@ -45,24 +45,12 @@ std::string DpdkTransport::getMacFromIp(std::string ip){
     return "02:de:ad:be:ef:60";
 }
 
-// DpdkTransport* DpdkTransport::getTransport(){
-//     assert(transport != nullptr);
-//     return transport;
-// }
-
-// int DpdkTransport::createTransport(){
-//     if(transport != nullptr)
-//             return -1;
-//         else{
-//             transport = new DpdkTransport();
-//             return 0;
-//         }
-// }
 uint32_t DpdkTransport::accept(const char* addr_str){
+    
     std::string addr(addr_str);
     size_t idx = addr.find(":");
     if (idx == std::string::npos) {
-        Log_error("rrr::Transport: bad connect address: %s", addr);
+        Log_error("rrr::Transport: bad accept address: %s", addr);
         return 0;
     }
     std::string server_ip = addr.substr(0, idx);
@@ -70,24 +58,43 @@ uint32_t DpdkTransport::accept(const char* addr_str){
 
      
     // UDPConnection *conn = new UDPConnection(*s_addr);
+
     TransportConnection* oconn = new TransportConnection();
     int pipefd[2];
     verify(pipe(pipefd)==0);
-    if (addr_lookup.find(addr)!= addr_lookup.end()){
+    if (addr_lookup_table.find(addr)!= addr_lookup_table.end()){
         return 0;
     }
     oconn->out_addr = NetAddress(getMacFromIp(server_ip).c_str(),server_ip.c_str(),port);
     oconn->in_fd_  = pipefd[0];
     oconn->wfd = pipefd[1];
+    oconn->udp_port = src_addr_[config_->host_name_].port;
+        addr = addr+ "::" + std::to_string(oconn->udp_port);
     uint32_t conn_id;
+    
     conn_lock.lock();
     conn_counter++;
     conn_id = conn_counter;
     out_connections[conn_id] = oconn;
-    addr_lookup[addr] = conn_id;
+    addr_lookup_table[addr] = conn_id;
     conn_lock.unlock();
    // this->connections_[conn_id] = conn;
-   
+   uint8_t con_ack_req[30] = {rrr::CON_ACK, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    while(!initiated){
+        // Log_debug("Wating for intialization");
+        // usleep(2);
+        ;
+    }
+    Log_info("Added [%s] %s, fd r: %d, w: %d",
+                            (addr).c_str()
+                            ,oconn->out_addr.to_string().c_str()
+                            ,oconn->in_fd_,oconn->wfd);
+    send(con_ack_req, 30*sizeof(uint8_t), conn_id, 
+            &thread_tx_info[rx_threads_%tx_threads_],rrr::SM);
+    sleep(1);
     return conn_id;
 }
 uint32_t DpdkTransport::connect(const char* addr_str){
@@ -106,18 +113,20 @@ uint32_t DpdkTransport::connect(const char* addr_str){
     TransportConnection* oconn = new TransportConnection();
     int pipefd[2];
     verify(pipe(pipefd)==0);
-    Log_debug("Connecting with a server");
-    Log_debug("Mac: %s",getMacFromIp(server_ip).c_str());
+    Log_debug("Connecting with a server : %s",addr_str);
+   // Log_debug("Mac: %s",getMacFromIp(server_ip).c_str());
     oconn->out_addr =     NetAddress(getMacFromIp(server_ip).c_str(),server_ip.c_str(),port);
-    Log_debug("Network added");
+   
     oconn->in_fd_  = pipefd[0];
     oconn->wfd = pipefd[1];
+    oconn->udp_port = get_open_port();
+    addr = addr + "::" + std::to_string(oconn->udp_port);
     uint32_t conn_id;
     conn_lock.lock();
     conn_counter++;
     conn_id = conn_counter;
     out_connections[conn_id] = oconn;
-    addr_lookup[addr] = conn_id;
+    addr_lookup_table[addr] = conn_id;
     conn_lock.unlock();
    // this->connections_[conn_id] = conn;
     uint8_t con_req[30] = {rrr::CON, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
@@ -129,10 +138,12 @@ uint32_t DpdkTransport::connect(const char* addr_str){
         // usleep(2);
         ;
     }
-    Log_debug("Added %s, fd r: %d, w: %d",oconn->out_addr.to_string().c_str(),oconn->in_fd_,oconn->wfd);
     send(con_req, 30*sizeof(uint8_t), conn_id, 
             &thread_tx_info[rx_threads_%tx_threads_],rrr::SM);
-    sleep(1);
+    while(!oconn->connected_)
+        usleep(50*1000);
+    Log_info("Connected to %s, fd r: %d, w: %d",addr.c_str(),oconn->in_fd_,oconn->wfd);
+   
     return conn_id;
 }
 void DpdkTransport::initialize_tx_mbufs(void* arg){
@@ -143,7 +154,7 @@ void DpdkTransport::initialize_tx_mbufs(void* arg){
     dpdk_thread_info* tx_info = &(thread_tx_info[rte_lcore_id()%tx_threads_]);
     
     if (tx_info->count == 0) {
-         Log_debug("Mbuf Pool Initialized at index %d, name: %s",tx_info->thread_id%tx_threads_,tx_mbuf_pool[tx_info->thread_id%tx_threads_]->name);
+         Log_info("Mbuf Pool Initialized at index %d, name: %s",tx_info->thread_id%tx_threads_,tx_mbuf_pool[tx_info->thread_id%tx_threads_]->name);
          int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
          if (ret < 0)
              rte_panic("couldn't allocate mbufs");
@@ -165,8 +176,10 @@ void DpdkTransport::tx_loop_one(dpdk_thread_info *arg){
     unsigned lcore_id = rte_lcore_id();
     std::vector<Marshal*> requests;
     dpdk_thread_info* tx_info = &(thread_tx_info[rte_lcore_id()%tx_threads_]);
-    
-    for(std::pair<uint32_t,TransportConnection*> entry:tx_info->dpdk_th->out_connections){
+    conn_lock.lock();
+    for(auto const& entry:tx_info->dpdk_th->out_connections){
+       
+        verify(entry.second != nullptr);
         entry.second->outl.lock();
             if(!entry.second->out_messages.empty()){
                  Marshal* req = entry.second->out_messages.front();
@@ -177,10 +190,10 @@ void DpdkTransport::tx_loop_one(dpdk_thread_info *arg){
                  
                 entry.second->out_messages.pop();
             }
-            entry.second->outl.unlock();
+        entry.second->outl.unlock();
         
     }
-    
+    conn_lock.unlock();
     
     return;
 }
@@ -227,10 +240,11 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         struct rte_udp_hdr* udp_hdr = reinterpret_cast<struct rte_udp_hdr*> (pkt_ptr + udp_hdr_offset);
         
         uint16_t src_port = ntohs(udp_hdr->src_port);
-        
+        uint16_t dest_port = ntohs(udp_hdr->dst_port);
         uint16_t pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
         //Log_debug("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
         std::string src_addr = ipv4_to_string(src_ip) + ":" + std::to_string(src_port);
+        std::string lookup_addr = src_addr + ("::" + std::to_string(dest_port));
         uint8_t* data_ptr = pkt_ptr + udp_hdr_offset + sizeof(rte_udp_hdr);
         //   for (int i=0; i < pkt_size; ++i) {
         //         if (! (i % 16) && i)
@@ -240,25 +254,27 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         // }
         // printf("\n\n");
         uint8_t pkt_type;
+        Log_debug("Processing incoming packet for %s",src_addr.c_str());
         mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
         data_ptr += sizeof(uint8_t); 
         if(pkt_type == rrr::RR ){
-            if(rx_info->dpdk_th->addr_lookup.find(src_addr)!=addr_lookup.end()){
-                int n = write(rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,data_ptr,pkt_size);
+         
+            if(transport_l->addr_lookup_table.find(lookup_addr)!= addr_lookup_table.end()){
+                int n = write(transport_l->out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size);
                 #ifdef TRANSPORT_STATS
                 rx_info->stat.pkt_count++;
                 gettimeofday(&current, NULL);
                 int elapsed_sec = current.tv_sec - start_clock.tv_sec;
 
-                if (elapsed_sec >= 100) {
+                if (elapsed_sec >= 10) {
                     gettimeofday(&start_clock,NULL);
                     rx_info->stat.show_statistics();
                 }
                 #endif
                  if (n>0){
                   Log_debug("%d bytes written to fd %d, read end %d",
-                            n,rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->wfd,
-                            rx_info->dpdk_th->out_connections[addr_lookup[src_addr]]->in_fd_);
+                            n,rx_info->dpdk_th->out_connections[addr_lookup_table[lookup_addr]]->wfd,
+                            rx_info->dpdk_th->out_connections[addr_lookup_table[lookup_addr]]->in_fd_);
                 }
                 if(n < 0 ){
                 perror("Message: ");
@@ -282,12 +298,22 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
             Log_debug("Session Management Packet received pkt type 0x%2x",pkt_type);
             Marshal * sm_req = new Marshal();
             uint8_t req_type;
+            
             mempcpy(&req_type,data_ptr,sizeof(uint8_t));
-            *(sm_req)<<req_type;
-            *(sm_req)<<src_addr;
-            rx_info->dpdk_th->sm_queue_l.lock();
-            rx_info->dpdk_th->sm_queue.push(sm_req);
-            rx_info->dpdk_th->sm_queue_l.unlock();
+            Log_debug("Req Type 0x%2x, src_addr : %s",req_type, src_addr.c_str());
+            if(req_type == rrr::CON_ACK){
+                if(rx_info->dpdk_th->out_connections.find(addr_lookup_table[lookup_addr]) != 
+                        rx_info->dpdk_th->out_connections.end()){
+                    rx_info->dpdk_th->out_connections[addr_lookup_table[lookup_addr]]->connected_ = true;
+                    Log_debug("Connection to %s accepted",src_addr.c_str());
+                        }
+            }else{
+                *(sm_req)<<req_type;
+                *(sm_req)<<src_addr;
+                rx_info->dpdk_th->sm_queue_l.lock();
+                rx_info->dpdk_th->sm_queue.push(sm_req);
+                rx_info->dpdk_th->sm_queue_l.unlock();
+            }
               #ifdef TRANSPORT_STATS
                 rx_info->stat.pkt_count++;
                 gettimeofday(&current, NULL);
@@ -297,7 +323,7 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
                     gettimeofday(&start_clock,NULL);
                     rx_info->stat.show_statistics();
                 }
-                #endif
+            #endif
                
             
         }else{
@@ -312,16 +338,26 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
     for (int i = 0; i < rx_info->count; i++)
         rte_pktmbuf_free(rx_info->buf[i]);
 }
-
+uint16_t DpdkTransport::get_open_port(){
+    
+    pc_l.lock();
+    uint16_t temp =  u_port_counter;
+    u_port_counter+=1;
+    pc_l.unlock();
+    return temp;
+}
 void DpdkTransport::send(uint8_t* payload, unsigned length,
                       uint16_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type) {
-    
+    sendl.lock();
     if (tx_info->count == 0) {
         int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
         if (ret < 0)
             rte_panic("couldn't allocate mbufs");
     }
-    
+    //verify(tx_info != nullptr);
+   // Log_info("Tx coun for tx buf: %d",tx_info->count);
+    verify(tx_info->buf[tx_info->count] != nullptr);
+
     uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
 
     int hdr_len = make_pkt_header(pkt_buf, length, conn_id);
@@ -334,7 +370,7 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
     int data_size = hdr_len + sizeof(uint8_t)  + length;
     if(data_size < 64){
         memcpy(pkt_buf + data_size, padd, 64-data_size);
-        Log_debug("Padding %d bytes because data_size: %d",64-data_size,data_size);
+       // Log_debug("Padding %d bytes because data_size: %d",64-data_size,data_size);
     }
     data_size = std::max(data_size,64);
 
@@ -354,14 +390,18 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
         if (unlikely(ret < 0))
             Log_error("Tx couldn't send\n");
 
-        if (unlikely(ret != tx_info->count))
+        if (unlikely(ret != tx_info->count)){
             Log_error("Couldn't send all packets");
+            
+        }
 
         tx_info->stat.pkt_count += tx_info->count;
         tx_info->count = 0;
+       
     }
     else
         tx_info->stat.pkt_error += tx_info->count;
+    sendl.unlock();
 }
 
 int DpdkTransport::make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id) {
@@ -381,7 +421,7 @@ int DpdkTransport::make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_
     pkt_offset += sizeof(ipv4_hdr_t);
     rte_udp_hdr* udp_hdr = reinterpret_cast<rte_udp_hdr*>(pkt + pkt_offset);
     int client_port_addr = src_addr.port;
-    gen_udp_header(udp_hdr, client_port_addr, dest_addr.port, payload_len);
+    gen_udp_header(udp_hdr, out_connections[conn_id]->udp_port, dest_addr.port , payload_len);
 
     pkt_offset += sizeof(udp_hdr_t);
     return pkt_offset;
@@ -484,7 +524,7 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
         /* TODO: Fix it for machines with more than one NUMA node */
         rx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, DPDK_NUM_MBUFS,
                                                          DPDK_MBUF_CACHE_SIZE, 0, 
-                                                         1000*RTE_MBUF_DEFAULT_BUF_SIZE, 
+                                                         (uint16_t)1000*RTE_MBUF_DEFAULT_BUF_SIZE, 
                                                          rte_socket_id());
         if (rx_mbuf_pool[pool_idx] == NULL)
             rte_exit(EXIT_FAILURE, "Cannot create rx mbuf pool %d\n", pool_idx);

@@ -64,10 +64,10 @@ int main(int argc, char **argv) {
   
 
 
-
+    #ifdef DPDK
     char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_catskill.yml","-fconfig_files/network_catskill.yml"};
     rrr::Config::create_config(5, argv2);
-    
+    #endif
     unsigned int time = atoi(argv[2]);
     CounterServiceImpl *csi = new CounterServiceImpl(time);
     rrr::PollMgr *pm = new rrr::PollMgr(1);
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
         usleep(1000);
         i++;
     }
-
+    printf("Here 4");
     server->stop();
     #ifdef DPDK
     rrr::DpdkTransport::get_transport()->trigger_shutdown();

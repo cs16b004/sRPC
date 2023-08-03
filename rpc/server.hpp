@@ -32,12 +32,15 @@ static const int g_stat_server_batching_size = 1000;
 static int g_stat_server_batching[g_stat_server_batching_size];
 static int g_stat_server_batching_idx;
 static uint64_t g_stat_server_batching_report_time = 0;
-static const uint64_t g_stat_server_batching_report_interval = 1000 * 1000 * 1000;
+static const uint64_t g_stat_server_batching_report_interval = 2000 * 1000 * 1000;
 static uint64_t g_stat_bytes_in = 0;
 static bool g_stat_stop_thread=false;
+static SpinLock thr_l;
 static uint64_t get_and_set_bytes(){
+    thr_l.lock();
     uint64_t copy = g_stat_bytes_in;
     g_stat_bytes_in=0;
+    thr_l.unlock();
     return copy;
 }
 
@@ -262,7 +265,7 @@ class Server: public NoCopy{
     pthread_t loop_th_;
     protected:
     #ifdef RPC_STATISTICS
-        rrr::ReportThroughputJob* rJob;
+      //  rrr::ReportThroughputJob* rJob;
     #endif
         ~Server() {
             
@@ -272,8 +275,8 @@ public:
 
     Server(PollMgr* pollmgr = nullptr, ThreadPool* thrpool = nullptr):pollmgr_(pollmgr),threadpool_(thrpool){
         #ifdef RPC_STATISTICS
-        rJob = new ReportThroughputJob();
-        pollmgr_->add(rJob);
+        //rJob = new ReportThroughputJob();
+        //pollmgr_->add(rJob);
         #endif
     };
     

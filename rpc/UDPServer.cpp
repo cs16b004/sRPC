@@ -59,7 +59,7 @@ void UDPConnection::end_reply() {
      Marshal *new_reply = new Marshal() ;
      new_reply->read_from_marshal(out_,out_.content_size());
 
-    Log_debug("Reply content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
+    //Log_debug("Reply content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
     ((UDPServer*)server_)->transport_->out_connections[connId]->out_messages.push(new_reply);
 
     out_l_.unlock();
@@ -75,7 +75,9 @@ void UDPConnection::handle_read() {
 
     int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
     #ifdef RPC_STATISTICS
+        thr_l.lock();
         g_stat_bytes_in += bytes_read;
+        thr_l.unlock();
     #endif
     if (bytes_read == 0) {
       
@@ -280,7 +282,8 @@ void UDPServer::stop(){
     }
     verify(sconns_ctr_.peek_next() == 0);
     #ifdef RPC_STATISTICS
-        pollmgr_->remove(rJob);
+        
+      //  pollmgr_->remove(rJob);
     #endif
     // transport_->trigger_shutdown();
     // transport_->shutdown();

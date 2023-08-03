@@ -25,6 +25,7 @@ namespace rrr{
     const uint8_t RR = 0x09;
     const uint8_t DIS = 0x01;
     const uint8_t CON = 0x02;
+    const uint8_t CON_ACK = 0x3;
     
     struct packet_stats {
         uint64_t pkt_count = 0;
@@ -66,6 +67,9 @@ namespace rrr{
         SpinLock outl;
         std::queue<Marshal*> out_messages;
         NetAddress out_addr;
+        //My port nbumber ;
+        uint16_t udp_port;
+        bool connected_ = false;
     };
        
     class DpdkTransport {
@@ -85,13 +89,17 @@ namespace rrr{
         uint16_t rx_queue_ = 1, tx_queue_ = 1;
         struct rte_mempool **tx_mbuf_pool;
         struct rte_mempool **rx_mbuf_pool;
+        uint16_t u_port_counter = 9000;
+        rrr::SpinLock pc_l;
       //  std::map<uint16_t,rrr::Connection*> connections_;
         SpinLock connLock;
         SpinLock init_lock;
+        
         bool initiated=false;
         
-        std::map<std::string,uint32_t> addr_lookup;
+        std::map<std::string,uint32_t> addr_lookup_table;
         std::map<uint32_t, TransportConnection*> out_connections;
+        
         std::map<std::string, NetAddress> src_addr_;
         std::map<std::string, NetAddress> dest_addr_;
         SpinLock sm_queue_l;
@@ -130,6 +138,7 @@ namespace rrr{
         void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
         void send(uint8_t* payload, unsigned length,
                       uint16_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type);
+        SpinLock sendl;
 
 public:
    // static int createTransport();
@@ -141,7 +150,7 @@ public:
     uint32_t connect (const char* addr);
       uint32_t accept(const char* addr);
     int connect(std::string addr);
-  
+    uint16_t get_open_port();
     void shutdown();
     void trigger_shutdown();
 

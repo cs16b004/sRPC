@@ -1,0 +1,325 @@
+I [config.cpp:56] 2023-08-02 19:37:42.118 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:98] 2023-08-02 19:37:42.122 | Loading CPU Config
+I [config.cpp:56] 2023-08-02 19:37:42.122 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:56] 2023-08-02 19:37:42.123 | Loading configuration from : config_files/host_greenport.yml
+I [config.cpp:56] 2023-08-02 19:37:42.124 | Loading configuration from : config_files/network_greenport.yml
+I [transport.cpp:561] 2023-08-02 19:37:42.126 | Setting up netowkr info....
+I [transport.cpp:579] 2023-08-02 19:37:42.126 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:579] 2023-08-02 19:37:42.126 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:579] 2023-08-02 19:37:42.126 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:579] 2023-08-02 19:37:42.126 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:579] 2023-08-02 19:37:42.126 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:566] 2023-08-02 19:37:42.126 | Configuring local address 5, 172.19.0.122
+I [transport.cpp:579] 2023-08-02 19:37:42.126 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+here
+I [client.hpp:190] 2023-08-02 19:37:42.126 | Job Added
+I [transport.cpp:920] 2023-08-02 19:37:43.292 | Flow isolation enabled for port 0
+
+I [transport.cpp:990] 2023-08-02 19:37:43.332 | IP Address to be queued 172.19.0.122
+I [transport.cpp:1018] 2023-08-02 19:37:43.350 | Flow Rule Added for IP Address : 172.19.0.122
+I [transport.cpp:539] 2023-08-02 19:37:43.350 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:549] 2023-08-02 19:37:43.350 | Launching TX Thread
+I [transport.cpp:166] 2023-08-02 19:37:43.350 | Entering TX Loop at lcore 1
+I [transport.cpp:206] 2023-08-02 19:37:43.350 | Enter receive thread 0 on core 0 on port_id 0 on queue 0
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [client.hpp:31] 2023-08-02 19:37:45.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.134 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.134 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.134 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.134 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:45.134 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:45.137 | Sample Size : 22812 Average Latency in nano sec: 302676.633965
+I [client.hpp:31] 2023-08-02 19:37:46.154 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:46.154 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:46.154 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:46.154 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:46.154 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:46.156 | Sample Size : 90055 Average Latency in nano sec: 31789.931255
+I [client.hpp:31] 2023-08-02 19:37:47.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:47.157 | Sample Size : 90950 Average Latency in nano sec: 30411.177044
+I [client.hpp:31] 2023-08-02 19:37:48.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:48.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:48.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:48.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:48.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:48.163 | Sample Size : 91355 Average Latency in nano sec: 29749.074792
+I [client.hpp:31] 2023-08-02 19:37:49.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:49.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:49.158 | Sample Size : 92320 Average Latency in nano sec: 29675.208860
+I [client.hpp:31] 2023-08-02 19:37:50.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:50.162 | Sample Size : 91090 Average Latency in nano sec: 29849.773039
+I [client.hpp:31] 2023-08-02 19:37:51.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:51.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:51.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:51.157 | Sample Size : 91255 Average Latency in nano sec: 30231.240467
+I [transport.cpp:876] 2023-08-02 19:37:51.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:37:51.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:37:51.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:37:51.000 | Packets Received Total= 650642
+I [client.hpp:31] 2023-08-02 19:37:52.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:52.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:52.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:52.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:52.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:52.168 | Sample Size : 93245 Average Latency in nano sec: 29664.302563
+I [client.hpp:31] 2023-08-02 19:37:53.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:53.156 | Sample Size : 86819 Average Latency in nano sec: 31600.369990
+I [client.hpp:31] 2023-08-02 19:37:54.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:54.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:54.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:54.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:54.170 | Sample Size : 91832 Average Latency in nano sec: 29848.495083
+I [client.hpp:31] 2023-08-02 19:37:55.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:55.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:55.158 | Sample Size : 91335 Average Latency in nano sec: 30477.096389
+I [client.hpp:31] 2023-08-02 19:37:56.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:56.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:37:56.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:56.156 | Sample Size : 87962 Average Latency in nano sec: 31350.372435
+I [client.hpp:31] 2023-08-02 19:37:57.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:57.163 | Sample Size : 88972 Average Latency in nano sec: 30947.694487
+I [client.hpp:31] 2023-08-02 19:37:58.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:58.158 | Sample Size : 91672 Average Latency in nano sec: 30652.245258
+I [client.hpp:31] 2023-08-02 19:37:59.138 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:37:59.163 | Sample Size : 92005 Average Latency in nano sec: 30142.929669
+I [client.hpp:31] 2023-08-02 19:38:00.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:00.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:00.157 | Sample Size : 85889 Average Latency in nano sec: 32171.453152
+I [client.hpp:31] 2023-08-02 19:38:01.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:01.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:01.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:01.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:01.158 | Sample Size : 91865 Average Latency in nano sec: 30457.388185
+I [transport.cpp:876] 2023-08-02 19:38:01.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:38:01.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:38:01.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:38:01.000 | Packets Received Total= 1549747
+I [client.hpp:51] 2023-08-02 19:38:02.158 | Sample Size : 91153 Average Latency in nano sec: 30575.307839
+I [client.hpp:31] 2023-08-02 19:38:03.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:03.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:03.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:03.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:03.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:03.162 | Sample Size : 91224 Average Latency in nano sec: 30492.673679
+I [client.hpp:31] 2023-08-02 19:38:04.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:04.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:04.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:04.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:04.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:04.158 | Sample Size : 91410 Average Latency in nano sec: 29982.192001
+I [client.hpp:31] 2023-08-02 19:38:05.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:05.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:05.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:05.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:05.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:05.158 | Sample Size : 92670 Average Latency in nano sec: 29969.677928
+I [client.hpp:31] 2023-08-02 19:38:06.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:06.158 | Sample Size : 92305 Average Latency in nano sec: 29682.111927
+I [client.hpp:31] 2023-08-02 19:38:07.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:07.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:07.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:07.158 | Sample Size : 92090 Average Latency in nano sec: 30542.425039
+I [client.hpp:31] 2023-08-02 19:38:08.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:08.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:08.158 | Sample Size : 90600 Average Latency in nano sec: 30371.370311
+I [client.hpp:31] 2023-08-02 19:38:09.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:09.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:09.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:09.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:09.132 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:09.171 | Sample Size : 89940 Average Latency in nano sec: 31076.355462
+I [client.hpp:31] 2023-08-02 19:38:10.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:10.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:10.158 | Sample Size : 90532 Average Latency in nano sec: 29820.216420
+I [client.hpp:31] 2023-08-02 19:38:11.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:11.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:11.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:11.158 | Sample Size : 93179 Average Latency in nano sec: 29776.446427
+I [transport.cpp:876] 2023-08-02 19:38:11.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:38:11.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:38:11.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:38:11.000 | Packets Received Total= 2463414
+I [client.hpp:31] 2023-08-02 19:38:12.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:12.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:12.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:12.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:12.158 | Sample Size : 89940 Average Latency in nano sec: 30415.479537
+I [client.hpp:31] 2023-08-02 19:38:13.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:13.157 | Sample Size : 90120 Average Latency in nano sec: 30027.067162
+I [client.hpp:31] 2023-08-02 19:38:14.136 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:14.136 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:14.160 | Sample Size : 89718 Average Latency in nano sec: 30444.893662
+I [client.hpp:31] 2023-08-02 19:38:15.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:15.158 | Sample Size : 91005 Average Latency in nano sec: 30494.187260
+I [client.hpp:31] 2023-08-02 19:38:16.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:16.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:16.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:16.132 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:16.132 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:16.157 | Sample Size : 88405 Average Latency in nano sec: 30883.608834
+I [client.hpp:31] 2023-08-02 19:38:17.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:17.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:17.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:17.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:17.158 | Sample Size : 91840 Average Latency in nano sec: 30045.095280
+I [client.hpp:31] 2023-08-02 19:38:18.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:18.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:18.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:18.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:18.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:18.162 | Sample Size : 82805 Average Latency in nano sec: 32272.336843
+I [client.hpp:31] 2023-08-02 19:38:19.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:19.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:19.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:19.160 | Sample Size : 85880 Average Latency in nano sec: 31361.466682
+I [client.hpp:31] 2023-08-02 19:38:20.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:20.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:20.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:20.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:20.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:20.159 | Sample Size : 84357 Average Latency in nano sec: 32152.039390
+I [client.hpp:31] 2023-08-02 19:38:21.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:21.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:21.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:21.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:21.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:21.159 | Sample Size : 84100 Average Latency in nano sec: 32623.913546
+I [transport.cpp:876] 2023-08-02 19:38:21.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:38:21.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:38:21.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:38:21.000 | Packets Received Total= 3339257
+I [client.hpp:31] 2023-08-02 19:38:22.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:22.161 | Sample Size : 86502 Average Latency in nano sec: 31312.961633
+I [client.hpp:31] 2023-08-02 19:38:23.134 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:23.205 | Sample Size : 84220 Average Latency in nano sec: 32219.866960
+I [client.hpp:31] 2023-08-02 19:38:24.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:24.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:24.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:24.158 | Sample Size : 82105 Average Latency in nano sec: 31859.636926
+I [client.hpp:31] 2023-08-02 19:38:25.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:25.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:25.159 | Sample Size : 85929 Average Latency in nano sec: 31764.920939
+I [client.hpp:31] 2023-08-02 19:38:26.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:26.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:26.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:26.159 | Sample Size : 85125 Average Latency in nano sec: 31702.140838
+I [client.hpp:31] 2023-08-02 19:38:27.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:27.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:27.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:27.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:27.160 | Sample Size : 86395 Average Latency in nano sec: 31727.740197
+I [client.hpp:31] 2023-08-02 19:38:28.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:28.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:28.159 | Sample Size : 83795 Average Latency in nano sec: 33115.884153
+I [client.hpp:31] 2023-08-02 19:38:29.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:29.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:29.157 | Sample Size : 77430 Average Latency in nano sec: 36772.547453
+I [client.hpp:31] 2023-08-02 19:38:30.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:30.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:30.158 | Sample Size : 77685 Average Latency in nano sec: 37050.475055
+I [client.hpp:51] 2023-08-02 19:38:31.157 | Sample Size : 76523 Average Latency in nano sec: 37372.502849
+I [transport.cpp:876] 2023-08-02 19:38:31.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:38:31.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:38:31.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:38:31.000 | Packets Received Total= 4157202
+I [client.hpp:31] 2023-08-02 19:38:32.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:32.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:32.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:32.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:32.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:32.157 | Sample Size : 77130 Average Latency in nano sec: 37048.936576
+I [client.hpp:31] 2023-08-02 19:38:33.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:33.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:33.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:33.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:33.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:33.158 | Sample Size : 78275 Average Latency in nano sec: 36914.655110
+I [client.hpp:31] 2023-08-02 19:38:34.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:34.156 | Sample Size : 77315 Average Latency in nano sec: 37019.319943
+I [client.hpp:31] 2023-08-02 19:38:35.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:35.157 | Sample Size : 78650 Average Latency in nano sec: 37361.712097
+I [client.hpp:31] 2023-08-02 19:38:36.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:36.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:36.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:36.157 | Sample Size : 77865 Average Latency in nano sec: 36874.092616
+I [client.hpp:31] 2023-08-02 19:38:37.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:37.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:37.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:37.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:37.157 | Sample Size : 78213 Average Latency in nano sec: 36462.788412
+I [client.hpp:51] 2023-08-02 19:38:38.157 | Sample Size : 76615 Average Latency in nano sec: 37633.568085
+I [client.hpp:51] 2023-08-02 19:38:39.157 | Sample Size : 77920 Average Latency in nano sec: 37118.363029
+I [client.hpp:31] 2023-08-02 19:38:40.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:40.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:40.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:40.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:40.158 | Sample Size : 77800 Average Latency in nano sec: 37015.104274
+I [client.hpp:31] 2023-08-02 19:38:41.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:41.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:41.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:41.157 | Sample Size : 77909 Average Latency in nano sec: 37124.924288
+I [transport.cpp:876] 2023-08-02 19:38:41.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:38:41.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:38:41.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:38:41.000 | Packets Received Total= 4934492
+I [client.hpp:31] 2023-08-02 19:38:42.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:42.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:42.171 | Sample Size : 77000 Average Latency in nano sec: 37311.506110
+I [client.hpp:31] 2023-08-02 19:38:43.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:43.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:43.157 | Sample Size : 74920 Average Latency in nano sec: 38016.318852
+I [client.hpp:31] 2023-08-02 19:38:44.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:44.157 | Sample Size : 78225 Average Latency in nano sec: 37296.501879
+I [client.hpp:31] 2023-08-02 19:38:45.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:45.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:45.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:45.133 | Difference in seconds !!!! 1
+I [client.hpp:31] 2023-08-02 19:38:45.133 | Difference in seconds !!!! 1
+I [client.hpp:51] 2023-08-02 19:38:45.156 | Sample Size : 77905 Average Latency in nano sec: 37015.083866

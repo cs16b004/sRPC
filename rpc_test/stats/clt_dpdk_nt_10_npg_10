@@ -1,0 +1,690 @@
+I [config.cpp:56] 2023-08-03 02:48:53.038 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:98] 2023-08-03 02:48:53.041 | Loading CPU Config
+I [config.cpp:56] 2023-08-03 02:48:53.041 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:56] 2023-08-03 02:48:53.043 | Loading configuration from : config_files/host_greenport.yml
+I [config.cpp:56] 2023-08-03 02:48:53.045 | Loading configuration from : config_files/network_greenport.yml
+I [transport.cpp:569] 2023-08-03 02:48:53.046 | Setting up netowkr info....
+I [transport.cpp:587] 2023-08-03 02:48:53.046 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:587] 2023-08-03 02:48:53.046 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:587] 2023-08-03 02:48:53.046 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:587] 2023-08-03 02:48:53.046 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:587] 2023-08-03 02:48:53.046 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:574] 2023-08-03 02:48:53.046 | Configuring local address 5, 172.19.0.122
+I [transport.cpp:587] 2023-08-03 02:48:53.046 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [client.hpp:190] 2023-08-03 02:48:53.047 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.047 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.048 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.048 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.049 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.049 | Job Added
+here
+I [client.hpp:190] 2023-08-03 02:48:53.050 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.052 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.053 | Job Added
+I [client.hpp:190] 2023-08-03 02:48:53.054 | Job Added
+I [transport.cpp:928] 2023-08-03 02:48:54.605 | Flow isolation enabled for port 0
+
+I [transport.cpp:998] 2023-08-03 02:48:54.673 | IP Address to be queued 172.19.0.122
+I [transport.cpp:1026] 2023-08-03 02:48:54.693 | Flow Rule Added for IP Address : 172.19.0.122
+I [transport.cpp:547] 2023-08-03 02:48:54.693 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:557] 2023-08-03 02:48:54.693 | Launching TX Thread
+I [transport.cpp:167] 2023-08-03 02:48:54.693 | Entering TX Loop at lcore 1
+I [transport.cpp:207] 2023-08-03 02:48:54.693 | Enter receive thread 0 on core 0 on port_id 0 on queue 0
+New client called 
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+New client called 
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:157] 2023-08-03 02:48:54.695 | Mbuf Pool Initialized at index 0, name: RRR_TX_MBUF_POOL_0
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+New client called 
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:145] 2023-08-03 02:48:54.746 | Connected to 172.19.0.121:8501::9000, fd r: 73, w: 74
+I [transport.cpp:145] 2023-08-03 02:48:55.698 | Connected to 172.19.0.121:8501::9001, fd r: 75, w: 76
+I [client.hpp:51] 2023-08-03 02:48:56.058 | Sample Size : 12230 Average Latency in nano sec: 934959.303352
+I [transport.cpp:145] 2023-08-03 02:48:56.701 | Connected to 172.19.0.121:8501::9002, fd r: 77, w: 78
+I [client.hpp:51] 2023-08-03 02:48:57.056 | Sample Size : 21120 Average Latency in nano sec: 559286.062784
+I [client.hpp:51] 2023-08-03 02:48:57.067 | Sample Size : 37370 Average Latency in nano sec: 142281.898181
+I [transport.cpp:145] 2023-08-03 02:48:57.703 | Connected to 172.19.0.121:8501::9003, fd r: 79, w: 80
+I [client.hpp:51] 2023-08-03 02:48:58.059 | Sample Size : 19436 Average Latency in nano sec: 606520.575530
+I [client.hpp:51] 2023-08-03 02:48:58.068 | Sample Size : 38770 Average Latency in nano sec: 139697.417947
+I [client.hpp:51] 2023-08-03 02:48:58.070 | Sample Size : 63305 Average Latency in nano sec: 83980.184696
+I [transport.cpp:145] 2023-08-03 02:48:58.705 | Connected to 172.19.0.121:8501::9004, fd r: 81, w: 82
+I [client.hpp:51] 2023-08-03 02:48:59.062 | Sample Size : 24680 Average Latency in nano sec: 482957.086791
+I [client.hpp:51] 2023-08-03 02:48:59.069 | Sample Size : 50050 Average Latency in nano sec: 105053.657771
+I [client.hpp:51] 2023-08-03 02:48:59.069 | Sample Size : 61890 Average Latency in nano sec: 82546.483965
+I [client.hpp:51] 2023-08-03 02:48:59.074 | Sample Size : 61910 Average Latency in nano sec: 84132.722825
+I [transport.cpp:145] 2023-08-03 02:48:59.706 | Connected to 172.19.0.121:8501::9005, fd r: 83, w: 84
+I [client.hpp:51] 2023-08-03 02:49:00.061 | Sample Size : 19960 Average Latency in nano sec: 598334.991383
+I [client.hpp:51] 2023-08-03 02:49:00.070 | Sample Size : 46411 Average Latency in nano sec: 118474.487366
+I [client.hpp:51] 2023-08-03 02:49:00.073 | Sample Size : 63131 Average Latency in nano sec: 85384.680746
+I [client.hpp:51] 2023-08-03 02:49:00.075 | Sample Size : 64540 Average Latency in nano sec: 85605.432812
+I [client.hpp:51] 2023-08-03 02:49:00.075 | Sample Size : 63430 Average Latency in nano sec: 84702.785672
+I [transport.cpp:145] 2023-08-03 02:49:00.710 | Connected to 172.19.0.121:8501::9006, fd r: 85, w: 86
+I [client.hpp:51] 2023-08-03 02:49:01.060 | Sample Size : 15968 Average Latency in nano sec: 778853.458918
+I [client.hpp:51] 2023-08-03 02:49:01.070 | Sample Size : 51912 Average Latency in nano sec: 111927.590224
+I [client.hpp:51] 2023-08-03 02:49:01.071 | Sample Size : 41150 Average Latency in nano sec: 141623.036979
+I [client.hpp:51] 2023-08-03 02:49:01.071 | Sample Size : 41050 Average Latency in nano sec: 142772.392523
+I [client.hpp:51] 2023-08-03 02:49:01.073 | Sample Size : 53770 Average Latency in nano sec: 111939.512607
+I [client.hpp:51] 2023-08-03 02:49:01.073 | Sample Size : 51779 Average Latency in nano sec: 114297.468806
+I [transport.cpp:145] 2023-08-03 02:49:01.710 | Connected to 172.19.0.121:8501::9007, fd r: 87, w: 88
+I [client.hpp:51] 2023-08-03 02:49:02.061 | Sample Size : 11230 Average Latency in nano sec: 1069980.375868
+I [client.hpp:51] 2023-08-03 02:49:02.063 | Sample Size : 24075 Average Latency in nano sec: 270858.715964
+I [client.hpp:51] 2023-08-03 02:49:02.065 | Sample Size : 25060 Average Latency in nano sec: 262591.482968
+I [client.hpp:51] 2023-08-03 02:49:02.067 | Sample Size : 43800 Average Latency in nano sec: 159811.103374
+I [client.hpp:51] 2023-08-03 02:49:02.069 | Sample Size : 42184 Average Latency in nano sec: 164878.186362
+I [client.hpp:51] 2023-08-03 02:49:02.070 | Sample Size : 43010 Average Latency in nano sec: 161015.275477
+I [client.hpp:51] 2023-08-03 02:49:02.071 | Sample Size : 42340 Average Latency in nano sec: 163647.282965
+I [transport.cpp:145] 2023-08-03 02:49:02.715 | Connected to 172.19.0.121:8501::9008, fd r: 89, w: 90
+I [client.hpp:51] 2023-08-03 02:49:03.062 | Sample Size : 12290 Average Latency in nano sec: 1031837.719691
+I [client.hpp:51] 2023-08-03 02:49:03.064 | Sample Size : 22790 Average Latency in nano sec: 297351.858829
+I [client.hpp:51] 2023-08-03 02:49:03.065 | Sample Size : 22680 Average Latency in nano sec: 301340.808153
+I [client.hpp:51] 2023-08-03 02:49:03.065 | Sample Size : 37440 Average Latency in nano sec: 189821.747770
+I [client.hpp:51] 2023-08-03 02:49:03.067 | Sample Size : 29230 Average Latency in nano sec: 204901.521170
+I [client.hpp:51] 2023-08-03 02:49:03.068 | Sample Size : 37280 Average Latency in nano sec: 189502.713650
+I [client.hpp:51] 2023-08-03 02:49:03.070 | Sample Size : 37502 Average Latency in nano sec: 190101.418506
+I [client.hpp:51] 2023-08-03 02:49:03.070 | Sample Size : 38030 Average Latency in nano sec: 184739.211961
+I [transport.cpp:145] 2023-08-03 02:49:03.764 | Connected to 172.19.0.121:8501::9009, fd r: 91, w: 92
+I [client.hpp:51] 2023-08-03 02:49:04.059 | Sample Size : 7830 Average Latency in nano sec: 1564605.002043
+I [client.hpp:51] 2023-08-03 02:49:04.065 | Sample Size : 19340 Average Latency in nano sec: 369517.134625
+I [client.hpp:51] 2023-08-03 02:49:04.068 | Sample Size : 18840 Average Latency in nano sec: 375305.209973
+I [client.hpp:51] 2023-08-03 02:49:04.068 | Sample Size : 32640 Average Latency in nano sec: 228033.262358
+I [client.hpp:51] 2023-08-03 02:49:04.069 | Sample Size : 32910 Average Latency in nano sec: 227859.200182
+I [client.hpp:51] 2023-08-03 02:49:04.071 | Sample Size : 23210 Average Latency in nano sec: 280738.011240
+I [client.hpp:51] 2023-08-03 02:49:04.072 | Sample Size : 33520 Average Latency in nano sec: 227498.993558
+I [client.hpp:51] 2023-08-03 02:49:04.073 | Sample Size : 32490 Average Latency in nano sec: 230884.649148
+I [client.hpp:51] 2023-08-03 02:49:04.075 | Sample Size : 32910 Average Latency in nano sec: 226744.689459
+I [client.hpp:51] 2023-08-03 02:49:05.057 | Sample Size : 9460 Average Latency in nano sec: 1297262.990486
+I [client.hpp:51] 2023-08-03 02:49:05.062 | Sample Size : 16550 Average Latency in nano sec: 446068.231703
+I [client.hpp:51] 2023-08-03 02:49:05.062 | Sample Size : 28980 Average Latency in nano sec: 272893.738151
+I [client.hpp:51] 2023-08-03 02:49:05.062 | Sample Size : 16690 Average Latency in nano sec: 443051.753713
+I [client.hpp:51] 2023-08-03 02:49:05.064 | Sample Size : 20360 Average Latency in nano sec: 325439.956456
+I [client.hpp:51] 2023-08-03 02:49:05.065 | Sample Size : 20745 Average Latency in nano sec: 327405.464466
+I [client.hpp:51] 2023-08-03 02:49:05.066 | Sample Size : 28995 Average Latency in nano sec: 271987.991002
+I [client.hpp:51] 2023-08-03 02:49:05.066 | Sample Size : 29120 Average Latency in nano sec: 273289.365705
+I [client.hpp:51] 2023-08-03 02:49:05.069 | Sample Size : 29034 Average Latency in nano sec: 271202.669983
+I [client.hpp:51] 2023-08-03 02:49:05.071 | Sample Size : 29664 Average Latency in nano sec: 269921.619027
+I [client.hpp:51] 2023-08-03 02:49:06.063 | Sample Size : 18560 Average Latency in nano sec: 384583.401131
+I [client.hpp:51] 2023-08-03 02:49:06.064 | Sample Size : 28150 Average Latency in nano sec: 273950.285866
+I [client.hpp:51] 2023-08-03 02:49:06.064 | Sample Size : 27070 Average Latency in nano sec: 283361.984047
+I [client.hpp:51] 2023-08-03 02:49:06.065 | Sample Size : 18910 Average Latency in nano sec: 379699.815169
+I [client.hpp:51] 2023-08-03 02:49:06.065 | Sample Size : 27250 Average Latency in nano sec: 281299.437644
+I [client.hpp:51] 2023-08-03 02:49:06.067 | Sample Size : 22310 Average Latency in nano sec: 284588.857975
+I [client.hpp:51] 2023-08-03 02:49:06.067 | Sample Size : 27028 Average Latency in nano sec: 284405.640638
+I [client.hpp:51] 2023-08-03 02:49:06.067 | Sample Size : 27010 Average Latency in nano sec: 282935.112361
+I [client.hpp:51] 2023-08-03 02:49:06.068 | Sample Size : 22030 Average Latency in nano sec: 293204.704697
+I [client.hpp:51] 2023-08-03 02:49:06.069 | Sample Size : 27210 Average Latency in nano sec: 282047.922399
+I [client.hpp:51] 2023-08-03 02:49:07.062 | Sample Size : 27020 Average Latency in nano sec: 287916.467185
+I [client.hpp:51] 2023-08-03 02:49:07.063 | Sample Size : 19280 Average Latency in nano sec: 396237.715552
+I [client.hpp:51] 2023-08-03 02:49:07.064 | Sample Size : 18380 Average Latency in nano sec: 397628.437194
+I [client.hpp:51] 2023-08-03 02:49:07.065 | Sample Size : 26992 Average Latency in nano sec: 288712.965003
+I [client.hpp:51] 2023-08-03 02:49:07.066 | Sample Size : 21700 Average Latency in nano sec: 299769.671211
+I [client.hpp:51] 2023-08-03 02:49:07.067 | Sample Size : 26824 Average Latency in nano sec: 290269.253858
+I [client.hpp:51] 2023-08-03 02:49:07.067 | Sample Size : 26660 Average Latency in nano sec: 291635.484964
+I [client.hpp:51] 2023-08-03 02:49:07.068 | Sample Size : 26970 Average Latency in nano sec: 289454.397294
+I [client.hpp:51] 2023-08-03 02:49:07.069 | Sample Size : 22190 Average Latency in nano sec: 288674.104865
+I [client.hpp:51] 2023-08-03 02:49:07.070 | Sample Size : 27108 Average Latency in nano sec: 286836.277638
+I [client.hpp:51] 2023-08-03 02:49:08.063 | Sample Size : 27130 Average Latency in nano sec: 302428.047273
+I [client.hpp:51] 2023-08-03 02:49:08.063 | Sample Size : 16070 Average Latency in nano sec: 467930.218408
+I [client.hpp:51] 2023-08-03 02:49:08.063 | Sample Size : 16180 Average Latency in nano sec: 463239.319333
+I [client.hpp:51] 2023-08-03 02:49:08.065 | Sample Size : 26520 Average Latency in nano sec: 309618.400075
+I [client.hpp:51] 2023-08-03 02:49:08.066 | Sample Size : 26929 Average Latency in nano sec: 304158.963804
+I [client.hpp:51] 2023-08-03 02:49:08.066 | Sample Size : 26610 Average Latency in nano sec: 307847.650526
+I [client.hpp:51] 2023-08-03 02:49:08.066 | Sample Size : 20512 Average Latency in nano sec: 312322.895283
+I [client.hpp:51] 2023-08-03 02:49:08.067 | Sample Size : 26560 Average Latency in nano sec: 308071.692426
+I [client.hpp:51] 2023-08-03 02:49:08.068 | Sample Size : 20467 Average Latency in nano sec: 316230.182790
+I [client.hpp:51] 2023-08-03 02:49:08.069 | Sample Size : 27080 Average Latency in nano sec: 301005.907688
+I [client.hpp:51] 2023-08-03 02:49:09.062 | Sample Size : 26500 Average Latency in nano sec: 309788.380611
+I [client.hpp:51] 2023-08-03 02:49:09.062 | Sample Size : 16070 Average Latency in nano sec: 470397.305224
+I [client.hpp:51] 2023-08-03 02:49:09.064 | Sample Size : 26590 Average Latency in nano sec: 306409.102441
+I [client.hpp:51] 2023-08-03 02:49:09.064 | Sample Size : 16069 Average Latency in nano sec: 476010.745569
+I [client.hpp:51] 2023-08-03 02:49:09.065 | Sample Size : 21830 Average Latency in nano sec: 289095.349025
+I [client.hpp:51] 2023-08-03 02:49:09.066 | Sample Size : 26250 Average Latency in nano sec: 312290.569117
+I [client.hpp:51] 2023-08-03 02:49:09.067 | Sample Size : 26130 Average Latency in nano sec: 313990.922073
+I [client.hpp:51] 2023-08-03 02:49:09.068 | Sample Size : 24560 Average Latency in nano sec: 315127.731262
+I [client.hpp:51] 2023-08-03 02:49:09.068 | Sample Size : 25920 Average Latency in nano sec: 315050.607327
+I [client.hpp:51] 2023-08-03 02:49:09.070 | Sample Size : 26320 Average Latency in nano sec: 311364.715420
+I [client.hpp:51] 2023-08-03 02:49:10.065 | Sample Size : 27610 Average Latency in nano sec: 276889.536785
+I [client.hpp:51] 2023-08-03 02:49:10.065 | Sample Size : 18950 Average Latency in nano sec: 384350.618490
+I [client.hpp:51] 2023-08-03 02:49:10.066 | Sample Size : 27760 Average Latency in nano sec: 277152.371048
+I [client.hpp:51] 2023-08-03 02:49:10.066 | Sample Size : 27270 Average Latency in nano sec: 282544.932111
+I [client.hpp:51] 2023-08-03 02:49:10.067 | Sample Size : 21970 Average Latency in nano sec: 297420.676934
+I [client.hpp:51] 2023-08-03 02:49:10.067 | Sample Size : 19020 Average Latency in nano sec: 384195.102995
+I [client.hpp:51] 2023-08-03 02:49:10.068 | Sample Size : 27200 Average Latency in nano sec: 283269.450974
+I [client.hpp:51] 2023-08-03 02:49:10.068 | Sample Size : 23540 Average Latency in nano sec: 299442.949214
+I [client.hpp:51] 2023-08-03 02:49:10.068 | Sample Size : 27554 Average Latency in nano sec: 275448.139566
+I [client.hpp:51] 2023-08-03 02:49:10.070 | Sample Size : 23640 Average Latency in nano sec: 299288.334630
+I [client.hpp:51] 2023-08-03 02:49:11.063 | Sample Size : 28510 Average Latency in nano sec: 278852.819425
+I [client.hpp:51] 2023-08-03 02:49:11.063 | Sample Size : 16260 Average Latency in nano sec: 455024.251444
+I [client.hpp:51] 2023-08-03 02:49:11.063 | Sample Size : 16200 Average Latency in nano sec: 455762.820481
+I [client.hpp:51] 2023-08-03 02:49:11.064 | Sample Size : 20030 Average Latency in nano sec: 334206.181986
+I [client.hpp:51] 2023-08-03 02:49:11.066 | Sample Size : 28660 Average Latency in nano sec: 275491.165399
+I [client.hpp:51] 2023-08-03 02:49:11.067 | Sample Size : 28280 Average Latency in nano sec: 281331.855214
+I [client.hpp:51] 2023-08-03 02:49:11.067 | Sample Size : 28176 Average Latency in nano sec: 282978.876144
+I [client.hpp:51] 2023-08-03 02:49:11.068 | Sample Size : 28480 Average Latency in nano sec: 279944.239311
+I [client.hpp:51] 2023-08-03 02:49:11.068 | Sample Size : 19804 Average Latency in nano sec: 336244.174018
+I [client.hpp:51] 2023-08-03 02:49:11.070 | Sample Size : 20296 Average Latency in nano sec: 323637.308726
+I [client.hpp:51] 2023-08-03 02:49:12.063 | Sample Size : 28379 Average Latency in nano sec: 274629.427032
+I [client.hpp:51] 2023-08-03 02:49:12.063 | Sample Size : 17840 Average Latency in nano sec: 410285.192661
+I [client.hpp:51] 2023-08-03 02:49:12.064 | Sample Size : 17750 Average Latency in nano sec: 408418.840484
+I [client.hpp:51] 2023-08-03 02:49:12.065 | Sample Size : 28300 Average Latency in nano sec: 273531.725998
+I [client.hpp:51] 2023-08-03 02:49:12.067 | Sample Size : 20930 Average Latency in nano sec: 315142.517526
+I [client.hpp:51] 2023-08-03 02:49:12.067 | Sample Size : 28281 Average Latency in nano sec: 277264.309457
+I [client.hpp:51] 2023-08-03 02:49:12.067 | Sample Size : 28500 Average Latency in nano sec: 273116.597895
+I [client.hpp:51] 2023-08-03 02:49:12.069 | Sample Size : 28330 Average Latency in nano sec: 274803.035215
+I [client.hpp:51] 2023-08-03 02:49:12.069 | Sample Size : 21070 Average Latency in nano sec: 311560.225633
+I [client.hpp:51] 2023-08-03 02:49:12.069 | Sample Size : 20673 Average Latency in nano sec: 324391.462401
+I [client.hpp:51] 2023-08-03 02:49:13.062 | Sample Size : 28787 Average Latency in nano sec: 270302.301271
+I [client.hpp:51] 2023-08-03 02:49:13.062 | Sample Size : 17900 Average Latency in nano sec: 409657.074260
+I [client.hpp:51] 2023-08-03 02:49:13.063 | Sample Size : 20903 Average Latency in nano sec: 315360.156888
+I [client.hpp:51] 2023-08-03 02:49:13.064 | Sample Size : 28330 Average Latency in nano sec: 273362.941673
+I [client.hpp:51] 2023-08-03 02:49:13.065 | Sample Size : 28400 Average Latency in nano sec: 271071.434706
+I [client.hpp:51] 2023-08-03 02:49:13.065 | Sample Size : 17700 Average Latency in nano sec: 410267.217053
+I [client.hpp:51] 2023-08-03 02:49:13.066 | Sample Size : 28340 Average Latency in nano sec: 271779.626102
+I [client.hpp:51] 2023-08-03 02:49:13.067 | Sample Size : 20671 Average Latency in nano sec: 324948.059387
+I [client.hpp:51] 2023-08-03 02:49:13.068 | Sample Size : 21250 Average Latency in nano sec: 309264.318344
+I [client.hpp:51] 2023-08-03 02:49:13.071 | Sample Size : 28502 Average Latency in nano sec: 271882.608432
+I [client.hpp:51] 2023-08-03 02:49:14.062 | Sample Size : 26972 Average Latency in nano sec: 286260.739462
+I [client.hpp:51] 2023-08-03 02:49:14.064 | Sample Size : 18340 Average Latency in nano sec: 394118.026812
+I [client.hpp:51] 2023-08-03 02:49:14.064 | Sample Size : 18690 Average Latency in nano sec: 386238.144064
+I [client.hpp:51] 2023-08-03 02:49:14.066 | Sample Size : 26740 Average Latency in nano sec: 288475.108685
+I [client.hpp:51] 2023-08-03 02:49:14.069 | Sample Size : 26930 Average Latency in nano sec: 288108.032999
+I [client.hpp:51] 2023-08-03 02:49:14.069 | Sample Size : 27320 Average Latency in nano sec: 284231.991182
+I [client.hpp:51] 2023-08-03 02:49:14.072 | Sample Size : 26727 Average Latency in nano sec: 289815.709706
+I [client.hpp:51] 2023-08-03 02:49:14.072 | Sample Size : 22042 Average Latency in nano sec: 290073.434518
+I [client.hpp:51] 2023-08-03 02:49:14.075 | Sample Size : 21590 Average Latency in nano sec: 297945.982083
+I [client.hpp:51] 2023-08-03 02:49:14.078 | Sample Size : 27160 Average Latency in nano sec: 284299.914280
+I [client.hpp:51] 2023-08-03 02:49:15.063 | Sample Size : 16160 Average Latency in nano sec: 460659.754855
+I [client.hpp:51] 2023-08-03 02:49:15.063 | Sample Size : 28300 Average Latency in nano sec: 284969.958634
+I [client.hpp:51] 2023-08-03 02:49:15.064 | Sample Size : 16120 Average Latency in nano sec: 463296.673528
+I [client.hpp:51] 2023-08-03 02:49:15.065 | Sample Size : 15850 Average Latency in nano sec: 463390.605801
+I [client.hpp:51] 2023-08-03 02:49:15.066 | Sample Size : 27700 Average Latency in nano sec: 289845.424143
+I [client.hpp:51] 2023-08-03 02:49:15.066 | Sample Size : 27740 Average Latency in nano sec: 289428.670523
+I [client.hpp:51] 2023-08-03 02:49:15.066 | Sample Size : 28009 Average Latency in nano sec: 287731.701488
+I [client.hpp:51] 2023-08-03 02:49:15.068 | Sample Size : 27175 Average Latency in nano sec: 293193.378370
+I [client.hpp:51] 2023-08-03 02:49:15.068 | Sample Size : 27960 Average Latency in nano sec: 286062.832386
+I [client.hpp:51] 2023-08-03 02:49:15.069 | Sample Size : 19905 Average Latency in nano sec: 319121.416813
+I [client.hpp:51] 2023-08-03 02:49:16.062 | Sample Size : 19877 Average Latency in nano sec: 356066.520038
+I [client.hpp:51] 2023-08-03 02:49:16.064 | Sample Size : 19680 Average Latency in nano sec: 357706.278771
+I [client.hpp:51] 2023-08-03 02:49:16.064 | Sample Size : 27753 Average Latency in nano sec: 266722.200375
+I [client.hpp:51] 2023-08-03 02:49:16.065 | Sample Size : 27920 Average Latency in nano sec: 265377.506910
+I [client.hpp:51] 2023-08-03 02:49:16.067 | Sample Size : 27580 Average Latency in nano sec: 270706.288619
+I [client.hpp:51] 2023-08-03 02:49:16.068 | Sample Size : 19470 Average Latency in nano sec: 358847.994148
+I [client.hpp:51] 2023-08-03 02:49:16.068 | Sample Size : 27436 Average Latency in nano sec: 271604.008090
+I [client.hpp:51] 2023-08-03 02:49:16.069 | Sample Size : 27656 Average Latency in nano sec: 270879.850286
+I [client.hpp:51] 2023-08-03 02:49:16.071 | Sample Size : 27735 Average Latency in nano sec: 267525.972022
+I [client.hpp:51] 2023-08-03 02:49:16.079 | Sample Size : 25120 Average Latency in nano sec: 270526.975284
+I [client.hpp:51] 2023-08-03 02:49:17.065 | Sample Size : 24790 Average Latency in nano sec: 277478.921402
+I [client.hpp:51] 2023-08-03 02:49:17.066 | Sample Size : 28412 Average Latency in nano sec: 257789.416931
+I [client.hpp:51] 2023-08-03 02:49:17.066 | Sample Size : 21060 Average Latency in nano sec: 372895.564206
+I [client.hpp:51] 2023-08-03 02:49:17.066 | Sample Size : 28330 Average Latency in nano sec: 258748.494107
+I [client.hpp:51] 2023-08-03 02:49:17.066 | Sample Size : 28460 Average Latency in nano sec: 257297.971824
+I [client.hpp:51] 2023-08-03 02:49:17.067 | Sample Size : 20530 Average Latency in nano sec: 339254.861394
+I [client.hpp:51] 2023-08-03 02:49:17.067 | Sample Size : 20470 Average Latency in nano sec: 349617.787109
+I [client.hpp:51] 2023-08-03 02:49:17.068 | Sample Size : 28700 Average Latency in nano sec: 254481.296579
+I [client.hpp:51] 2023-08-03 02:49:17.068 | Sample Size : 20020 Average Latency in nano sec: 348754.914928
+I [client.hpp:51] 2023-08-03 02:49:17.069 | Sample Size : 28265 Average Latency in nano sec: 255895.786419
+I [client.hpp:51] 2023-08-03 02:49:18.063 | Sample Size : 22130 Average Latency in nano sec: 296725.282069
+I [client.hpp:51] 2023-08-03 02:49:18.065 | Sample Size : 21390 Average Latency in nano sec: 377421.209299
+I [client.hpp:51] 2023-08-03 02:49:18.065 | Sample Size : 19520 Average Latency in nano sec: 362683.538300
+I [client.hpp:51] 2023-08-03 02:49:18.066 | Sample Size : 19610 Average Latency in nano sec: 360943.526707
+I [client.hpp:51] 2023-08-03 02:49:18.068 | Sample Size : 19709 Average Latency in nano sec: 359335.504589
+I [client.hpp:51] 2023-08-03 02:49:18.068 | Sample Size : 29210 Average Latency in nano sec: 256340.314100
+I [client.hpp:51] 2023-08-03 02:49:18.069 | Sample Size : 29132 Average Latency in nano sec: 255993.145220
+I [client.hpp:51] 2023-08-03 02:49:18.069 | Sample Size : 29300 Average Latency in nano sec: 254438.300751
+I [client.hpp:51] 2023-08-03 02:49:18.071 | Sample Size : 29070 Average Latency in nano sec: 254889.995117
+I [client.hpp:51] 2023-08-03 02:49:18.073 | Sample Size : 29270 Average Latency in nano sec: 253392.424731
+I [client.hpp:51] 2023-08-03 02:49:19.064 | Sample Size : 26440 Average Latency in nano sec: 277984.762420
+I [client.hpp:51] 2023-08-03 02:49:19.064 | Sample Size : 20600 Average Latency in nano sec: 392066.495633
+I [client.hpp:51] 2023-08-03 02:49:19.065 | Sample Size : 19230 Average Latency in nano sec: 370776.970166
+I [client.hpp:51] 2023-08-03 02:49:19.066 | Sample Size : 27780 Average Latency in nano sec: 268079.661965
+I [client.hpp:51] 2023-08-03 02:49:19.066 | Sample Size : 28310 Average Latency in nano sec: 265232.474786
+I [client.hpp:51] 2023-08-03 02:49:19.067 | Sample Size : 19380 Average Latency in nano sec: 369180.787472
+I [client.hpp:51] 2023-08-03 02:49:19.067 | Sample Size : 19330 Average Latency in nano sec: 370614.937384
+I [client.hpp:51] 2023-08-03 02:49:19.068 | Sample Size : 28200 Average Latency in nano sec: 267621.166643
+I [client.hpp:51] 2023-08-03 02:49:19.069 | Sample Size : 28440 Average Latency in nano sec: 265671.045800
+I [client.hpp:51] 2023-08-03 02:49:19.070 | Sample Size : 28104 Average Latency in nano sec: 266314.786939
+I [client.hpp:51] 2023-08-03 02:49:20.064 | Sample Size : 16660 Average Latency in nano sec: 444752.932394
+I [client.hpp:51] 2023-08-03 02:49:20.065 | Sample Size : 28380 Average Latency in nano sec: 280546.103487
+I [client.hpp:51] 2023-08-03 02:49:20.066 | Sample Size : 18140 Average Latency in nano sec: 475942.934876
+I [client.hpp:51] 2023-08-03 02:49:20.066 | Sample Size : 16550 Average Latency in nano sec: 448957.273913
+I [client.hpp:51] 2023-08-03 02:49:20.067 | Sample Size : 27950 Average Latency in nano sec: 283582.973462
+I [client.hpp:51] 2023-08-03 02:49:20.067 | Sample Size : 16730 Average Latency in nano sec: 440713.361290
+I [client.hpp:51] 2023-08-03 02:49:20.068 | Sample Size : 28310 Average Latency in nano sec: 279133.896081
+I [client.hpp:51] 2023-08-03 02:49:20.069 | Sample Size : 28360 Average Latency in nano sec: 279255.278886
+I [client.hpp:51] 2023-08-03 02:49:20.069 | Sample Size : 28450 Average Latency in nano sec: 276761.465214
+I [client.hpp:51] 2023-08-03 02:49:20.072 | Sample Size : 28308 Average Latency in nano sec: 277814.789680
+I [client.hpp:51] 2023-08-03 02:49:21.064 | Sample Size : 16050 Average Latency in nano sec: 467830.165193
+I [client.hpp:51] 2023-08-03 02:49:21.065 | Sample Size : 16030 Average Latency in nano sec: 466096.331671
+I [client.hpp:51] 2023-08-03 02:49:21.065 | Sample Size : 15940 Average Latency in nano sec: 470234.144138
+I [client.hpp:51] 2023-08-03 02:49:21.065 | Sample Size : 28200 Average Latency in nano sec: 284092.645764
+I [client.hpp:51] 2023-08-03 02:49:21.067 | Sample Size : 28249 Average Latency in nano sec: 283795.068686
+I [client.hpp:51] 2023-08-03 02:49:21.067 | Sample Size : 28120 Average Latency in nano sec: 281851.199609
+I [client.hpp:51] 2023-08-03 02:49:21.067 | Sample Size : 28329 Average Latency in nano sec: 281502.075479
+I [client.hpp:51] 2023-08-03 02:49:21.068 | Sample Size : 28180 Average Latency in nano sec: 284988.740404
+I [client.hpp:51] 2023-08-03 02:49:21.068 | Sample Size : 17540 Average Latency in nano sec: 500564.351282
+I [client.hpp:51] 2023-08-03 02:49:21.070 | Sample Size : 28180 Average Latency in nano sec: 283028.420765
+I [client.hpp:51] 2023-08-03 02:49:22.067 | Sample Size : 16420 Average Latency in nano sec: 461161.864273
+I [client.hpp:51] 2023-08-03 02:49:22.068 | Sample Size : 16560 Average Latency in nano sec: 457283.554194
+I [client.hpp:51] 2023-08-03 02:49:22.068 | Sample Size : 26410 Average Latency in nano sec: 302244.189656
+I [client.hpp:51] 2023-08-03 02:49:22.068 | Sample Size : 26290 Average Latency in nano sec: 305287.278821
+I [client.hpp:51] 2023-08-03 02:49:22.069 | Sample Size : 26320 Average Latency in nano sec: 304262.043638
+I [client.hpp:51] 2023-08-03 02:49:22.069 | Sample Size : 22830 Average Latency in nano sec: 362686.457093
+I [client.hpp:51] 2023-08-03 02:49:22.070 | Sample Size : 26340 Average Latency in nano sec: 305876.056622
+I [client.hpp:51] 2023-08-03 02:49:22.071 | Sample Size : 22480 Average Latency in nano sec: 350754.261494
+I [client.hpp:51] 2023-08-03 02:49:22.071 | Sample Size : 26426 Average Latency in nano sec: 302472.579862
+I [client.hpp:51] 2023-08-03 02:49:22.073 | Sample Size : 26370 Average Latency in nano sec: 303447.339841
+I [client.hpp:51] 2023-08-03 02:49:23.065 | Sample Size : 25380 Average Latency in nano sec: 308342.190272
+I [client.hpp:51] 2023-08-03 02:49:23.066 | Sample Size : 25775 Average Latency in nano sec: 304156.984061
+I [client.hpp:51] 2023-08-03 02:49:23.066 | Sample Size : 17350 Average Latency in nano sec: 428941.658410
+I [client.hpp:51] 2023-08-03 02:49:23.068 | Sample Size : 25680 Average Latency in nano sec: 306318.554340
+I [client.hpp:51] 2023-08-03 02:49:23.068 | Sample Size : 25400 Average Latency in nano sec: 309758.883168
+I [client.hpp:51] 2023-08-03 02:49:23.068 | Sample Size : 17380 Average Latency in nano sec: 430969.830362
+I [client.hpp:51] 2023-08-03 02:49:23.068 | Sample Size : 25570 Average Latency in nano sec: 306833.572166
+I [client.hpp:51] 2023-08-03 02:49:23.069 | Sample Size : 25585 Average Latency in nano sec: 308701.444306
+I [client.hpp:51] 2023-08-03 02:49:23.070 | Sample Size : 25570 Average Latency in nano sec: 305799.353675
+I [client.hpp:51] 2023-08-03 02:49:23.070 | Sample Size : 25590 Average Latency in nano sec: 307317.494414
+I [client.hpp:51] 2023-08-03 02:49:24.063 | Sample Size : 16638 Average Latency in nano sec: 452325.279793
+I [client.hpp:51] 2023-08-03 02:49:24.063 | Sample Size : 16730 Average Latency in nano sec: 449081.471505
+I [client.hpp:51] 2023-08-03 02:49:24.064 | Sample Size : 25820 Average Latency in nano sec: 312296.977313
+I [client.hpp:51] 2023-08-03 02:49:24.065 | Sample Size : 25670 Average Latency in nano sec: 311971.163895
+I [client.hpp:51] 2023-08-03 02:49:24.066 | Sample Size : 25790 Average Latency in nano sec: 309620.830736
+I [client.hpp:51] 2023-08-03 02:49:24.066 | Sample Size : 25803 Average Latency in nano sec: 309430.304014
+I [client.hpp:51] 2023-08-03 02:49:24.066 | Sample Size : 25760 Average Latency in nano sec: 310594.435933
+I [client.hpp:51] 2023-08-03 02:49:24.066 | Sample Size : 25818 Average Latency in nano sec: 309468.801572
+I [client.hpp:51] 2023-08-03 02:49:24.071 | Sample Size : 25795 Average Latency in nano sec: 309447.329200
+I [client.hpp:51] 2023-08-03 02:49:24.071 | Sample Size : 25902 Average Latency in nano sec: 307697.248611
+I [client.hpp:51] 2023-08-03 02:49:25.064 | Sample Size : 18689 Average Latency in nano sec: 388602.250816
+I [client.hpp:51] 2023-08-03 02:49:25.064 | Sample Size : 18670 Average Latency in nano sec: 387422.886188
+I [client.hpp:51] 2023-08-03 02:49:25.065 | Sample Size : 26269 Average Latency in nano sec: 291904.539606
+I [client.hpp:51] 2023-08-03 02:49:25.065 | Sample Size : 26004 Average Latency in nano sec: 296187.737488
+I [client.hpp:51] 2023-08-03 02:49:25.065 | Sample Size : 26013 Average Latency in nano sec: 295055.848019
+I [client.hpp:51] 2023-08-03 02:49:25.066 | Sample Size : 26294 Average Latency in nano sec: 291223.986618
+I [client.hpp:51] 2023-08-03 02:49:25.067 | Sample Size : 26390 Average Latency in nano sec: 292101.900671
+I [client.hpp:51] 2023-08-03 02:49:25.067 | Sample Size : 25830 Average Latency in nano sec: 298062.848259
+I [client.hpp:51] 2023-08-03 02:49:25.068 | Sample Size : 25864 Average Latency in nano sec: 295439.096525
+I [client.hpp:51] 2023-08-03 02:49:25.069 | Sample Size : 25932 Average Latency in nano sec: 294360.337548
+I [client.hpp:51] 2023-08-03 02:49:26.066 | Sample Size : 28090 Average Latency in nano sec: 225216.569903
+I [client.hpp:51] 2023-08-03 02:49:26.066 | Sample Size : 28067 Average Latency in nano sec: 225255.354781
+I [client.hpp:51] 2023-08-03 02:49:26.067 | Sample Size : 27830 Average Latency in nano sec: 226750.691272
+I [client.hpp:51] 2023-08-03 02:49:26.067 | Sample Size : 27897 Average Latency in nano sec: 227356.068272
+I [client.hpp:51] 2023-08-03 02:49:26.067 | Sample Size : 28023 Average Latency in nano sec: 226722.528306
+I [client.hpp:51] 2023-08-03 02:49:26.068 | Sample Size : 26740 Average Latency in nano sec: 230226.054393
+I [client.hpp:51] 2023-08-03 02:49:26.068 | Sample Size : 26440 Average Latency in nano sec: 230062.367422
+I [client.hpp:51] 2023-08-03 02:49:26.068 | Sample Size : 28112 Average Latency in nano sec: 226235.248115
+I [client.hpp:51] 2023-08-03 02:49:26.071 | Sample Size : 28128 Average Latency in nano sec: 226382.027439
+I [client.hpp:51] 2023-08-03 02:49:26.072 | Sample Size : 28045 Average Latency in nano sec: 225648.712559
+I [client.hpp:51] 2023-08-03 02:49:27.065 | Sample Size : 16140 Average Latency in nano sec: 469172.494675
+I [client.hpp:51] 2023-08-03 02:49:27.065 | Sample Size : 25260 Average Latency in nano sec: 318593.950970
+I [client.hpp:51] 2023-08-03 02:49:27.065 | Sample Size : 16210 Average Latency in nano sec: 467113.016769
+I [client.hpp:51] 2023-08-03 02:49:27.066 | Sample Size : 25130 Average Latency in nano sec: 321653.840403
+I [client.hpp:51] 2023-08-03 02:49:27.066 | Sample Size : 25550 Average Latency in nano sec: 312284.720816
+I [client.hpp:51] 2023-08-03 02:49:27.067 | Sample Size : 25250 Average Latency in nano sec: 320118.258076
+I [client.hpp:51] 2023-08-03 02:49:27.067 | Sample Size : 25290 Average Latency in nano sec: 319860.129957
+I [client.hpp:51] 2023-08-03 02:49:27.068 | Sample Size : 25480 Average Latency in nano sec: 316009.746851
+I [client.hpp:51] 2023-08-03 02:49:27.069 | Sample Size : 25390 Average Latency in nano sec: 319508.767659
+I [client.hpp:51] 2023-08-03 02:49:27.072 | Sample Size : 25287 Average Latency in nano sec: 317165.902776
+I [client.hpp:51] 2023-08-03 02:49:28.063 | Sample Size : 25698 Average Latency in nano sec: 308099.407344
+I [client.hpp:51] 2023-08-03 02:49:28.064 | Sample Size : 17840 Average Latency in nano sec: 417906.360056
+I [client.hpp:51] 2023-08-03 02:49:28.065 | Sample Size : 17719 Average Latency in nano sec: 422181.916465
+I [client.hpp:51] 2023-08-03 02:49:28.066 | Sample Size : 26162 Average Latency in nano sec: 301718.064267
+I [client.hpp:51] 2023-08-03 02:49:28.066 | Sample Size : 26180 Average Latency in nano sec: 300574.556128
+I [client.hpp:51] 2023-08-03 02:49:28.066 | Sample Size : 25900 Average Latency in nano sec: 303266.598263
+I [client.hpp:51] 2023-08-03 02:49:28.068 | Sample Size : 26067 Average Latency in nano sec: 301811.889336
+I [client.hpp:51] 2023-08-03 02:49:28.068 | Sample Size : 25995 Average Latency in nano sec: 302851.780235
+I [client.hpp:51] 2023-08-03 02:49:28.068 | Sample Size : 26230 Average Latency in nano sec: 300448.533765
+I [client.hpp:51] 2023-08-03 02:49:28.068 | Sample Size : 25779 Average Latency in nano sec: 307389.966963
+I [client.hpp:51] 2023-08-03 02:49:29.064 | Sample Size : 27890 Average Latency in nano sec: 223713.182705
+I [client.hpp:51] 2023-08-03 02:49:29.065 | Sample Size : 27660 Average Latency in nano sec: 224222.892556
+I [client.hpp:51] 2023-08-03 02:49:29.066 | Sample Size : 27729 Average Latency in nano sec: 224750.566139
+I [client.hpp:51] 2023-08-03 02:49:29.066 | Sample Size : 27630 Average Latency in nano sec: 224620.394427
+I [client.hpp:51] 2023-08-03 02:49:29.066 | Sample Size : 26344 Average Latency in nano sec: 228928.238565
+I [client.hpp:51] 2023-08-03 02:49:29.067 | Sample Size : 27680 Average Latency in nano sec: 224875.516360
+I [client.hpp:51] 2023-08-03 02:49:29.067 | Sample Size : 26060 Average Latency in nano sec: 230053.020483
+I [client.hpp:51] 2023-08-03 02:49:29.069 | Sample Size : 27814 Average Latency in nano sec: 223963.929863
+I [client.hpp:51] 2023-08-03 02:49:29.069 | Sample Size : 27710 Average Latency in nano sec: 223370.671248
+I [client.hpp:51] 2023-08-03 02:49:29.070 | Sample Size : 27870 Average Latency in nano sec: 223638.456313
+I [client.hpp:51] 2023-08-03 02:49:30.066 | Sample Size : 23068 Average Latency in nano sec: 281618.528339
+I [client.hpp:51] 2023-08-03 02:49:30.067 | Sample Size : 23500 Average Latency in nano sec: 281074.110440
+I [client.hpp:51] 2023-08-03 02:49:30.067 | Sample Size : 27030 Average Latency in nano sec: 254107.365865
+I [client.hpp:51] 2023-08-03 02:49:30.067 | Sample Size : 27040 Average Latency in nano sec: 253303.312895
+I [client.hpp:51] 2023-08-03 02:49:30.067 | Sample Size : 26990 Average Latency in nano sec: 254634.279741
+I [client.hpp:51] 2023-08-03 02:49:30.068 | Sample Size : 27070 Average Latency in nano sec: 253104.214882
+I [client.hpp:51] 2023-08-03 02:49:30.069 | Sample Size : 27087 Average Latency in nano sec: 253260.046426
+I [client.hpp:51] 2023-08-03 02:49:30.070 | Sample Size : 27235 Average Latency in nano sec: 250324.093448
+I [client.hpp:51] 2023-08-03 02:49:30.070 | Sample Size : 27093 Average Latency in nano sec: 251486.809394
+I [client.hpp:51] 2023-08-03 02:49:30.071 | Sample Size : 27260 Average Latency in nano sec: 250144.587545
+I [client.hpp:51] 2023-08-03 02:49:31.065 | Sample Size : 16360 Average Latency in nano sec: 463561.455651
+I [client.hpp:51] 2023-08-03 02:49:31.066 | Sample Size : 25060 Average Latency in nano sec: 319338.922657
+I [client.hpp:51] 2023-08-03 02:49:31.066 | Sample Size : 16260 Average Latency in nano sec: 468615.707416
+I [client.hpp:51] 2023-08-03 02:49:31.066 | Sample Size : 25385 Average Latency in nano sec: 317381.696594
+I [client.hpp:51] 2023-08-03 02:49:31.067 | Sample Size : 25470 Average Latency in nano sec: 317804.039796
+I [client.hpp:51] 2023-08-03 02:49:31.067 | Sample Size : 25580 Average Latency in nano sec: 315271.996522
+I [client.hpp:51] 2023-08-03 02:49:31.067 | Sample Size : 25450 Average Latency in nano sec: 316617.024437
+I [client.hpp:51] 2023-08-03 02:49:31.068 | Sample Size : 25405 Average Latency in nano sec: 316275.846962
+I [client.hpp:51] 2023-08-03 02:49:31.068 | Sample Size : 25840 Average Latency in nano sec: 312087.888141
+I [client.hpp:51] 2023-08-03 02:49:31.070 | Sample Size : 25584 Average Latency in nano sec: 312837.279597
+I [client.hpp:51] 2023-08-03 02:49:32.064 | Sample Size : 25890 Average Latency in nano sec: 315856.469768
+I [client.hpp:51] 2023-08-03 02:49:32.066 | Sample Size : 15890 Average Latency in nano sec: 487960.889686
+I [client.hpp:51] 2023-08-03 02:49:32.066 | Sample Size : 15890 Average Latency in nano sec: 484246.564906
+I [client.hpp:51] 2023-08-03 02:49:32.067 | Sample Size : 25660 Average Latency in nano sec: 321823.973938
+I [client.hpp:51] 2023-08-03 02:49:32.067 | Sample Size : 25940 Average Latency in nano sec: 316374.664085
+I [client.hpp:51] 2023-08-03 02:49:32.067 | Sample Size : 25543 Average Latency in nano sec: 321562.419990
+I [client.hpp:51] 2023-08-03 02:49:32.068 | Sample Size : 23560 Average Latency in nano sec: 304236.154000
+I [client.hpp:51] 2023-08-03 02:49:32.068 | Sample Size : 25720 Average Latency in nano sec: 319931.899359
+I [client.hpp:51] 2023-08-03 02:49:32.068 | Sample Size : 25848 Average Latency in nano sec: 318426.298631
+I [client.hpp:51] 2023-08-03 02:49:32.070 | Sample Size : 26000 Average Latency in nano sec: 313299.102592
+I [client.hpp:51] 2023-08-03 02:49:33.066 | Sample Size : 26540 Average Latency in nano sec: 285846.004934
+I [client.hpp:51] 2023-08-03 02:49:33.067 | Sample Size : 26600 Average Latency in nano sec: 286567.350658
+I [client.hpp:51] 2023-08-03 02:49:33.067 | Sample Size : 18770 Average Latency in nano sec: 378892.821885
+I [client.hpp:51] 2023-08-03 02:49:33.068 | Sample Size : 18790 Average Latency in nano sec: 382296.244628
+I [client.hpp:51] 2023-08-03 02:49:33.068 | Sample Size : 26480 Average Latency in nano sec: 288595.981314
+I [client.hpp:51] 2023-08-03 02:49:33.071 | Sample Size : 26392 Average Latency in nano sec: 287918.385015
+I [client.hpp:51] 2023-08-03 02:49:33.071 | Sample Size : 22770 Average Latency in nano sec: 271423.324144
+I [client.hpp:51] 2023-08-03 02:49:33.074 | Sample Size : 26300 Average Latency in nano sec: 291071.913645
+I [client.hpp:51] 2023-08-03 02:49:33.074 | Sample Size : 26680 Average Latency in nano sec: 285552.218799
+I [client.hpp:51] 2023-08-03 02:49:33.077 | Sample Size : 26740 Average Latency in nano sec: 283415.626467
+I [client.hpp:51] 2023-08-03 02:49:34.064 | Sample Size : 16150 Average Latency in nano sec: 466289.720297
+I [client.hpp:51] 2023-08-03 02:49:34.065 | Sample Size : 26820 Average Latency in nano sec: 302455.021580
+I [client.hpp:51] 2023-08-03 02:49:34.065 | Sample Size : 16093 Average Latency in nano sec: 467403.953487
+I [client.hpp:51] 2023-08-03 02:49:34.068 | Sample Size : 26658 Average Latency in nano sec: 308737.897593
+I [client.hpp:51] 2023-08-03 02:49:34.068 | Sample Size : 20380 Average Latency in nano sec: 312958.057479
+I [client.hpp:51] 2023-08-03 02:49:34.068 | Sample Size : 21700 Average Latency in nano sec: 322165.204883
+I [client.hpp:51] 2023-08-03 02:49:34.068 | Sample Size : 26890 Average Latency in nano sec: 300087.598327
+I [client.hpp:51] 2023-08-03 02:49:34.068 | Sample Size : 26630 Average Latency in nano sec: 300400.406412
+I [client.hpp:51] 2023-08-03 02:49:34.069 | Sample Size : 26800 Average Latency in nano sec: 303020.815591
+I [client.hpp:51] 2023-08-03 02:49:34.071 | Sample Size : 26558 Average Latency in nano sec: 302783.502371
+I [client.hpp:51] 2023-08-03 02:49:35.066 | Sample Size : 19650 Average Latency in nano sec: 369411.218955
+I [client.hpp:51] 2023-08-03 02:49:35.067 | Sample Size : 26575 Average Latency in nano sec: 287122.865488
+I [client.hpp:51] 2023-08-03 02:49:35.067 | Sample Size : 26765 Average Latency in nano sec: 286390.025404
+I [client.hpp:51] 2023-08-03 02:49:35.068 | Sample Size : 23350 Average Latency in nano sec: 273188.009461
+I [client.hpp:51] 2023-08-03 02:49:35.068 | Sample Size : 26580 Average Latency in nano sec: 289894.542196
+I [client.hpp:51] 2023-08-03 02:49:35.068 | Sample Size : 26546 Average Latency in nano sec: 289058.431692
+I [client.hpp:51] 2023-08-03 02:49:35.069 | Sample Size : 19650 Average Latency in nano sec: 371737.994151
+I [client.hpp:51] 2023-08-03 02:49:35.069 | Sample Size : 26670 Average Latency in nano sec: 287849.170390
+I [client.hpp:51] 2023-08-03 02:49:35.071 | Sample Size : 26017 Average Latency in nano sec: 284907.392823
+I [client.hpp:51] 2023-08-03 02:49:35.072 | Sample Size : 26893 Average Latency in nano sec: 284624.999963
+I [client.hpp:51] 2023-08-03 02:49:36.062 | Sample Size : 18588 Average Latency in nano sec: 462316.808313
+I [client.hpp:51] 2023-08-03 02:49:36.064 | Sample Size : 16763 Average Latency in nano sec: 445748.937578
+I [client.hpp:51] 2023-08-03 02:49:36.064 | Sample Size : 16480 Average Latency in nano sec: 452564.477441
+I [client.hpp:51] 2023-08-03 02:49:36.065 | Sample Size : 21138 Average Latency in nano sec: 294068.567477
+I [client.hpp:51] 2023-08-03 02:49:36.066 | Sample Size : 27413 Average Latency in nano sec: 295139.244657
+I [client.hpp:51] 2023-08-03 02:49:36.066 | Sample Size : 27706 Average Latency in nano sec: 290638.960160
+I [client.hpp:51] 2023-08-03 02:49:36.067 | Sample Size : 27699 Average Latency in nano sec: 289741.536107
+I [client.hpp:51] 2023-08-03 02:49:36.068 | Sample Size : 27430 Average Latency in nano sec: 292209.692826
+I [client.hpp:51] 2023-08-03 02:49:36.068 | Sample Size : 27145 Average Latency in nano sec: 294865.076422
+I [client.hpp:51] 2023-08-03 02:49:36.069 | Sample Size : 27760 Average Latency in nano sec: 290642.646292
+I [client.hpp:51] 2023-08-03 02:49:37.065 | Sample Size : 21500 Average Latency in nano sec: 363082.813087
+I [client.hpp:51] 2023-08-03 02:49:37.067 | Sample Size : 19970 Average Latency in nano sec: 347959.944795
+I [client.hpp:51] 2023-08-03 02:49:37.067 | Sample Size : 22520 Average Latency in nano sec: 272639.463858
+I [client.hpp:51] 2023-08-03 02:49:37.068 | Sample Size : 27750 Average Latency in nano sec: 265337.450494
+I [client.hpp:51] 2023-08-03 02:49:37.068 | Sample Size : 27622 Average Latency in nano sec: 268367.421550
+I [client.hpp:51] 2023-08-03 02:49:37.069 | Sample Size : 20240 Average Latency in nano sec: 346395.176767
+I [client.hpp:51] 2023-08-03 02:49:37.069 | Sample Size : 27806 Average Latency in nano sec: 264251.132269
+I [client.hpp:51] 2023-08-03 02:49:37.069 | Sample Size : 27510 Average Latency in nano sec: 268076.586771
+I [client.hpp:51] 2023-08-03 02:49:37.070 | Sample Size : 27530 Average Latency in nano sec: 268839.847531
+I [client.hpp:51] 2023-08-03 02:49:37.070 | Sample Size : 27610 Average Latency in nano sec: 267403.768465
+I [client.hpp:51] 2023-08-03 02:49:38.066 | Sample Size : 17940 Average Latency in nano sec: 483184.897883
+I [client.hpp:51] 2023-08-03 02:49:38.069 | Sample Size : 16420 Average Latency in nano sec: 454575.214181
+I [client.hpp:51] 2023-08-03 02:49:38.070 | Sample Size : 27350 Average Latency in nano sec: 293309.314035
+I [client.hpp:51] 2023-08-03 02:49:38.071 | Sample Size : 27150 Average Latency in nano sec: 294171.944907
+I [client.hpp:51] 2023-08-03 02:49:38.072 | Sample Size : 27140 Average Latency in nano sec: 296284.165316
+I [client.hpp:51] 2023-08-03 02:49:38.073 | Sample Size : 27180 Average Latency in nano sec: 294915.212431
+I [client.hpp:51] 2023-08-03 02:49:38.077 | Sample Size : 27290 Average Latency in nano sec: 293386.066777
+I [client.hpp:51] 2023-08-03 02:49:38.078 | Sample Size : 27130 Average Latency in nano sec: 296536.330287
+I [client.hpp:51] 2023-08-03 02:49:38.083 | Sample Size : 16360 Average Latency in nano sec: 454457.498656
+I [client.hpp:51] 2023-08-03 02:49:38.086 | Sample Size : 20220 Average Latency in nano sec: 316930.914731
+I [client.hpp:51] 2023-08-03 02:49:39.063 | Sample Size : 18420 Average Latency in nano sec: 469298.196419
+I [client.hpp:51] 2023-08-03 02:49:39.065 | Sample Size : 16650 Average Latency in nano sec: 440983.300300
+I [client.hpp:51] 2023-08-03 02:49:39.066 | Sample Size : 20250 Average Latency in nano sec: 313191.296594
+I [client.hpp:51] 2023-08-03 02:49:39.066 | Sample Size : 17970 Average Latency in nano sec: 475996.974305
+I [client.hpp:51] 2023-08-03 02:49:39.067 | Sample Size : 27880 Average Latency in nano sec: 283785.748584
+I [client.hpp:51] 2023-08-03 02:49:39.068 | Sample Size : 27810 Average Latency in nano sec: 284078.522070
+I [client.hpp:51] 2023-08-03 02:49:39.068 | Sample Size : 21259 Average Latency in nano sec: 305523.095914
+I [client.hpp:51] 2023-08-03 02:49:39.069 | Sample Size : 28100 Average Latency in nano sec: 281129.778228
+I [client.hpp:51] 2023-08-03 02:49:39.069 | Sample Size : 27780 Average Latency in nano sec: 284070.649514
+I [client.hpp:51] 2023-08-03 02:49:39.069 | Sample Size : 27508 Average Latency in nano sec: 285247.996075
+I [client.hpp:51] 2023-08-03 02:49:40.067 | Sample Size : 26790 Average Latency in nano sec: 293059.754328
+I [client.hpp:51] 2023-08-03 02:49:40.067 | Sample Size : 26330 Average Latency in nano sec: 297553.051405
+I [client.hpp:51] 2023-08-03 02:49:40.067 | Sample Size : 26190 Average Latency in nano sec: 298545.745153
+I [client.hpp:51] 2023-08-03 02:49:40.068 | Sample Size : 18820 Average Latency in nano sec: 393639.937122
+I [client.hpp:51] 2023-08-03 02:49:40.069 | Sample Size : 26140 Average Latency in nano sec: 299847.648642
+I [client.hpp:51] 2023-08-03 02:49:40.069 | Sample Size : 19630 Average Latency in nano sec: 413297.259216
+I [client.hpp:51] 2023-08-03 02:49:40.069 | Sample Size : 26070 Average Latency in nano sec: 300946.836120
+I [client.hpp:51] 2023-08-03 02:49:40.069 | Sample Size : 24822 Average Latency in nano sec: 299773.086864
+I [client.hpp:51] 2023-08-03 02:49:40.070 | Sample Size : 23930 Average Latency in nano sec: 275385.523254
+I [client.hpp:51] 2023-08-03 02:49:40.071 | Sample Size : 26202 Average Latency in nano sec: 300417.640589
+I [client.hpp:51] 2023-08-03 02:49:41.065 | Sample Size : 15770 Average Latency in nano sec: 486413.487262
+I [client.hpp:51] 2023-08-03 02:49:41.066 | Sample Size : 15690 Average Latency in nano sec: 488816.451783
+I [client.hpp:51] 2023-08-03 02:49:41.067 | Sample Size : 23640 Average Latency in nano sec: 350395.452727
+I [client.hpp:51] 2023-08-03 02:49:41.067 | Sample Size : 25530 Average Latency in nano sec: 319402.480619
+I [client.hpp:51] 2023-08-03 02:49:41.068 | Sample Size : 25630 Average Latency in nano sec: 319361.519618
+I [client.hpp:51] 2023-08-03 02:49:41.068 | Sample Size : 25520 Average Latency in nano sec: 321412.246435
+I [client.hpp:51] 2023-08-03 02:49:41.069 | Sample Size : 25800 Average Latency in nano sec: 317399.226036
+I [client.hpp:51] 2023-08-03 02:49:41.069 | Sample Size : 25750 Average Latency in nano sec: 317243.437966
+I [client.hpp:51] 2023-08-03 02:49:41.071 | Sample Size : 25830 Average Latency in nano sec: 317146.543576
+I [client.hpp:51] 2023-08-03 02:49:41.071 | Sample Size : 25490 Average Latency in nano sec: 318294.015766
+I [client.hpp:51] 2023-08-03 02:49:42.065 | Sample Size : 19210 Average Latency in nano sec: 429408.260406
+I [client.hpp:51] 2023-08-03 02:49:42.067 | Sample Size : 18310 Average Latency in nano sec: 409750.054749
+I [client.hpp:51] 2023-08-03 02:49:42.068 | Sample Size : 18330 Average Latency in nano sec: 414214.965104
+I [client.hpp:51] 2023-08-03 02:49:42.069 | Sample Size : 27510 Average Latency in nano sec: 285327.258321
+I [client.hpp:51] 2023-08-03 02:49:42.069 | Sample Size : 27510 Average Latency in nano sec: 284218.749600
+I [client.hpp:51] 2023-08-03 02:49:42.069 | Sample Size : 27460 Average Latency in nano sec: 287823.073571
+I [client.hpp:51] 2023-08-03 02:49:42.069 | Sample Size : 24960 Average Latency in nano sec: 323266.606448
+I [client.hpp:51] 2023-08-03 02:49:42.070 | Sample Size : 23100 Average Latency in nano sec: 353496.444613
+I [client.hpp:51] 2023-08-03 02:49:42.070 | Sample Size : 27640 Average Latency in nano sec: 284482.653671
+I [client.hpp:51] 2023-08-03 02:49:42.070 | Sample Size : 27520 Average Latency in nano sec: 286756.438685
+I [client.hpp:51] 2023-08-03 02:49:43.065 | Sample Size : 18370 Average Latency in nano sec: 472915.669097
+I [client.hpp:51] 2023-08-03 02:49:43.066 | Sample Size : 16760 Average Latency in nano sec: 448417.731485
+I [client.hpp:51] 2023-08-03 02:49:43.066 | Sample Size : 16990 Average Latency in nano sec: 443705.467941
+I [client.hpp:51] 2023-08-03 02:49:43.066 | Sample Size : 18330 Average Latency in nano sec: 473856.900981
+I [client.hpp:51] 2023-08-03 02:49:43.068 | Sample Size : 24690 Average Latency in nano sec: 282905.738178
+I [client.hpp:51] 2023-08-03 02:49:43.068 | Sample Size : 18060 Average Latency in nano sec: 481882.212894
+I [client.hpp:51] 2023-08-03 02:49:43.070 | Sample Size : 29405 Average Latency in nano sec: 256785.990617
+I [client.hpp:51] 2023-08-03 02:49:43.070 | Sample Size : 29780 Average Latency in nano sec: 260553.111380
+I [client.hpp:51] 2023-08-03 02:49:43.070 | Sample Size : 29402 Average Latency in nano sec: 264209.898851
+I [client.hpp:51] 2023-08-03 02:49:43.070 | Sample Size : 29469 Average Latency in nano sec: 260998.364565
+I [client.hpp:51] 2023-08-03 02:49:44.065 | Sample Size : 18670 Average Latency in nano sec: 471072.773983
+I [client.hpp:51] 2023-08-03 02:49:44.066 | Sample Size : 18580 Average Latency in nano sec: 472262.211834
+I [client.hpp:51] 2023-08-03 02:49:44.066 | Sample Size : 16570 Average Latency in nano sec: 452691.154765
+I [client.hpp:51] 2023-08-03 02:49:44.066 | Sample Size : 16800 Average Latency in nano sec: 439554.400595
+I [client.hpp:51] 2023-08-03 02:49:44.067 | Sample Size : 18530 Average Latency in nano sec: 472137.518393
+I [client.hpp:51] 2023-08-03 02:49:44.069 | Sample Size : 21170 Average Latency in nano sec: 307033.614873
+I [client.hpp:51] 2023-08-03 02:49:44.070 | Sample Size : 30500 Average Latency in nano sec: 248699.904540
+I [client.hpp:51] 2023-08-03 02:49:44.070 | Sample Size : 30942 Average Latency in nano sec: 247855.651137
+I [client.hpp:51] 2023-08-03 02:49:44.071 | Sample Size : 30750 Average Latency in nano sec: 248740.505642
+I [client.hpp:51] 2023-08-03 02:49:44.071 | Sample Size : 31100 Average Latency in nano sec: 246345.443519
+I [client.hpp:51] 2023-08-03 02:49:45.066 | Sample Size : 18690 Average Latency in nano sec: 417336.495668
+I [client.hpp:51] 2023-08-03 02:49:45.066 | Sample Size : 18040 Average Latency in nano sec: 417039.315402
+I [client.hpp:51] 2023-08-03 02:49:45.067 | Sample Size : 19890 Average Latency in nano sec: 428546.314020
+I [client.hpp:51] 2023-08-03 02:49:45.068 | Sample Size : 19790 Average Latency in nano sec: 431871.337424
+I [client.hpp:51] 2023-08-03 02:49:45.069 | Sample Size : 17730 Average Latency in nano sec: 410048.276212
+I [client.hpp:51] 2023-08-03 02:49:45.069 | Sample Size : 30475 Average Latency in nano sec: 247787.992357
+I [client.hpp:51] 2023-08-03 02:49:45.070 | Sample Size : 22250 Average Latency in nano sec: 290121.252516
+I [client.hpp:51] 2023-08-03 02:49:45.070 | Sample Size : 30623 Average Latency in nano sec: 247126.095094
+I [client.hpp:51] 2023-08-03 02:49:45.071 | Sample Size : 30470 Average Latency in nano sec: 245506.453806
+I [client.hpp:51] 2023-08-03 02:49:45.072 | Sample Size : 30210 Average Latency in nano sec: 250358.589450
+I [client.hpp:51] 2023-08-03 02:49:46.065 | Sample Size : 19030 Average Latency in nano sec: 459729.445431
+I [client.hpp:51] 2023-08-03 02:49:46.067 | Sample Size : 16440 Average Latency in nano sec: 445620.099331
+I [client.hpp:51] 2023-08-03 02:49:46.067 | Sample Size : 16410 Average Latency in nano sec: 446434.870037
+I [client.hpp:51] 2023-08-03 02:49:46.068 | Sample Size : 16670 Average Latency in nano sec: 445243.910911
+I [client.hpp:51] 2023-08-03 02:49:46.069 | Sample Size : 20760 Average Latency in nano sec: 318734.319451
+I [client.hpp:51] 2023-08-03 02:49:46.069 | Sample Size : 18060 Average Latency in nano sec: 452492.552739
+I [client.hpp:51] 2023-08-03 02:49:46.070 | Sample Size : 31882 Average Latency in nano sec: 238281.109118
+I [client.hpp:51] 2023-08-03 02:49:46.071 | Sample Size : 31360 Average Latency in nano sec: 240183.613293
+I [client.hpp:51] 2023-08-03 02:49:46.071 | Sample Size : 31410 Average Latency in nano sec: 244295.116020
+I [client.hpp:51] 2023-08-03 02:49:46.072 | Sample Size : 31810 Average Latency in nano sec: 242246.737577
+I [client.hpp:51] 2023-08-03 02:49:47.066 | Sample Size : 22460 Average Latency in nano sec: 372433.633600
+I [client.hpp:51] 2023-08-03 02:49:47.067 | Sample Size : 17280 Average Latency in nano sec: 415541.524349
+I [client.hpp:51] 2023-08-03 02:49:47.067 | Sample Size : 17168 Average Latency in nano sec: 417036.634765
+I [client.hpp:51] 2023-08-03 02:49:47.068 | Sample Size : 17570 Average Latency in nano sec: 408357.642093
+I [client.hpp:51] 2023-08-03 02:49:47.068 | Sample Size : 17330 Average Latency in nano sec: 419214.011246
+I [client.hpp:51] 2023-08-03 02:49:47.069 | Sample Size : 20770 Average Latency in nano sec: 319857.991338
+I [client.hpp:51] 2023-08-03 02:49:47.070 | Sample Size : 31310 Average Latency in nano sec: 240168.405204
+I [client.hpp:51] 2023-08-03 02:49:47.070 | Sample Size : 30570 Average Latency in nano sec: 244798.826815
+I [client.hpp:51] 2023-08-03 02:49:47.071 | Sample Size : 31206 Average Latency in nano sec: 241500.853784
+I [client.hpp:51] 2023-08-03 02:49:47.071 | Sample Size : 30800 Average Latency in nano sec: 243064.474651
+I [client.hpp:51] 2023-08-03 02:49:48.067 | Sample Size : 16220 Average Latency in nano sec: 452787.286340
+I [client.hpp:51] 2023-08-03 02:49:48.067 | Sample Size : 19560 Average Latency in nano sec: 344229.734696
+I [client.hpp:51] 2023-08-03 02:49:48.067 | Sample Size : 16350 Average Latency in nano sec: 449039.607029
+I [client.hpp:51] 2023-08-03 02:49:48.067 | Sample Size : 16250 Average Latency in nano sec: 453232.864699
+I [client.hpp:51] 2023-08-03 02:49:48.068 | Sample Size : 16220 Average Latency in nano sec: 455053.618669
+I [client.hpp:51] 2023-08-03 02:49:48.070 | Sample Size : 29730 Average Latency in nano sec: 264608.336550
+I [client.hpp:51] 2023-08-03 02:49:48.070 | Sample Size : 29730 Average Latency in nano sec: 264922.220208
+I [client.hpp:51] 2023-08-03 02:49:48.071 | Sample Size : 29840 Average Latency in nano sec: 263764.388643
+I [client.hpp:51] 2023-08-03 02:49:48.071 | Sample Size : 29535 Average Latency in nano sec: 266565.409206
+I [client.hpp:51] 2023-08-03 02:49:48.073 | Sample Size : 29550 Average Latency in nano sec: 265011.760675
+I [client.hpp:51] 2023-08-03 02:49:49.066 | Sample Size : 17558 Average Latency in nano sec: 412029.997951
+I [client.hpp:51] 2023-08-03 02:49:49.066 | Sample Size : 17710 Average Latency in nano sec: 408790.774492
+I [client.hpp:51] 2023-08-03 02:49:49.067 | Sample Size : 17510 Average Latency in nano sec: 412829.343836
+I [client.hpp:51] 2023-08-03 02:49:49.068 | Sample Size : 17860 Average Latency in nano sec: 416427.129043
+I [client.hpp:51] 2023-08-03 02:49:49.068 | Sample Size : 20710 Average Latency in nano sec: 319314.949903
+I [client.hpp:51] 2023-08-03 02:49:49.069 | Sample Size : 29720 Average Latency in nano sec: 258611.195022
+I [client.hpp:51] 2023-08-03 02:49:49.069 | Sample Size : 29700 Average Latency in nano sec: 257874.450160
+I [client.hpp:51] 2023-08-03 02:49:49.070 | Sample Size : 29590 Average Latency in nano sec: 257789.156453
+I [client.hpp:51] 2023-08-03 02:49:49.071 | Sample Size : 29940 Average Latency in nano sec: 257420.670851
+I [client.hpp:51] 2023-08-03 02:49:49.072 | Sample Size : 29840 Average Latency in nano sec: 256407.648643
+I [client.hpp:51] 2023-08-03 02:49:50.068 | Sample Size : 22250 Average Latency in nano sec: 315080.319117
+I [client.hpp:51] 2023-08-03 02:49:50.069 | Sample Size : 29070 Average Latency in nano sec: 250060.635763
+I [client.hpp:51] 2023-08-03 02:49:50.069 | Sample Size : 22130 Average Latency in nano sec: 315967.312331
+I [client.hpp:51] 2023-08-03 02:49:50.069 | Sample Size : 22040 Average Latency in nano sec: 321062.935737
+I [client.hpp:51] 2023-08-03 02:49:50.069 | Sample Size : 29230 Average Latency in nano sec: 248736.497948
+I [client.hpp:51] 2023-08-03 02:49:50.070 | Sample Size : 23750 Average Latency in nano sec: 280233.339310
+I [client.hpp:51] 2023-08-03 02:49:50.070 | Sample Size : 29420 Average Latency in nano sec: 245428.270710
+I [client.hpp:51] 2023-08-03 02:49:50.071 | Sample Size : 22370 Average Latency in nano sec: 314155.368186
+I [client.hpp:51] 2023-08-03 02:49:50.071 | Sample Size : 28940 Average Latency in nano sec: 253079.537858
+I [client.hpp:51] 2023-08-03 02:49:50.071 | Sample Size : 29170 Average Latency in nano sec: 249186.990130
+I [client.hpp:51] 2023-08-03 02:49:51.067 | Sample Size : 16560 Average Latency in nano sec: 438950.302293
+I [client.hpp:51] 2023-08-03 02:49:51.068 | Sample Size : 16960 Average Latency in nano sec: 440796.627048
+I [client.hpp:51] 2023-08-03 02:49:51.068 | Sample Size : 20830 Average Latency in nano sec: 315204.876296
+I [client.hpp:51] 2023-08-03 02:49:51.068 | Sample Size : 16670 Average Latency in nano sec: 452032.662770
+I [client.hpp:51] 2023-08-03 02:49:51.069 | Sample Size : 19410 Average Latency in nano sec: 435569.458342
+I [client.hpp:51] 2023-08-03 02:49:51.071 | Sample Size : 19490 Average Latency in nano sec: 344269.689538
+I [client.hpp:51] 2023-08-03 02:49:51.071 | Sample Size : 30390 Average Latency in nano sec: 250919.368914
+I [client.hpp:51] 2023-08-03 02:49:51.072 | Sample Size : 30359 Average Latency in nano sec: 252400.800817
+I [client.hpp:51] 2023-08-03 02:49:51.073 | Sample Size : 30480 Average Latency in nano sec: 247961.604428
+I [client.hpp:51] 2023-08-03 02:49:51.074 | Sample Size : 30100 Average Latency in nano sec: 251408.611026
+I [client.hpp:51] 2023-08-03 02:49:52.068 | Sample Size : 21800 Average Latency in nano sec: 307936.800275
+I [client.hpp:51] 2023-08-03 02:49:52.069 | Sample Size : 22520 Average Latency in nano sec: 290213.288771
+I [client.hpp:51] 2023-08-03 02:49:52.070 | Sample Size : 17810 Average Latency in nano sec: 421014.150842
+I [client.hpp:51] 2023-08-03 02:49:52.070 | Sample Size : 18020 Average Latency in nano sec: 402788.686245
+I [client.hpp:51] 2023-08-03 02:49:52.070 | Sample Size : 18090 Average Latency in nano sec: 407084.746298
+I [client.hpp:51] 2023-08-03 02:49:52.070 | Sample Size : 29419 Average Latency in nano sec: 257350.056883
+I [client.hpp:51] 2023-08-03 02:49:52.070 | Sample Size : 19510 Average Latency in nano sec: 435835.357172
+I [client.hpp:51] 2023-08-03 02:49:52.071 | Sample Size : 28580 Average Latency in nano sec: 262808.017873
+I [client.hpp:51] 2023-08-03 02:49:52.071 | Sample Size : 29469 Average Latency in nano sec: 259071.695826
+I [client.hpp:51] 2023-08-03 02:49:52.072 | Sample Size : 29679 Average Latency in nano sec: 255920.923339
+I [client.hpp:51] 2023-08-03 02:49:53.067 | Sample Size : 17290 Average Latency in nano sec: 421227.501098
+I [client.hpp:51] 2023-08-03 02:49:53.068 | Sample Size : 20000 Average Latency in nano sec: 327486.407096
+I [client.hpp:51] 2023-08-03 02:49:53.068 | Sample Size : 18190 Average Latency in nano sec: 480276.299945
+I [client.hpp:51] 2023-08-03 02:49:53.069 | Sample Size : 16650 Average Latency in nano sec: 449138.437035
+I [client.hpp:51] 2023-08-03 02:49:53.069 | Sample Size : 16460 Average Latency in nano sec: 448848.365270
+I [client.hpp:51] 2023-08-03 02:49:53.070 | Sample Size : 29350 Average Latency in nano sec: 268487.752036
+I [client.hpp:51] 2023-08-03 02:49:53.070 | Sample Size : 29620 Average Latency in nano sec: 265853.338814
+I [client.hpp:51] 2023-08-03 02:49:53.071 | Sample Size : 29748 Average Latency in nano sec: 263169.066100
+I [client.hpp:51] 2023-08-03 02:49:53.071 | Sample Size : 29950 Average Latency in nano sec: 261468.836867
+I [client.hpp:51] 2023-08-03 02:49:53.072 | Sample Size : 28675 Average Latency in nano sec: 270131.021719
+I [client.hpp:51] 2023-08-03 02:49:54.068 | Sample Size : 19670 Average Latency in nano sec: 370319.048882
+I [client.hpp:51] 2023-08-03 02:49:54.070 | Sample Size : 20508 Average Latency in nano sec: 382046.544400
+I [client.hpp:51] 2023-08-03 02:49:54.071 | Sample Size : 19570 Average Latency in nano sec: 369643.274974
+I [client.hpp:51] 2023-08-03 02:49:54.073 | Sample Size : 28360 Average Latency in nano sec: 265886.277067
+I [client.hpp:51] 2023-08-03 02:49:54.073 | Sample Size : 19340 Average Latency in nano sec: 372486.737829
+I [client.hpp:51] 2023-08-03 02:49:54.074 | Sample Size : 28610 Average Latency in nano sec: 264401.965199
+I [client.hpp:51] 2023-08-03 02:49:54.074 | Sample Size : 28460 Average Latency in nano sec: 264971.671373
+I [client.hpp:51] 2023-08-03 02:49:54.074 | Sample Size : 26230 Average Latency in nano sec: 275548.778277
+I [client.hpp:51] 2023-08-03 02:49:54.079 | Sample Size : 28498 Average Latency in nano sec: 262625.122211
+I [client.hpp:51] 2023-08-03 02:49:54.080 | Sample Size : 27120 Average Latency in nano sec: 268295.460376
+I [client.hpp:51] 2023-08-03 02:49:55.067 | Sample Size : 17470 Average Latency in nano sec: 434416.285829
+I [client.hpp:51] 2023-08-03 02:49:55.068 | Sample Size : 17510 Average Latency in nano sec: 424295.789726
+I [client.hpp:51] 2023-08-03 02:49:55.069 | Sample Size : 28280 Average Latency in nano sec: 276542.837469
+I [client.hpp:51] 2023-08-03 02:49:55.069 | Sample Size : 17400 Average Latency in nano sec: 422335.154509
+I [client.hpp:51] 2023-08-03 02:49:55.070 | Sample Size : 17360 Average Latency in nano sec: 424815.019574
+I [client.hpp:51] 2023-08-03 02:49:55.070 | Sample Size : 28090 Average Latency in nano sec: 278161.834662
+I [client.hpp:51] 2023-08-03 02:49:55.071 | Sample Size : 27970 Average Latency in nano sec: 280009.199392
+I [client.hpp:51] 2023-08-03 02:49:55.071 | Sample Size : 28280 Average Latency in nano sec: 275808.222022
+I [client.hpp:51] 2023-08-03 02:49:55.071 | Sample Size : 28364 Average Latency in nano sec: 277478.641080
+I [client.hpp:51] 2023-08-03 02:49:55.072 | Sample Size : 28080 Average Latency in nano sec: 276672.626131
+I [client.hpp:51] 2023-08-03 02:49:56.067 | Sample Size : 16023 Average Latency in nano sec: 470432.767043
+I [client.hpp:51] 2023-08-03 02:49:56.067 | Sample Size : 16030 Average Latency in nano sec: 471114.498005
+I [client.hpp:51] 2023-08-03 02:49:56.069 | Sample Size : 15900 Average Latency in nano sec: 470301.692269
+I [client.hpp:51] 2023-08-03 02:49:56.069 | Sample Size : 15990 Average Latency in nano sec: 468442.324312
+I [client.hpp:51] 2023-08-03 02:49:56.069 | Sample Size : 28558 Average Latency in nano sec: 280314.091046
+I [client.hpp:51] 2023-08-03 02:49:56.070 | Sample Size : 28600 Average Latency in nano sec: 281549.882698
+I [client.hpp:51] 2023-08-03 02:49:56.070 | Sample Size : 28779 Average Latency in nano sec: 277329.836847
+I [client.hpp:51] 2023-08-03 02:49:56.071 | Sample Size : 28420 Average Latency in nano sec: 280466.471896
+I [client.hpp:51] 2023-08-03 02:49:56.071 | Sample Size : 28970 Average Latency in nano sec: 276002.338073
+I [client.hpp:51] 2023-08-03 02:49:56.072 | Sample Size : 28485 Average Latency in nano sec: 282129.184383
+I [client.hpp:51] 2023-08-03 02:49:57.067 | Sample Size : 18170 Average Latency in nano sec: 402471.890631
+I [client.hpp:51] 2023-08-03 02:49:57.068 | Sample Size : 17910 Average Latency in nano sec: 407607.168527
+I [client.hpp:51] 2023-08-03 02:49:57.070 | Sample Size : 18030 Average Latency in nano sec: 406040.434590
+I [client.hpp:51] 2023-08-03 02:49:57.070 | Sample Size : 28284 Average Latency in nano sec: 275602.520697
+I [client.hpp:51] 2023-08-03 02:49:57.070 | Sample Size : 18160 Average Latency in nano sec: 406084.296753
+I [client.hpp:51] 2023-08-03 02:49:57.070 | Sample Size : 28280 Average Latency in nano sec: 275515.297150
+I [client.hpp:51] 2023-08-03 02:49:57.070 | Sample Size : 28360 Average Latency in nano sec: 274638.051639
+I [client.hpp:51] 2023-08-03 02:49:57.071 | Sample Size : 28280 Average Latency in nano sec: 275215.892047
+I [client.hpp:51] 2023-08-03 02:49:57.071 | Sample Size : 28305 Average Latency in nano sec: 274365.986116
+I [client.hpp:51] 2023-08-03 02:49:57.072 | Sample Size : 28130 Average Latency in nano sec: 277588.420327
+I [client.hpp:51] 2023-08-03 02:49:58.067 | Sample Size : 15790 Average Latency in nano sec: 474710.386013
+I [client.hpp:51] 2023-08-03 02:49:58.067 | Sample Size : 15760 Average Latency in nano sec: 474672.214521
+I [client.hpp:51] 2023-08-03 02:49:58.068 | Sample Size : 15760 Average Latency in nano sec: 475792.073431
+I [client.hpp:51] 2023-08-03 02:49:58.068 | Sample Size : 15730 Average Latency in nano sec: 476787.928145
+I [client.hpp:51] 2023-08-03 02:49:58.070 | Sample Size : 28890 Average Latency in nano sec: 280063.546920
+I [client.hpp:51] 2023-08-03 02:49:58.070 | Sample Size : 28525 Average Latency in nano sec: 282097.343638
+I [client.hpp:51] 2023-08-03 02:49:58.071 | Sample Size : 28520 Average Latency in nano sec: 281250.061023
+I [client.hpp:51] 2023-08-03 02:49:58.071 | Sample Size : 28670 Average Latency in nano sec: 280308.771865
+I [client.hpp:51] 2023-08-03 02:49:58.072 | Sample Size : 28920 Average Latency in nano sec: 277475.067957
+I [client.hpp:51] 2023-08-03 02:49:58.072 | Sample Size : 28639 Average Latency in nano sec: 282569.031554

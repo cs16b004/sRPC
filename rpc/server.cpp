@@ -262,7 +262,7 @@ void TCPServer::stop(){
     }
     verify(sconns_ctr_.peek_next() == 0);
     #ifdef RPC_STATISTICS
-        pollmgr_->remove(rJob);
+       // pollmgr_->remove(rJob);
     #endif
     threadpool_->release();
     pollmgr_->release();

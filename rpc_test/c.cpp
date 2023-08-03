@@ -16,6 +16,7 @@ CounterProxy **get_proxy() {
         pm[i] = new rrr::PollMgr();
         #ifdef DPDK
         rrr::UDPClient *client = new rrr::UDPClient(pm[i]);
+        printf("New client called \n");
         #else
         rrr::TCPClient* client = new rrr::TCPClient(pm[i]);
         #endif
@@ -82,10 +83,11 @@ void *do_add_short(void *) {
 
 #endif
 int main(int argc, char **argv) {
-
+    #ifdef DPDK
      char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_greenport.yml","-fconfig_files/network_greenport.yml"};
      rrr::Config::create_config(5, argv2);
     rrr::DpdkTransport::create_transport(rrr::Config::get_config());
+    #endif
 
     if (argc < 5)
         return -1;
@@ -124,6 +126,7 @@ int main(int argc, char **argv) {
         pthread_create(ph + i, NULL, func, NULL);
     
     i=0;
+    printf("here\n");
     while(i <atoi(argv[5+ns])){
         usleep(1000);
         i++;

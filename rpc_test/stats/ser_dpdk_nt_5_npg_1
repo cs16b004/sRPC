@@ -1,0 +1,389 @@
+I [config.cpp:56] 2023-08-02 19:43:55.687 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:98] 2023-08-02 19:43:55.692 | Loading CPU Config
+I [config.cpp:56] 2023-08-02 19:43:55.692 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:56] 2023-08-02 19:43:55.695 | Loading configuration from : config_files/host_catskill.yml
+I [config.cpp:56] 2023-08-02 19:43:55.698 | Loading configuration from : config_files/network_catskill.yml
+I [transport.cpp:561] 2023-08-02 19:43:55.701 | Setting up netowkr info....
+I [transport.cpp:579] 2023-08-02 19:43:55.701 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:579] 2023-08-02 19:43:55.701 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:579] 2023-08-02 19:43:55.701 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:579] 2023-08-02 19:43:55.701 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:566] 2023-08-02 19:43:55.701 | Configuring local address 4, 172.19.0.121
+I [transport.cpp:579] 2023-08-02 19:43:55.701 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:579] 2023-08-02 19:43:55.701 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:920] 2023-08-02 19:43:56.421 | Flow isolation enabled for port 0
+
+I [transport.cpp:990] 2023-08-02 19:43:56.465 | IP Address to be queued 172.19.0.121
+I [transport.cpp:1018] 2023-08-02 19:43:56.490 | Flow Rule Added for IP Address : 172.19.0.121
+I [transport.cpp:539] 2023-08-02 19:43:56.490 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:549] 2023-08-02 19:43:56.490 | Launching TX Thread
+I [transport.cpp:166] 2023-08-02 19:43:56.490 | Entering TX Loop at lcore 1
+I [transport.cpp:206] 2023-08-02 19:43:56.490 | Enter receive thread 0 on core 0 on port_id 0 on queue 0
+I [UDPServer.cpp:317] 2023-08-02 19:43:56.490 | Starting Server Loop
+I [UDPServer.cpp:332] 2023-08-02 19:44:03.586 | SM REQ to connect 172.19.0.122:9000
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [UDPServer.cpp:332] 2023-08-02 19:44:04.586 | SM REQ to connect 172.19.0.122:9001
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I 2023-08-02 19:44:04.586 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:04.586 | * RPC COUNT: id=0x2389aff9 count=1 cumulative=1
+I [transport.cpp:876] 2023-08-02 19:44:04.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:44:04.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:44:04.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:44:04.000 | Packets Received Total= 1371
+I 2023-08-02 19:44:05.086 | * RPC COUNT: id=0x2389aff9 count=1644 cumulative=1645
+I 2023-08-02 19:44:05.586 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:05.587 | * RPC COUNT: id=0x2389aff9 count=1641 cumulative=3286
+I [UDPServer.cpp:332] 2023-08-02 19:44:05.587 | SM REQ to connect 172.19.0.122:9003
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+------------------------------------------------------------
+
+
+
+
+time: 10.000024, count: 3932, rpc per sec: 393.199040
+n
+
+
+
+
+
+------------------------------------------------------------
+
+
+
+
+I 2023-08-02 19:44:06.087 | * RPC COUNT: id=0x2389aff9 count=14413 cumulative=17699
+I 2023-08-02 19:44:06.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:06.587 | * RPC COUNT: id=0x2389aff9 count=21870 cumulative=39569
+I [UDPServer.cpp:332] 2023-08-02 19:44:06.588 | SM REQ to connect 172.19.0.122:9002
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I 2023-08-02 19:44:07.087 | * RPC COUNT: id=0x2389aff9 count=30200 cumulative=69769
+I 2023-08-02 19:44:07.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:07.587 | * RPC COUNT: id=0x2389aff9 count=27003 cumulative=96772
+I [UDPServer.cpp:332] 2023-08-02 19:44:07.588 | SM REQ to connect 172.19.0.122:9004
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I 2023-08-02 19:44:08.087 | * RPC COUNT: id=0x2389aff9 count=36734 cumulative=133506
+I 2023-08-02 19:44:08.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:08.587 | * RPC COUNT: id=0x2389aff9 count=28190 cumulative=161696
+I 2023-08-02 19:44:09.087 | * RPC COUNT: id=0x2389aff9 count=46253 cumulative=207949
+I 2023-08-02 19:44:09.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:09.587 | * RPC COUNT: id=0x2389aff9 count=57903 cumulative=265852
+I 2023-08-02 19:44:10.087 | * RPC COUNT: id=0x2389aff9 count=54183 cumulative=320035
+I 2023-08-02 19:44:10.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:10.587 | * RPC COUNT: id=0x2389aff9 count=43836 cumulative=363871
+I 2023-08-02 19:44:11.087 | * RPC COUNT: id=0x2389aff9 count=47901 cumulative=411772
+I 2023-08-02 19:44:11.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:11.587 | * RPC COUNT: id=0x2389aff9 count=49888 cumulative=461660
+I 2023-08-02 19:44:12.087 | * RPC COUNT: id=0x2389aff9 count=47796 cumulative=509456
+I 2023-08-02 19:44:12.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:12.587 | * RPC COUNT: id=0x2389aff9 count=49231 cumulative=558687
+I 2023-08-02 19:44:13.087 | * RPC COUNT: id=0x2389aff9 count=48235 cumulative=606922
+I 2023-08-02 19:44:13.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:13.587 | * RPC COUNT: id=0x2389aff9 count=54873 cumulative=661795
+I 2023-08-02 19:44:14.087 | * RPC COUNT: id=0x2389aff9 count=55797 cumulative=717592
+I 2023-08-02 19:44:14.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:14.587 | * RPC COUNT: id=0x2389aff9 count=56793 cumulative=774385
+I [transport.cpp:876] 2023-08-02 19:44:14.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:44:14.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:44:14.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:44:14.000 | Packets Received Total= 819894
+I 2023-08-02 19:44:15.087 | * RPC COUNT: id=0x2389aff9 count=52131 cumulative=826516
+I 2023-08-02 19:44:15.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:15.587 | * RPC COUNT: id=0x2389aff9 count=45274 cumulative=871790
+------------------------------------------------------------
+
+
+
+
+time: 10.000046, count: 876918, rpc per sec: 87691.400706
+n
+
+
+
+
+
+------------------------------------------------------------
+
+
+
+
+I 2023-08-02 19:44:16.087 | * RPC COUNT: id=0x2389aff9 count=37987 cumulative=909777
+I 2023-08-02 19:44:16.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:16.587 | * RPC COUNT: id=0x2389aff9 count=36326 cumulative=946103
+I 2023-08-02 19:44:17.087 | * RPC COUNT: id=0x2389aff9 count=36237 cumulative=982340
+I 2023-08-02 19:44:17.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:17.587 | * RPC COUNT: id=0x2389aff9 count=37445 cumulative=1019785
+I 2023-08-02 19:44:18.087 | * RPC COUNT: id=0x2389aff9 count=38562 cumulative=1058347
+I 2023-08-02 19:44:18.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:18.587 | * RPC COUNT: id=0x2389aff9 count=40108 cumulative=1098455
+I 2023-08-02 19:44:19.087 | * RPC COUNT: id=0x2389aff9 count=38128 cumulative=1136583
+I 2023-08-02 19:44:19.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:19.587 | * RPC COUNT: id=0x2389aff9 count=33279 cumulative=1169862
+I 2023-08-02 19:44:20.087 | * RPC COUNT: id=0x2389aff9 count=38690 cumulative=1208552
+I 2023-08-02 19:44:20.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:20.587 | * RPC COUNT: id=0x2389aff9 count=41829 cumulative=1250381
+I 2023-08-02 19:44:21.087 | * RPC COUNT: id=0x2389aff9 count=29960 cumulative=1280341
+I 2023-08-02 19:44:21.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:21.587 | * RPC COUNT: id=0x2389aff9 count=30692 cumulative=1311033
+I 2023-08-02 19:44:22.087 | * RPC COUNT: id=0x2389aff9 count=29743 cumulative=1340776
+I 2023-08-02 19:44:22.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:22.587 | * RPC COUNT: id=0x2389aff9 count=30327 cumulative=1371103
+I 2023-08-02 19:44:23.087 | * RPC COUNT: id=0x2389aff9 count=29780 cumulative=1400883
+I 2023-08-02 19:44:23.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:23.587 | * RPC COUNT: id=0x2389aff9 count=30975 cumulative=1431858
+I 2023-08-02 19:44:24.087 | * RPC COUNT: id=0x2389aff9 count=29751 cumulative=1461609
+I 2023-08-02 19:44:24.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:24.587 | * RPC COUNT: id=0x2389aff9 count=30671 cumulative=1492280
+I [transport.cpp:876] 2023-08-02 19:44:24.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:44:24.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:44:24.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:44:24.000 | Packets Received Total= 1517646
+I 2023-08-02 19:44:25.087 | * RPC COUNT: id=0x2389aff9 count=29864 cumulative=1522144
+I 2023-08-02 19:44:25.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:25.587 | * RPC COUNT: id=0x2389aff9 count=30360 cumulative=1552504
+------------------------------------------------------------
+
+
+
+
+time: 10.000056, count: 678741, rpc per sec: 67873.718346
+n
+
+
+
+
+
+------------------------------------------------------------
+
+
+
+
+I 2023-08-02 19:44:26.087 | * RPC COUNT: id=0x2389aff9 count=30749 cumulative=1583253
+I 2023-08-02 19:44:26.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:26.587 | * RPC COUNT: id=0x2389aff9 count=31042 cumulative=1614295
+I 2023-08-02 19:44:27.087 | * RPC COUNT: id=0x2389aff9 count=29825 cumulative=1644120
+I 2023-08-02 19:44:27.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:27.587 | * RPC COUNT: id=0x2389aff9 count=30528 cumulative=1674648
+I 2023-08-02 19:44:28.087 | * RPC COUNT: id=0x2389aff9 count=29947 cumulative=1704595
+I 2023-08-02 19:44:28.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:28.587 | * RPC COUNT: id=0x2389aff9 count=31238 cumulative=1735833
+I 2023-08-02 19:44:29.087 | * RPC COUNT: id=0x2389aff9 count=30565 cumulative=1766398
+I 2023-08-02 19:44:29.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:29.587 | * RPC COUNT: id=0x2389aff9 count=25408 cumulative=1791806
+I 2023-08-02 19:44:30.087 | * RPC COUNT: id=0x2389aff9 count=33398 cumulative=1825204
+I 2023-08-02 19:44:30.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:30.587 | * RPC COUNT: id=0x2389aff9 count=30529 cumulative=1855733
+I 2023-08-02 19:44:31.087 | * RPC COUNT: id=0x2389aff9 count=29955 cumulative=1885688
+I 2023-08-02 19:44:31.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:31.587 | * RPC COUNT: id=0x2389aff9 count=30535 cumulative=1916223
+I 2023-08-02 19:44:32.087 | * RPC COUNT: id=0x2389aff9 count=29829 cumulative=1946052
+I 2023-08-02 19:44:32.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:32.587 | * RPC COUNT: id=0x2389aff9 count=29888 cumulative=1975940
+I 2023-08-02 19:44:33.087 | * RPC COUNT: id=0x2389aff9 count=29656 cumulative=2005596
+I 2023-08-02 19:44:33.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:33.587 | * RPC COUNT: id=0x2389aff9 count=30748 cumulative=2036344
+I 2023-08-02 19:44:34.087 | * RPC COUNT: id=0x2389aff9 count=29824 cumulative=2066168
+I 2023-08-02 19:44:34.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:34.587 | * RPC COUNT: id=0x2389aff9 count=30624 cumulative=2096792
+I [transport.cpp:876] 2023-08-02 19:44:34.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:44:34.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:44:34.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:44:34.000 | Packets Received Total= 2122314
+I 2023-08-02 19:44:35.087 | * RPC COUNT: id=0x2389aff9 count=29940 cumulative=2126732
+I 2023-08-02 19:44:35.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:35.587 | * RPC COUNT: id=0x2389aff9 count=30860 cumulative=2157592
+------------------------------------------------------------
+
+
+
+
+time: 10.000041, count: 605024, rpc per sec: 60502.151651
+n
+
+
+
+
+
+------------------------------------------------------------
+
+
+
+
+I 2023-08-02 19:44:36.087 | * RPC COUNT: id=0x2389aff9 count=29706 cumulative=2187298
+I 2023-08-02 19:44:36.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:36.587 | * RPC COUNT: id=0x2389aff9 count=30340 cumulative=2217638
+I 2023-08-02 19:44:37.087 | * RPC COUNT: id=0x2389aff9 count=29490 cumulative=2247128
+I 2023-08-02 19:44:37.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:37.587 | * RPC COUNT: id=0x2389aff9 count=30929 cumulative=2278057
+I 2023-08-02 19:44:38.087 | * RPC COUNT: id=0x2389aff9 count=29470 cumulative=2307527
+I 2023-08-02 19:44:38.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:38.587 | * RPC COUNT: id=0x2389aff9 count=30513 cumulative=2338040
+I 2023-08-02 19:44:39.087 | * RPC COUNT: id=0x2389aff9 count=29880 cumulative=2367920
+I 2023-08-02 19:44:39.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:39.587 | * RPC COUNT: id=0x2389aff9 count=30569 cumulative=2398489
+I 2023-08-02 19:44:40.087 | * RPC COUNT: id=0x2389aff9 count=29592 cumulative=2428081
+I 2023-08-02 19:44:40.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:40.587 | * RPC COUNT: id=0x2389aff9 count=30136 cumulative=2458217
+I 2023-08-02 19:44:41.087 | * RPC COUNT: id=0x2389aff9 count=29723 cumulative=2487940
+I 2023-08-02 19:44:41.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:41.587 | * RPC COUNT: id=0x2389aff9 count=29988 cumulative=2517928
+I 2023-08-02 19:44:42.087 | * RPC COUNT: id=0x2389aff9 count=38808 cumulative=2556736
+I 2023-08-02 19:44:42.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:42.587 | * RPC COUNT: id=0x2389aff9 count=37667 cumulative=2594403
+I 2023-08-02 19:44:43.087 | * RPC COUNT: id=0x2389aff9 count=29592 cumulative=2623995
+I 2023-08-02 19:44:43.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:43.587 | * RPC COUNT: id=0x2389aff9 count=30641 cumulative=2654636
+I 2023-08-02 19:44:44.087 | * RPC COUNT: id=0x2389aff9 count=29416 cumulative=2684052
+I 2023-08-02 19:44:44.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:44.587 | * RPC COUNT: id=0x2389aff9 count=30682 cumulative=2714734
+I [transport.cpp:876] 2023-08-02 19:44:44.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:44:44.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:44:44.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:44:44.000 | Packets Received Total= 2740546
+I 2023-08-02 19:44:45.087 | * RPC COUNT: id=0x2389aff9 count=30348 cumulative=2745082
+I 2023-08-02 19:44:45.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:45.587 | * RPC COUNT: id=0x2389aff9 count=30672 cumulative=2775754
+------------------------------------------------------------
+
+
+
+
+time: 10.000038, count: 618013, rpc per sec: 61801.064717
+n
+
+
+
+
+
+------------------------------------------------------------
+
+
+
+
+I 2023-08-02 19:44:46.087 | * RPC COUNT: id=0x2389aff9 count=29732 cumulative=2805486
+I 2023-08-02 19:44:46.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:46.587 | * RPC COUNT: id=0x2389aff9 count=30302 cumulative=2835788
+I 2023-08-02 19:44:47.087 | * RPC COUNT: id=0x2389aff9 count=29767 cumulative=2865555
+I 2023-08-02 19:44:47.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:47.588 | * RPC COUNT: id=0x2389aff9 count=38533 cumulative=2904088
+I 2023-08-02 19:44:48.088 | * RPC COUNT: id=0x2389aff9 count=29647 cumulative=2933735
+I 2023-08-02 19:44:48.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:48.588 | * RPC COUNT: id=0x2389aff9 count=30568 cumulative=2964303
+I 2023-08-02 19:44:49.088 | * RPC COUNT: id=0x2389aff9 count=29712 cumulative=2994015
+I 2023-08-02 19:44:49.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:49.588 | * RPC COUNT: id=0x2389aff9 count=30632 cumulative=3024647
+I 2023-08-02 19:44:50.088 | * RPC COUNT: id=0x2389aff9 count=29657 cumulative=3054304
+I 2023-08-02 19:44:50.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:50.588 | * RPC COUNT: id=0x2389aff9 count=35289 cumulative=3089593
+I 2023-08-02 19:44:51.088 | * RPC COUNT: id=0x2389aff9 count=30536 cumulative=3120129
+I 2023-08-02 19:44:51.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:51.588 | * RPC COUNT: id=0x2389aff9 count=30280 cumulative=3150409
+I 2023-08-02 19:44:52.088 | * RPC COUNT: id=0x2389aff9 count=29371 cumulative=3179780
+I 2023-08-02 19:44:52.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:52.588 | * RPC COUNT: id=0x2389aff9 count=30383 cumulative=3210163
+I 2023-08-02 19:44:53.088 | * RPC COUNT: id=0x2389aff9 count=29721 cumulative=3239884
+I 2023-08-02 19:44:53.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:53.588 | * RPC COUNT: id=0x2389aff9 count=31131 cumulative=3271015
+I 2023-08-02 19:44:54.088 | * RPC COUNT: id=0x2389aff9 count=30143 cumulative=3301158
+I 2023-08-02 19:44:54.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:54.588 | * RPC COUNT: id=0x2389aff9 count=30938 cumulative=3332096
+I [transport.cpp:876] 2023-08-02 19:44:54.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:44:54.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:44:54.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:44:54.000 | Packets Received Total= 3357595
+I 2023-08-02 19:44:55.088 | * RPC COUNT: id=0x2389aff9 count=30194 cumulative=3362290
+I 2023-08-02 19:44:55.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:55.588 | * RPC COUNT: id=0x2389aff9 count=30958 cumulative=3393248
+------------------------------------------------------------
+
+
+
+
+time: 10.000041, count: 617724, rpc per sec: 61772.147630
+n
+
+
+
+
+
+------------------------------------------------------------
+
+
+
+
+I 2023-08-02 19:44:56.088 | * RPC COUNT: id=0x2389aff9 count=29587 cumulative=3422835
+I 2023-08-02 19:44:56.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:56.588 | * RPC COUNT: id=0x2389aff9 count=30337 cumulative=3453172
+I 2023-08-02 19:44:57.088 | * RPC COUNT: id=0x2389aff9 count=30040 cumulative=3483212
+I 2023-08-02 19:44:57.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:57.588 | * RPC COUNT: id=0x2389aff9 count=31132 cumulative=3514344
+I 2023-08-02 19:44:58.088 | * RPC COUNT: id=0x2389aff9 count=29323 cumulative=3543667
+I 2023-08-02 19:44:58.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:58.588 | * RPC COUNT: id=0x2389aff9 count=30737 cumulative=3574404
+I 2023-08-02 19:44:59.088 | * RPC COUNT: id=0x2389aff9 count=29595 cumulative=3603999
+I 2023-08-02 19:44:59.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:44:59.588 | * RPC COUNT: id=0x2389aff9 count=30469 cumulative=3634468
+I 2023-08-02 19:45:00.088 | * RPC COUNT: id=0x2389aff9 count=32312 cumulative=3666780
+I 2023-08-02 19:45:00.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:45:00.588 | * RPC COUNT: id=0x2389aff9 count=37470 cumulative=3704250
+I 2023-08-02 19:45:01.088 | * RPC COUNT: id=0x2389aff9 count=30203 cumulative=3734453
+I 2023-08-02 19:45:01.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:45:01.588 | * RPC COUNT: id=0x2389aff9 count=36505 cumulative=3770958
+I 2023-08-02 19:45:02.088 | * RPC COUNT: id=0x2389aff9 count=29687 cumulative=3800645
+I 2023-08-02 19:45:02.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:45:02.588 | * RPC COUNT: id=0x2389aff9 count=30508 cumulative=3831153
+I 2023-08-02 19:45:03.088 | * RPC COUNT: id=0x2389aff9 count=29858 cumulative=3861011
+I 2023-08-02 19:45:03.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:45:03.588 | * RPC COUNT: id=0x2389aff9 count=30637 cumulative=3891648
+I 2023-08-02 19:45:04.088 | * RPC COUNT: id=0x2389aff9 count=29947 cumulative=3921595
+I 2023-08-02 19:45:04.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:45:04.588 | * RPC COUNT: id=0x2389aff9 count=30564 cumulative=3952159
+I [transport.cpp:876] 2023-08-02 19:45:04.000 | ===================
+I [transport.cpp:877] 2023-08-02 19:45:04.000 | Network Statistics
+I [transport.cpp:878] 2023-08-02 19:45:04.000 | ===================
+I [transport.cpp:883] 2023-08-02 19:45:04.000 | Packets Received Total= 3977430
+I 2023-08-02 19:45:05.088 | * RPC COUNT: id=0x2389aff9 count=29912 cumulative=3982071
+I 2023-08-02 19:45:05.587 | Server BATCHING: min=1 avg=1.0 max=1
+I 2023-08-02 19:45:05.588 | * RPC COUNT: id=0x2389aff9 count=31413 cumulative=4013484

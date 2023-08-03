@@ -1,1 +1,1 @@
-sudo ./bin/server 8501 1000 60000 
+sudo ./bin/server 8501 10 100000
