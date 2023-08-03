@@ -5,3 +5,6 @@
 
  - stats TCP:
  ```time: 100.000106, count: 1278520, rpc per sec: 12785.186456```
+- Throuput latency graph:
+
+![Image](rpc_test/dpdk-figure.png)
