@@ -5,6 +5,7 @@
 
 //#include "rrr.hpp"
 #include "base/misc.hpp"
+#include <bitset>
 #include "utils.hpp"
 
 using rrr::FrequentJob;
@@ -34,7 +35,7 @@ class PollMgr: public rrr::RefCounted {
  public:
     class PollThread;
 
-    PollThread* poll_threads_;
+    PollThread** poll_threads_;
     const int n_threads_;
 
 protected:
@@ -55,6 +56,7 @@ public:
     // Frequent Job
     void add(FrequentJob*);
     void remove(FrequentJob*);
+    int set_cpu_affinity(std::bitset<128> &core_mask);
 };
 
 } // namespace rrr

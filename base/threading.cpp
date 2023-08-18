@@ -1,12 +1,22 @@
 #include <functional>
 #include <sys/time.h>
+#include <memory>
 
+#include <stdlib.h>
+ #include <unistd.h>
 #include "misc.hpp"
 #include "threading.hpp"
 
 using namespace std;
 
 namespace rrr {
+
+std::string stringify(thread_type ty){
+    if(ty == SERVER_THREAD)
+        return "SERVER_THREAD";
+    else
+        return "POLL_THREAD";
+}
 
 void SpinLock::lock() {
     if (!locked_ && !__sync_lock_test_and_set(&locked_, true)) {
@@ -51,6 +61,33 @@ struct start_thread_pool_args {
     int id_in_pool;
 };
 
+int RPC_Thread::set_cpu_affinity(std::bitset<128> &core_mask){
+    
+    if(!init){
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        int core_id;
+        for(core_id=0; core_id< core_mask.size(); core_id++){
+            if (core_mask.test(core_id)){
+                Log_debug("Setting cpu affinity to cpu: %d for thread id %s-%d",core_id,stringify(type_).c_str(),thread_id_);
+                CPU_SET(core_id, &cpuset);
+            }
+        }
+
+        int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+        assert((core_id <= num_cores));
+
+        int err = pthread_setaffinity_np(*p_th_, sizeof(cpu_set_t), &cpuset);
+        if (err < 0) {
+            Log_error("Couldn't set affinity of thread %s-%d to core %d",stringify(type_).c_str(),thread_id_, core_id);
+            return err;
+        }
+        init = true;
+    }
+     return 0;
+ 
+}
+
 void* ThreadPool::start_thread_pool(void* args) {
     start_thread_pool_args* t_args = (start_thread_pool_args *) args;
     t_args->thrpool->run_thread(t_args->id_in_pool);
@@ -62,14 +99,17 @@ void* ThreadPool::start_thread_pool(void* args) {
 ThreadPool::ThreadPool(int n /* =... */)
     : n_(n), should_stop_(false), round_robin_(), th_(), q_() {
     verify(n_ >= 0);
-    th_ = new pthread_t[n_];
+    th_ = new RPC_Thread*[n_];
+    for(int i=0;i<n_;i++){
+        th_[i] = new RPC_Thread(new pthread_t, i, thread_type::SERVER_THREAD);
+    }
     q_ = new Queue<function<void()>*> [n_];
 
     for (int i = 0; i < n_; i++) {
         start_thread_pool_args* args = new start_thread_pool_args();
         args->thrpool = this;
         args->id_in_pool = i;
-        Pthread_create(&th_[i], nullptr, ThreadPool::start_thread_pool, args);
+        Pthread_create(th_[i]->get_thread(), nullptr, ThreadPool::start_thread_pool, args);
     }
 }
 
@@ -79,7 +119,7 @@ ThreadPool::~ThreadPool() {
         q_[i].push(nullptr);  // death pill
     }
     for (int i = 0; i < n_; i++) {
-        Pthread_join(th_[i], nullptr);
+        Pthread_join(*(th_[i]->get_thread()), nullptr);
     }
     // check if there's left over jobs
     for (int i = 0; i < n_; i++) {
@@ -104,6 +144,7 @@ int ThreadPool::run_async(const std::function<void()>& f) {
 }
 
 void ThreadPool::run_thread(int id_in_pool) {
+    Log_debug("Threadpool thread id: %d, type: SERVER launched",id_in_pool);
     struct timespec sleep_req;
     const int min_sleep_nsec = 1000;  // 1us
     const int max_sleep_nsec = 50 * 1000;  // 50us
@@ -178,7 +219,11 @@ void ThreadPool::run_thread(int id_in_pool) {
     }
     delete[] steal_order;
 }
-
+int ThreadPool::set_cpu_affinity(std::bitset<128> &core_mask){
+    for(int i=0;i<n_;i++){
+        th_[i]->set_cpu_affinity(core_mask);
+    }
+}
 void* RunLater::start_run_later(void* thiz) {
     RunLater* rl = (RunLater *) thiz;
     rl->run_later_loop();

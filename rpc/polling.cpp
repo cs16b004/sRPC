@@ -24,7 +24,7 @@ using namespace std;
 
 namespace rrr {
 
-class PollMgr::PollThread {
+class PollMgr::PollThread : RPC_Thread {
 
     friend class PollMgr;
 
@@ -40,8 +40,6 @@ class PollMgr::PollThread {
 
     std::unordered_set<Pollable*> pending_remove_;
     SpinLock pending_remove_l_;
-
-    pthread_t th_;
     bool stop_flag_;
 
     static void* start_poll_loop(void* arg) {
@@ -55,7 +53,7 @@ class PollMgr::PollThread {
 
     void start(PollMgr* poll_mgr) {
         poll_mgr_ = poll_mgr;
-        Pthread_create(&th_, nullptr, PollMgr::PollThread::start_poll_loop, this);
+        Pthread_create(p_th_, nullptr, PollMgr::PollThread::start_poll_loop, this);
     }
 
     void trigger_fjob() {
@@ -66,7 +64,7 @@ class PollMgr::PollThread {
 
 public:
 
-    PollThread(): poll_mgr_(nullptr), stop_flag_(false) {
+    PollThread(pthread_t* th, uint16_t tid): RPC_Thread(th, tid, thread_type::POLL_THREAD), poll_mgr_(nullptr), stop_flag_(false) {
 #ifdef USE_KQUEUE
         poll_fd_ = kqueue();
 #else
@@ -77,7 +75,7 @@ public:
 
     ~PollThread() {
         stop_flag_ = true;
-        Pthread_join(th_, nullptr);
+        Pthread_join(*p_th_, nullptr);
 
         // when stopping, release anything registered in pollmgr
         for (auto& it: poll_set_) {
@@ -99,9 +97,10 @@ public:
 PollMgr::PollMgr(int n_threads /* =... */)
     : n_threads_(n_threads), poll_threads_() {
     verify(n_threads_ > 0);
-    poll_threads_ = new PollThread[n_threads_];
+    poll_threads_ = new PollThread*[n_threads_];
     for (int i = 0; i < n_threads_; i++) {
-        poll_threads_[i].start(this);
+        poll_threads_[i] = new PollThread(new pthread_t, i);
+        poll_threads_[i]->start(this);
     }
 }
 
@@ -111,6 +110,7 @@ PollMgr::~PollMgr() {
 }
 
 void PollMgr::PollThread::poll_loop() {
+    Log_debug("Poll Thread %d started", thread_id_);
     while (!stop_flag_) {
         const int max_nev = 100;
 
@@ -395,7 +395,7 @@ void PollMgr::add(Pollable* poll) {
     int fd = poll->fd();
     if (fd >= 0) {
         int tid = hash_fd(fd) % n_threads_;
-        poll_threads_[tid].add(poll);
+        poll_threads_[tid]->add(poll);
     }
 }
 
@@ -403,7 +403,7 @@ void PollMgr::remove(Pollable* poll) {
     int fd = poll->fd();
     if (fd >= 0) {
         int tid = hash_fd(fd) % n_threads_;
-        poll_threads_[tid].remove(poll);
+        poll_threads_[tid]->remove(poll);
     }
 }
 
@@ -411,18 +411,24 @@ void PollMgr::update_mode(Pollable* poll, int new_mode) {
     int fd = poll->fd();
     if (fd >= 0) {
         int tid = hash_fd(fd) % n_threads_;
-        poll_threads_[tid].update_mode(poll, new_mode);
+        poll_threads_[tid]->update_mode(poll, new_mode);
     }
 }
 
 void PollMgr::add(FrequentJob* fjob) {
     int tid = 0;
-    poll_threads_[tid].add(fjob);
+    poll_threads_[tid]->add(fjob);
 }
 
 void PollMgr::remove(FrequentJob* fjob) {
     int tid = 0;
-    poll_threads_[tid].remove(fjob);
+    poll_threads_[tid]->remove(fjob);
+}
+
+int PollMgr::set_cpu_affinity(std::bitset<128> &core_mask){
+   for(int i=0; i< n_threads_; i++){
+    poll_threads_[i]->set_cpu_affinity(core_mask);
+   }
 }
 
 } // namespace rrr

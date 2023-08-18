@@ -19,9 +19,9 @@ class ReportLatencyJob: public FrequentJob{
         std::unordered_map<uint64_t, std::timespec> end_book;
         ReportLatencyJob(){
             #ifdef DPDK
-            set_period(100*100*100);
+            set_period(10*100*100);
             #else
-            set_period(1*1000*1000);
+            set_period(300*1000);
             #endif
         }
         double diff_timespec(const struct timespec &time1, const struct timespec &time0) {

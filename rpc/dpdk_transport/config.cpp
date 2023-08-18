@@ -49,7 +49,6 @@ void Config::load_cfg_files() {
     }
 
     assert(cpu_info_.core_per_numa > 1);
-    cpu_info_.compute_maxs(dpdk_rxtx_threads_ratio_);
 }
 
 void Config::load_yml(std::string& filename) {
@@ -91,7 +90,8 @@ void Config::load_network_yml(YAML::Node config) {
 
 void Config::load_dpdk_yml(YAML::Node config) {
     dpdk_options_ = config["option"].as<std::string>();
-    dpdk_rxtx_threads_ratio_ = config["rxtx_thread"].as<float>();
+    num_rx_threads_ = config["rx_threads"].as<uint16_t>();
+    num_tx_threads_ = config["tx_threads"].as<uint16_t>();
 }
 
 void Config::load_cpu_yml(YAML::Node config) {
@@ -102,11 +102,14 @@ void Config::load_cpu_yml(YAML::Node config) {
 
 void Config::load_host_yml(YAML::Node config) {
     host_name_ = config["name"].as<std::string>();
+    thread_pool_  = config["thread_pool"].as<int>();
+    poll_threads_ = config["poll_threads"].as<int>();
+    core_affinity_mask_ = config["thread_affinity"].as<std::vector<uint16_t>>();
+
 }
 
 void Config::load_server_yml(YAML::Node config) {
-    default_server_ = config["default_server"].as<int>();
-    server_update_path_ = config["update_path"].as<std::string>();
+    
 }
 
 

@@ -4,10 +4,11 @@
 #include <queue>
 #include <functional>
 #include <pthread.h>
+#include <bitset>
 
 #include "basetypes.hpp"
 #include "misc.hpp"
-
+#include "logging.hpp"
 #define Pthread_spin_init(l, pshared) verify(pthread_spin_init(l, (pshared)) == 0)
 #define Pthread_spin_lock(l) verify(pthread_spin_lock(l) == 0)
 #define Pthread_spin_unlock(l) verify(pthread_spin_unlock(l) == 0)
@@ -24,7 +25,13 @@
 #define Pthread_create(th, attr, func, arg) verify(pthread_create(th, attr, func, arg) == 0)
 #define Pthread_join(th, attr) verify(pthread_join(th, attr) == 0)
 
+
+
 namespace rrr {
+enum thread_type{
+        SERVER_THREAD,
+        POLL_THREAD
+    };
 
 class Lockable: public NoCopy {
 public:
@@ -249,11 +256,34 @@ public:
         return e;
     }
 };
+class RPC_Thread{
+    protected:
+        pthread_t* p_th_;
+        uint16_t thread_id_;
+        uint64_t clamps[200*1000] = {0};
+        uint16_t counter = 0;
+        thread_type type_;
+        bool init;
+    
+    public: 
+        RPC_Thread(pthread_t* th, uint16_t tid, thread_type type): p_th_(th), thread_id_(tid), type_(type){
 
+        }
+        void add_clamp(){
+           
+                clamps[counter%200000] = rrr::rdtsc();
+
+        }
+    pthread_t* get_thread(){
+        return p_th_;
+    }
+    int set_cpu_affinity(std::bitset<128> &core_mask) ;
+
+};
 class ThreadPool: public RefCounted {
     int n_;
     Counter round_robin_;
-    pthread_t* th_;
+    RPC_Thread** th_;
     Queue<std::function<void()>*>* q_;
     bool should_stop_;
 
@@ -270,6 +300,7 @@ public:
 
     // return 0 when queuing ok, otherwise EPERM
     int run_async(const std::function<void()>&);
+    int set_cpu_affinity(std::bitset<128> &core_mask);
 };
 
 class RunLater: public RefCounted {

@@ -30,7 +30,6 @@ public:
         int core_per_numa;
         int max_rx_threads;
         int max_tx_threads;
-
         void compute_maxs(float rxtx_ratio) {
             float total_cores = (float) numa * (float) core_per_numa;
             float total_ratio = rxtx_ratio + 1.0;
@@ -57,11 +56,13 @@ public:
     std::vector<NetworkInfo> net_info_;
     std::string dpdk_options_;
     CpuInfo cpu_info_;
-    float dpdk_rxtx_threads_ratio_ = 1.0;
-    uint32_t client_rate_ = 1000;
-    int default_server_ = 0;
-    std::string server_update_path_;
+    std::vector<uint16_t> core_affinity_mask_;
+  
 
+    uint16_t num_tx_threads_;
+    uint16_t num_rx_threads_;
+    int poll_threads_ = 1;
+    int thread_pool_ = 1;
     int transport_ = 0;
     int workload_ = 0;
     int ratio_ = 0;
@@ -93,18 +94,6 @@ public:
     }
     int get_host_threads() const {
         return host_threads_;
-    }
-    int get_default_server() const {
-        return default_server_;
-    }
-    const char* get_server_update_path() const {
-        if (server_update_path_.empty())
-            return nullptr;
-        else
-            return server_update_path_.c_str();
-    }
-    float get_dpdk_rxtx_thread_ratio() const {
-        return dpdk_rxtx_threads_ratio_;
     }
     int get_transport() const {
         return transport_;

@@ -5,6 +5,7 @@
 #include <thread>
 #include <functional>
 #include <string>
+#include <bitset>
 #include "../../misc/marshal.hpp"
 #include "config.hpp"
 

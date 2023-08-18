@@ -134,8 +134,6 @@ uint32_t DpdkTransport::connect(const char* addr_str){
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0};
     while(!initiated){
-        // Log_debug("Wating for intialization");
-        // usleep(2);
         ;
     }
     send(con_req, 30*sizeof(uint8_t), conn_id, 
@@ -146,7 +144,7 @@ uint32_t DpdkTransport::connect(const char* addr_str){
    
     return conn_id;
 }
-void DpdkTransport::initialize_tx_mbufs(void* arg){
+void DpdkTransport::initialize_tx_mbufs(void* arg){ 
       auto rx_info = reinterpret_cast<dpdk_thread_info*>(arg);
     auto dpdk_th = rx_info->dpdk_th;
     unsigned lcore_id = rte_lcore_id();
@@ -154,7 +152,7 @@ void DpdkTransport::initialize_tx_mbufs(void* arg){
     dpdk_thread_info* tx_info = &(thread_tx_info[rte_lcore_id()%tx_threads_]);
     
     if (tx_info->count == 0) {
-         Log_info("Mbuf Pool Initialized at index %d, name: %s",tx_info->thread_id%tx_threads_,tx_mbuf_pool[tx_info->thread_id%tx_threads_]->name);
+        // Log_info("Mbuf Pool Initialized at index %d, name: %s",tx_info->thread_id%tx_threads_,tx_mbuf_pool[tx_info->thread_id%tx_threads_]->name);
          int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
          if (ret < 0)
              rte_panic("couldn't allocate mbufs");
@@ -164,7 +162,7 @@ void DpdkTransport::initialize_tx_mbufs(void* arg){
 int DpdkTransport::dpdk_tx_loop(void* arg){
     auto tx_info = reinterpret_cast<dpdk_thread_info*>(arg);
     auto dpdk_th = tx_info->dpdk_th;
-    Log_info("Entering TX Loop at lcore %d",rte_lcore_id());
+    Log_info("Entering TX thread %d at lcore %d",tx_info->thread_id,rte_lcore_id());
     dpdk_th->initialize_tx_mbufs(arg);
     while(!dpdk_th->force_quit){
         dpdk_th->tx_loop_one(reinterpret_cast<dpdk_thread_info*>(arg));
@@ -436,16 +434,9 @@ void DpdkTransport::init(Config* config) {
 
         Config::CpuInfo cpu_info = config->get_cpu_info();
         const char* argv_str = config->get_dpdk_options();
-        tx_threads_ = config->get_host_threads();
-        rx_threads_ = (int) (config->get_dpdk_rxtx_thread_ratio() * (float) tx_threads_);
-        if ((rx_threads_ > cpu_info.max_rx_threads) || (rx_threads_ < 1)) {
-            Log_error("Total number of threads %d cannot be more than %d or less than 1. "
-                  "Change the rxtx_threads", rx_threads_, cpu_info.max_rx_threads);
-            assert(false);
-        }
-
-        /* TODO: remove this */
-        tx_threads_ = rx_threads_;
+        tx_threads_ = config->num_rx_threads_;
+        rx_threads_ = config->num_tx_threads_;
+       
         gettimeofday(&start_clock, NULL);
         main_thread = std::thread([this, argv_str](){
             this->init_dpdk_main_thread(argv_str);
@@ -487,22 +478,9 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
         rte_exit(EXIT_FAILURE, "Error with insufficient number of ports\n");
 
     /* HACK: to have same number of queues across all ports (T_T) */
-    int tx_th_remainder = (tx_threads_ % port_num_);
-    if (tx_th_remainder) {
-        Log_info("Adjusting Tx thread number from %d to %d",
-                 tx_threads_, tx_threads_ + (port_num_ - tx_th_remainder));
-        tx_threads_ += (port_num_ - tx_th_remainder);
-    }
-
-    int rx_th_remainder = (rx_threads_ % port_num_);
-    if (rx_th_remainder) {
-        Log_info("Adjusting Rx thread number from %d to %d",
-                 rx_threads_, rx_threads_ + (port_num_ - rx_th_remainder));
-        rx_threads_ += (port_num_ - rx_th_remainder);
-    }
-
-    tx_queue_ = tx_threads_ / port_num_;
-    rx_queue_ = rx_threads_ / port_num_;
+   
+    tx_queue_ = tx_threads_ ;
+    rx_queue_ = rx_threads_ ;
 
     tx_mbuf_pool = new struct rte_mempool*[tx_threads_];
     for (int pool_idx = 0; pool_idx < tx_threads_; pool_idx++) {
@@ -546,27 +524,44 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
 
     Log_info("DPDK tx threads %d, rx threads %d", tx_threads_, rx_threads_);
 
+
+
+    uint16_t total_lcores = rte_lcore_count();
+ 
+    Log_info("Total Cores available: %d",total_lcores);
+    uint16_t rx_lcore_lim = rx_threads_;
+    uint16_t tx_lcore_lim =  rx_threads_ + tx_threads_;
+
+    uint8_t numa_id =  config_->get_cpu_info().numa;
+    // Add core per numa so that threads are scheduled on rigt lcores
     uint16_t lcore;
-    for (lcore = 1; lcore < rx_threads_; lcore++) {
-        Log_info("Launching RX Thread");
-        int retval = rte_eal_remote_launch(dpdk_rx_loop, &thread_rx_info[lcore], lcore);
-        if (retval < 0)
-            rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore);
+    rx_lcore_lim += numa_id * Config::get_config()->cpu_info_.core_per_numa;
+    tx_lcore_lim += numa_id * Config::get_config()->cpu_info_.core_per_numa;
+    Log_info("rx_core limit: %d tx_core limit: %d",rx_lcore_lim,tx_lcore_lim);
+    for (lcore = numa_id * Config::get_config()->cpu_info_.core_per_numa + 1; lcore < rx_lcore_lim+1; lcore++) {
+            
+            int retval = rte_eal_remote_launch(dpdk_rx_loop, &thread_rx_info[lcore%rx_threads_], lcore );
+            if (retval < 0)
+                rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore % total_lcores);
+       
+        
     }
-     for (lcore = rx_threads_; lcore < rx_threads_+tx_threads_; lcore++) {
-        Log_info("Launching TX Thread");
-        int retval = rte_eal_remote_launch(dpdk_tx_loop, &thread_tx_info[lcore%tx_threads_], lcore);
-        if (retval < 0)
-            rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore);
+
+    
+    for (lcore = rx_lcore_lim+1; lcore < tx_lcore_lim+1; lcore++) {
+            
+            int retval = rte_eal_remote_launch(dpdk_tx_loop, &thread_tx_info[lcore%tx_threads_], lcore );
+            if (retval < 0)
+                rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore % total_lcores);
+        
     }
-    lcore = 0;
     initiated = true;
-    dpdk_rx_loop(&thread_rx_info[lcore]);
+   
 }
 
 void DpdkTransport::addr_config(std::string host_name,
                        std::vector<Config::NetworkInfo> net_info) {
-    Log_info("Setting up netowkr info....");
+    Log_info("Setting up network info....");
     for (auto& net : net_info) {
         std::map<std::string, NetAddress>* addr;
         if (host_name == net.name){
@@ -663,10 +658,10 @@ int DpdkTransport::port_init(uint16_t port_id) {
     for (q = 0; q < rx_queue_; q++) {
         /* TODO: Maybe we should set the type of queue in QDMA
          * to be stream/memory mapped */
-        int pool_idx = port_id * rx_queue_ + q;
+      
         retval = rte_eth_rx_queue_setup(port_id, q, nb_rxd,
                                         rte_eth_dev_socket_id(port_id),
-                                        &rxconf, rx_mbuf_pool[pool_idx]);
+                                        &rxconf, rx_mbuf_pool[q]);
         if (retval < 0) {
             Log_error("Error during rx queue %d setup (port %u) info: %s",
                       q, port_id, strerror(-retval));
@@ -695,15 +690,16 @@ int DpdkTransport::port_init(uint16_t port_id) {
     }
 
     for (int i = 0; i < rx_queue_; i++) {
-        int thread_id = port_id * rx_queue_ + i;
-        Log_debug("Create thread %d info on port %d and queue %d",
-                    thread_id, port_id, i);
-        thread_rx_info[thread_id].init(this, thread_id, port_id, i, DPDK_RX_BURST_SIZE);
+      
+        Log_debug("Create rx thread %d info on port %d and queue %d",
+                    i, port_id, i);
+        thread_rx_info[i].init(this, i, port_id, i, DPDK_RX_BURST_SIZE);
     }
 
     for (int i = 0; i < tx_queue_; i++) {
-        int thread_id = port_id * tx_queue_ + i;
-        thread_tx_info[thread_id].init(this, thread_id, port_id, i, DPDK_TX_BURST_SIZE);
+        Log_debug("Create tx thread %d info on port %d and queue %d",
+                    i, port_id, i);
+        thread_tx_info[i].init(this, i, port_id, i, DPDK_TX_BURST_SIZE);
     }
     install_flow_rule(port_id);
     return 0;
