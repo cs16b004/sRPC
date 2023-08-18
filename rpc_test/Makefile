@@ -16,8 +16,11 @@ debug: all
 stat: CXXFLAGS += -g3 -O0 -DRPC_STATISTICS
 stat: all 
 
-dpdk: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS
-dpdk: all
+dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS -DLOG_LEVEL_AS_DEBUG
+dpdk_debug: all
+
+dpdk_stat: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS
+dpdk_stat: all
 
 .PHONY: clean
 clean:

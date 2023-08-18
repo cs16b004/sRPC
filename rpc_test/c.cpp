@@ -6,24 +6,31 @@
 
 char **servers;
 unsigned int ns;
-unsigned int npg;
+unsigned int num_batched_wait;
 bool fg_quit = false;
+CounterProxy **proxies=nullptr;
+std::bitset<128> core_affinity_mask_;
 CounterProxy **get_proxy() {
-    unsigned int i = 0;
-    rrr::PollMgr **pm = (rrr::PollMgr **)malloc(sizeof(rrr::PollMgr *) * ns);
-    CounterProxy **ret = (CounterProxy **)malloc(sizeof(CounterProxy *) * ns);
-    for (; i < ns; i++) {
-        pm[i] = new rrr::PollMgr();
-        #ifdef DPDK
-        rrr::UDPClient *client = new rrr::UDPClient(pm[i]);
-        printf("New client called \n");
-        #else
-        rrr::TCPClient* client = new rrr::TCPClient(pm[i]);
-        #endif
-        client->connect(servers[i]);
-        ret[i] = new CounterProxy((rrr::Client*)client);
+    if(proxies == nullptr){
+
+        unsigned int i = 0;
+        rrr::PollMgr **pm = (rrr::PollMgr **)malloc(sizeof(rrr::PollMgr *) * ns);
+        CounterProxy **ret = (CounterProxy **)malloc(sizeof(CounterProxy *) * ns);
+        for (; i < ns; i++) {
+            pm[i] = new rrr::PollMgr(rrr::Config::get_config()->poll_threads_);
+            pm[i]->set_cpu_affinity(core_affinity_mask_);
+            #ifdef DPDK
+                rrr::UDPClient *client = new rrr::UDPClient(pm[i]);
+                printf("New client called \n");
+            #else
+            rrr::TCPClient* client = new rrr::TCPClient(pm[i]);
+            #endif
+            client->connect(servers[i]);
+            ret[i] = new CounterProxy((rrr::Client*)client);
+        }
+        proxies = ret;
     }
-    return ret;
+    return proxies;
 }
 
 
@@ -34,7 +41,7 @@ void *do_add(void *) {
     while (!fg_quit) {
         rrr::FutureGroup fg;
         for (i = 0; i < ns; i++) {
-            for (j = 0; j < npg; j++) {
+            for (j = 0; j < num_batched_wait; j++) {
                 fg.add(proxy[start++]->async_add());
                 start %= ns;
             }
@@ -51,7 +58,7 @@ void *do_add_long(void *) {
     unsigned int i = 0;
     while (!fg_quit) {
         rrr::FutureGroup fg;
-        for (i = 0; i < npg; i++) {
+        for (i = 0; i < num_batched_wait; i++) {
             fg.add(proxy[start++]->async_add_long(1, 2, 3, 4, 5, std::vector<rrr::i64>(2, 1)));
             start %= ns;
         }
@@ -67,7 +74,7 @@ void *do_add_short(void *) {
     unsigned int j = 0;
     while (!fg_quit) {
         rrr::FutureGroup fg;
-        for (i = 0; i < npg; i++) {
+        for (i = 0; i < num_batched_wait; i++) {
             fg.add(proxy[start++]->async_add_short((rrr::i64)1));
             start %= ns;
         }
@@ -83,16 +90,21 @@ void *do_add_short(void *) {
 
 #endif
 int main(int argc, char **argv) {
+    
+    char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_greenport.yml","-fconfig_files/network_greenport.yml"};
+    rrr::Config::create_config(5, argv2);
+    rrr::Config* conf = rrr::Config::get_config();
+    for(int i=conf->core_affinity_mask_[0];i <= conf->core_affinity_mask_[1];i++){
+        core_affinity_mask_.set(i);
+    }
     #ifdef DPDK
-     char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_greenport.yml","-fconfig_files/network_greenport.yml"};
-     rrr::Config::create_config(5, argv2);
-    rrr::DpdkTransport::create_transport(rrr::Config::get_config());
+     rrr::DpdkTransport::create_transport(conf);
     #endif
-
+    
     if (argc < 5)
         return -1;
 
-    unsigned int nt = atoi(argv[1]);
+    unsigned int num_threads = atoi(argv[1]);
 
     void *(*func)(void *);
     switch(atoi(argv[2])) {
@@ -109,7 +121,7 @@ int main(int argc, char **argv) {
             return -3;
     }
 
-    npg = atoi(argv[3]);
+    num_batched_wait = atoi(argv[3]);
     ns = atoi(argv[4]);
 
     if ((unsigned int)argc < 5 + ns)
@@ -121,8 +133,8 @@ int main(int argc, char **argv) {
     for (; i < ns; i++)
         servers[i] = argv[i + 5];
 
-    pthread_t *ph = (pthread_t *)malloc(sizeof(pthread_t) * nt);
-    for (i = 0; i < nt; i++)
+    pthread_t *ph = (pthread_t *)malloc(sizeof(pthread_t) * num_threads);
+    for (i = 0; i < num_threads; i++)
         pthread_create(ph + i, NULL, func, NULL);
     
     i=0;
@@ -132,7 +144,7 @@ int main(int argc, char **argv) {
         i++;
     }
     fg_quit=true;
-    for (i = 0; i < nt; i++)
+    for (i = 0; i < num_threads; i++)
         pthread_join(ph[i], NULL);
     return 0;
 }

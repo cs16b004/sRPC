@@ -64,16 +64,24 @@ int main(int argc, char **argv) {
   
 
 
-    #ifdef DPDK
+ 
     char* argv2[] = {"bin/server","-fconfig_files/cpu.yml","-fconfig_files/dpdk.yml","-fconfig_files/host_catskill.yml","-fconfig_files/network_catskill.yml"};
     rrr::Config::create_config(5, argv2);
-    #endif
+    std::bitset<128> affinity_mask;
+    rrr::Config* conf  = rrr::Config::get_config();
+    for(int i=conf->core_affinity_mask_[0];i <= conf->core_affinity_mask_[1];i++){
+        affinity_mask.set(i);
+    }
     unsigned int time = atoi(argv[2]);
     CounterServiceImpl *csi = new CounterServiceImpl(time);
-    rrr::PollMgr *pm = new rrr::PollMgr(1);
-    base::ThreadPool *tp = new base::ThreadPool(1);
+
+    rrr::PollMgr *pm = new rrr::PollMgr(conf->poll_threads_);
+    pm->set_cpu_affinity(affinity_mask);
+    base::ThreadPool *tp = new base::ThreadPool(conf->thread_pool_);
+    tp->set_cpu_affinity(affinity_mask);
+
     #ifdef DPDK
-    rrr::DpdkTransport::create_transport(rrr::Config::get_config());
+    rrr::DpdkTransport::create_transport(conf);
     rrr::UDPServer *server = new rrr::UDPServer(pm,tp);
     #else
     rrr::TCPServer *server = new rrr::TCPServer(pm, tp);
@@ -90,7 +98,6 @@ int main(int argc, char **argv) {
         usleep(1000);
         i++;
     }
-    printf("Here 4");
     server->stop();
     #ifdef DPDK
     rrr::DpdkTransport::get_transport()->trigger_shutdown();
