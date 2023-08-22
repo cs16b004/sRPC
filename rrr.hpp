@@ -19,6 +19,7 @@
 #include "rpc/polling.hpp"
 #include "rpc/client.hpp"
 #include "rpc/server.hpp"
+#include "rpc/reporter.hpp"
 
 #include "coroutine/scheduler.h"
 #include "coroutine/coroutine.h"

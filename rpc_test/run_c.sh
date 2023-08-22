@@ -1,1 +1,1 @@
-sudo bin/client 1 1 5 1 172.19.0.121:8501 60000
+sudo bin/client -f config_files/cpu.yml -f config_files/dpdk.yml -f config_files/host_greenport.yml -f config_files/network_greenport.yml -f config_files/benchmarks.yml

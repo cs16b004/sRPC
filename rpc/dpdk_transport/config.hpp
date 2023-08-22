@@ -9,7 +9,9 @@ class Config {
 private:
 
 public:
-
+    #ifdef RPC_STATISTICS
+        uint16_t connections;
+    #endif
     struct NetworkInfo {
         std::string name;
         int id;
@@ -61,8 +63,20 @@ public:
 
     uint16_t num_tx_threads_;
     uint16_t num_rx_threads_;
-    int poll_threads_ = 1;
-    int thread_pool_ = 1;
+    //benchmarks yml
+    uint16_t num_client_threads_;
+    uint16_t client_poll_threads_ = 1;
+    uint16_t server_poll_threads_ = 1;
+    uint16_t client_connections_=1;
+    uint16_t input_size_ = 64;
+    uint16_t output_size_ = 64;
+    uint16_t client_duration_ = 20;
+    uint16_t server_duration_ = 60;
+    std::string server_address_;
+
+    uint16_t client_batch_size_=5;
+    //
+
     int transport_ = 0;
     int workload_ = 0;
     int ratio_ = 0;

@@ -74,10 +74,7 @@ void TCPConnection::handle_read() {
     if (bytes_read == 0) {
         return;
     }
-    #ifdef RPC_STATISTICS
-        g_stat_bytes_in += bytes_read;
-       // Log_info("%d Bytes added to g_stat_bytes: %d",bytes_read,g_stat_bytes_in);
-    #endif
+   
     list<Request*> complete_requests;
 
     for (;;) {
@@ -102,7 +99,9 @@ void TCPConnection::handle_read() {
     }
 
 #ifdef RPC_STATISTICS
-    stat_server_batching(complete_requests.size());
+    //stat_server_batching(complete_requests.size());
+    record_batch(complete_requests.size());
+
 #endif // RPC_STATISTICS
 
     for (auto& req: complete_requests) {
@@ -119,7 +118,8 @@ void TCPConnection::handle_read() {
         req->m >> rpc_id;
 
 #ifdef RPC_STATISTICS
-        stat_server_rpc_counting(rpc_id);
+      //  stat_server_rpc_counting(rpc_id);
+      count(0);
 #endif // RPC_STATISTICS
 
         auto it = server_->handlers_.find(rpc_id);

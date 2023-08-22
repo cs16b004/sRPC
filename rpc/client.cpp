@@ -358,7 +358,7 @@ void TCPClient::handle_read() {
               
                 std::timespec ts;
                 std::timespec_get(&ts, TIME_UTC);
-                rJob->end_book.insert(std::make_pair(fu->xid_,ts));
+               // rJob->end_book.insert(std::make_pair(fu->xid_,ts));
                // Log_info("Inserted into %p",&(rJob->end_book));
                 #endif 
                 // since we removed it from pending_fu_
@@ -417,7 +417,7 @@ Future* TCPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) 
     #ifdef RPC_STATISTICS
         std::timespec ts;
         std::timespec_get(&ts, TIME_UTC);
-        rJob->start_book.insert(std::make_pair(fu->xid_, ts));
+        //rJob->start_book.insert(std::make_pair(fu->xid_, ts));
     #endif
     // one ref is already in pending_fu_
     return (Future *) fu->ref_copy();

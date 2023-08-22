@@ -69,6 +69,8 @@ void Config::load_yml(std::string& filename) {
 
     if (config["server"])
         load_server_yml(config["server"]);
+    if (config["benchmarks"])
+        load_benchmark_yml(config["benchmarks"]);
 }
 
 void Config::load_network_yml(YAML::Node config) {
@@ -102,14 +104,24 @@ void Config::load_cpu_yml(YAML::Node config) {
 
 void Config::load_host_yml(YAML::Node config) {
     host_name_ = config["name"].as<std::string>();
-    thread_pool_  = config["thread_pool"].as<int>();
-    poll_threads_ = config["poll_threads"].as<int>();
     core_affinity_mask_ = config["thread_affinity"].as<std::vector<uint16_t>>();
-
+    
 }
 
 void Config::load_server_yml(YAML::Node config) {
     
+}
+void Config::load_benchmark_yml(YAML::Node config){
+    server_poll_threads_ = config["server_poll_threads"].as<int>();
+    client_poll_threads_ = config["client_poll_threads"].as<int>();
+    client_connections_ = config["client_connections"].as<std::uint16_t>();
+    num_client_threads_ = config["client_threads"].as<uint16_t>();
+    input_size_ = config["input_size"].as<std::uint16_t>();
+    output_size_ = config["output_size"].as<std::uint16_t>();
+
+    server_address_ = config["server_address"].as<std::string>();
+    client_batch_size_ = config["client_batch_size"].as<uint16_t>();
+
 }
 
 

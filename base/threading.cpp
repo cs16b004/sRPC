@@ -217,6 +217,7 @@ void ThreadPool::run_thread(int id_in_pool) {
             sleep_req.tv_nsec = clamp(sleep_req.tv_nsec + 1000, min_sleep_nsec, max_sleep_nsec);
         }
     }
+    Log_debug("Threadpool thread id: %d, type: SERVER stopped",id_in_pool);
     delete[] steal_order;
 }
 int ThreadPool::set_cpu_affinity(std::bitset<128> &core_mask){

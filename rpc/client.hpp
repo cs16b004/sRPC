@@ -57,6 +57,8 @@ class ReportLatencyJob: public FrequentJob{
 };
 
 #endif
+
+class Reporter;
 class Future;
 class Client;
 class TCPClient;
@@ -162,6 +164,7 @@ class Client: public Pollable {
 protected:
     #ifdef RPC_STATISTICS
         ReportLatencyJob* rJob;
+        friend class Reporter;
     #endif
     Marshal in_, out_;
     PollMgr* pollmgr_;
@@ -185,9 +188,9 @@ protected:
 public:
     Client(PollMgr* pollmgr): pollmgr_(pollmgr), status_(NEW) { 
         #ifdef RPC_STATISTICS
-        rJob = new rrr::ReportLatencyJob();
-        pollmgr_->add(rJob);
-        Log_info("Job Added");
+       // rJob = new rrr::ReportLatencyJob();
+       // pollmgr_->add(rJob);
+       // Log_info("Job Added");
        
         #endif
     }

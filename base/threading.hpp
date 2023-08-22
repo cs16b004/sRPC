@@ -28,6 +28,7 @@
 
 
 namespace rrr {
+    class Reporter;
 enum thread_type{
         SERVER_THREAD,
         POLL_THREAD
@@ -257,11 +258,15 @@ public:
     }
 };
 class RPC_Thread{
+   
+        friend class Reporter;
+ 
     protected:
         pthread_t* p_th_;
         uint16_t thread_id_;
         uint64_t clamps[200*1000] = {0};
-        uint16_t counter = 0;
+        uint64_t counter[6] = {0};
+        uint64_t clamp_counter=0;
         thread_type type_;
         bool init;
     
@@ -270,9 +275,11 @@ class RPC_Thread{
 
         }
         void add_clamp(){
-           
-                clamps[counter%200000] = rrr::rdtsc();
-
+                clamps[clamp_counter%200000] = rrr::rdtsc();
+                clamp_counter++;
+        }
+        void count(){
+            counter[0]++;
         }
     pthread_t* get_thread(){
         return p_th_;
@@ -281,6 +288,9 @@ class RPC_Thread{
 
 };
 class ThreadPool: public RefCounted {
+    #ifdef RPC_STATISTICS
+        friend class Reporter;
+    #endif
     int n_;
     Counter round_robin_;
     RPC_Thread** th_;

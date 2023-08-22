@@ -1,6 +1,3 @@
 host:
   name: greenport
-  threads: 1 # Number of tx threads. we will use the ratio to determine rx.
-  poll_threads: 1
-  thread_pool: 1
   thread_affinity: [30,31]

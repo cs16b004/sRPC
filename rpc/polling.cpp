@@ -8,92 +8,27 @@
 #include <sys/epoll.h>
 #endif
 
-#include <unordered_map>
-#include <unordered_set>
 
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
 
-#include "base/all.hpp"
 
-#include "utils.hpp"
 #include "polling.hpp"
 
 using namespace std;
 
 namespace rrr {
 
-class PollMgr::PollThread : RPC_Thread {
 
-    friend class PollMgr;
-
-    PollMgr* poll_mgr_;
-
-    // guard mode_ and poll_set_
-    SpinLock l_;
-    std::unordered_map<int, int> mode_;
-    std::unordered_set<Pollable*> poll_set_;
-    int poll_fd_;
-
-    std::set<FrequentJob*> fjobs_;
-
-    std::unordered_set<Pollable*> pending_remove_;
-    SpinLock pending_remove_l_;
-    bool stop_flag_;
-
-    static void* start_poll_loop(void* arg) {
-        PollThread* thiz = (PollThread *) arg;
-        thiz->poll_loop();
-        pthread_exit(nullptr);
-        return nullptr;
-    }
-
-    void poll_loop();
-
-    void start(PollMgr* poll_mgr) {
-        poll_mgr_ = poll_mgr;
-        Pthread_create(p_th_, nullptr, PollMgr::PollThread::start_poll_loop, this);
-    }
-
-    void trigger_fjob() {
-	for (auto &fjob: fjobs_) {
-	    fjob->trigger();
-	}
-    }
-
-public:
-
-    PollThread(pthread_t* th, uint16_t tid): RPC_Thread(th, tid, thread_type::POLL_THREAD), poll_mgr_(nullptr), stop_flag_(false) {
+PollMgr::PollThread::PollThread(pthread_t* th, uint16_t tid): RPC_Thread(th, tid, thread_type::POLL_THREAD), poll_mgr_(nullptr), stop_flag_(false) {
 #ifdef USE_KQUEUE
         poll_fd_ = kqueue();
 #else
         poll_fd_ = epoll_create(10);    // arg ignored, any value > 0 will do
 #endif
         verify(poll_fd_ != -1);
-    }
-
-    ~PollThread() {
-        stop_flag_ = true;
-        Pthread_join(*p_th_, nullptr);
-
-        // when stopping, release anything registered in pollmgr
-        for (auto& it: poll_set_) {
-            this->remove(it);
-        }
-        for (auto& it: pending_remove_) {
-            it->release();
-        }
-    }
-
-    void add(Pollable*);
-    void remove(Pollable*);
-    void update_mode(Pollable*, int new_mode);
-
-    void add(FrequentJob*);
-    void remove(FrequentJob*);
-};
-
+}
 PollMgr::PollMgr(int n_threads /* =... */)
     : n_threads_(n_threads), poll_threads_() {
     verify(n_threads_ > 0);
@@ -380,7 +315,13 @@ void PollMgr::PollThread::update_mode(Pollable* poll, int new_mode) {
 
     l_.unlock();
 }
-
+void PollMgr::PollThread::trigger_fjob(){
+  
+	for (auto &fjob: fjobs_) {
+	    fjob->trigger();
+	}
+    
+}
 static inline uint32_t hash_fd(uint32_t key) {
     uint32_t c2 = 0x27d4eb2d; // a prime or an odd constant
     key = (key ^ 61) ^ (key >> 16);
@@ -396,6 +337,7 @@ void PollMgr::add(Pollable* poll) {
     if (fd >= 0) {
         int tid = hash_fd(fd) % n_threads_;
         poll_threads_[tid]->add(poll);
+        Log_debug("Poll Job added to thread :%d",tid);
     }
 }
 

@@ -8,7 +8,7 @@ LIB=-Llib -lrpc -lbase -lpthread -lyaml-cpp $(LIB_DPDK)
 CXXFLAGS=-std=c++17 -g -Wall $(CFLAG_DPDK)
 
 .PHONY: all
-all: clean bin/server bin/client bin/client_share_n bin/client_share_one
+all: clean bin/server bin/client
 
 debug: CXXFLAGS += -g3 -O0 -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS
 debug: all
@@ -38,24 +38,23 @@ clean:
 counter.hpp: ../bin/rpcgen counter.rpc
 	../bin/rpcgen counter.rpc
 
-bin/server: s.cpp counter.hpp lib/librpc.a lib/libbase.a
-	${CXX} ${CXXFLAGS} ${INC} s.cpp ${LIB} -o bin/server
+bin/server: s.cpp counter.hpp lib/librpc.a lib/libbase.a benchmarks.o
+	${CXX} ${CXXFLAGS} ${INC} s.cpp benchmarks.o ${LIB} -o bin/server
 
-bin/client: c.cpp counter.hpp lib/librpc.a lib/libbase.a
-	${CXX} ${CXXFLAGS} ${INC} c.cpp ${LIB} -o bin/client
+bin/client: c.cpp counter.hpp lib/librpc.a lib/libbase.a benchmarks.o
+	${CXX} ${CXXFLAGS} ${INC} c.cpp benchmarks.o ${LIB} -o bin/client
 
-bin/client_share_n: c_share_n.cpp counter.hpp lib/librpc.a lib/libbase.a
-	${CXX} ${CXXFLAGS} ${INC} c_share_n.cpp ${LIB} -o bin/client_share_n
 
-bin/client_share_one: c_share_one.cpp counter.hpp lib/librpc.a lib/libbase.a
-	${CXX} ${CXXFLAGS} ${INC} c_share_one.cpp ${LIB} -o bin/client_share_one
+benchmarks.o: benchmarks.cpp benchmarks.hpp lib/librpc.a lib/libbase.a
+	${CXX} ${CXXFLAGS} ${INC} -c benchmarks.cpp ${LIB} -o benchmarks.o
+
 
 lib/librpc.a: client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o
 	ar rcs lib/librpc.a client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o
 	rm -f client.o marshal.o polling.o server.o utils.o udpserver.o
 
-lib/libbase.a: basetypes.o logging.o misc.o strop.o threading.o unittest.o
-	ar rcs lib/libbase.a basetypes.o logging.o misc.o strop.o threading.o unittest.o
+lib/libbase.a: basetypes.o logging.o misc.o strop.o threading.o unittest.o reporter.o
+	ar rcs lib/libbase.a basetypes.o logging.o misc.o strop.o threading.o unittest.o reporter.o
 	rm -f basetypes.o logging.o misc.o strop.o threading.o unittest.o
 
 client.o: ../rpc/client.cpp ../rpc/client.hpp  transport.o
@@ -102,4 +101,7 @@ threading.o: ../base/threading.cpp ../base/threading.hpp
 
 unittest.o: ../base/unittest.cpp ../base/unittest.hpp
 	${CXX} ${CXXFLAGS} ${INC} -c ../base/unittest.cpp -o unittest.o
+
+reporter.o: ../rpc/reporter.cpp ../rpc/reporter.hpp ../rpc/polling.hpp polling.o
+	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/reporter.cpp -o reporter.o
 

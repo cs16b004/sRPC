@@ -277,6 +277,7 @@ public:
         #ifdef RPC_STATISTICS
         //rJob = new ReportThroughputJob();
         //pollmgr_->add(rJob);
+        
         #endif
     };
     

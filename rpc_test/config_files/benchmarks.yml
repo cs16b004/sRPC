@@ -1,0 +1,11 @@
+benchmarks:
+  input_size: 128 #input size in bytes
+  output_size: 64
+  client_poll_threads: 1
+  server_poll_threads: 1
+  client_connections: 1
+  client_threads: 1
+  server_duration: 100 #server_duration in seconds
+  client_duration: 60
+  client_batch_size: 10
+  server_address: "172.19.0.121:8501"
