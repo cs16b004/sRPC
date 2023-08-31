@@ -75,9 +75,7 @@ void UDPConnection::handle_read() {
 
     int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
     #ifdef RPC_STATISTICS
-        thr_l.lock();
-        g_stat_bytes_in += bytes_read;
-        thr_l.unlock();
+      
     #endif
     if (bytes_read == 0) {
       
@@ -98,7 +96,14 @@ void UDPConnection::handle_read() {
 
             Request* req = new Request;
             verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
-
+             #ifdef RPC_STATISTICS
+            // Read packet ID
+            Marshal id;
+            uint64_t pkt_id;
+            id.read_from_marshal(in_,sizeof(uint64_t));
+            id >> pkt_id;
+            rx_pkt_ids.push_back(pkt_id);
+            #endif
             v64 v_xid;
             req->m >> v_xid;
             req->xid = v_xid.get();
@@ -112,7 +117,8 @@ void UDPConnection::handle_read() {
     
       //  Log_info("Request read");
 #ifdef RPC_STATISTICS
-    stat_server_batching(complete_requests.size());
+    //stat_server_batching(complete_requests.size());
+     record_batch(complete_requests.size());
 #endif // RPC_STATISTICS
 
     for (auto& req: complete_requests) {
@@ -129,7 +135,7 @@ void UDPConnection::handle_read() {
         req->m >> rpc_id;
 
 #ifdef RPC_STATISTICS
-        stat_server_rpc_counting(rpc_id);
+        count(0);
 #endif // RPC_STATISTICS
 
         auto it = server_->handlers_.find(rpc_id);

@@ -6,6 +6,7 @@
 #include <functional>
 #include <string>
 #include <bitset>
+#include <unordered_map>
 #include "../../misc/marshal.hpp"
 #include "config.hpp"
 
@@ -79,8 +80,9 @@ namespace rrr{
         friend class UDPConnection;
     private:
         static DpdkTransport* transport_l;
-        unsigned udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
-        unsigned ip_hdr_offset = sizeof(struct rte_ether_hdr);
+        uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
+        uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
+        uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
         Config* config_;
         int port_num_ = 0;
         int tx_threads_ = 0;
@@ -105,7 +107,13 @@ namespace rrr{
         std::map<std::string, NetAddress> dest_addr_;
         SpinLock sm_queue_l;
         std::queue<Marshal*> sm_queue;
- 
+        #ifdef RPC_STATISTICS
+        std::unordered_map<uint64_t,uint64_t> pkt_rx_ts;
+        std::unordered_map<uint64_t,uint64_t> pkt_process_ts;
+        std::unordered_map<uint64_t,uint64_t> pkt_complete_ts;
+        
+        uint64_t pkt_counter=0;
+        #endif
         
 
         struct dpdk_thread_info *thread_rx_info{nullptr};

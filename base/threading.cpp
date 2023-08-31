@@ -69,7 +69,7 @@ int RPC_Thread::set_cpu_affinity(std::bitset<128> &core_mask){
         int core_id;
         for(core_id=0; core_id< core_mask.size(); core_id++){
             if (core_mask.test(core_id)){
-                Log_debug("Setting cpu affinity to cpu: %d for thread id %s-%d",core_id,stringify(type_).c_str(),thread_id_);
+                //Log_debug("Setting cpu affinity to cpu: %d for thread id %s-%d",core_id,stringify(type_).c_str(),thread_id_);
                 CPU_SET(core_id, &cpuset);
             }
         }

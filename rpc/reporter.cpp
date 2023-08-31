@@ -14,6 +14,7 @@ void* Reporter::run(void* arg){
     Reporter* reporter = (Reporter*)arg;
     Log::info("Reporter Thread Launched, Observing %d poll threads", reporter->pm_->n_threads_);
     uint64_t job_count=0;
+    uint64_t last_job_count=0;
     uint64_t diff_count=0;
     while(! reporter->stop){
         usleep(reporter->period_ * 1000);
@@ -25,7 +26,8 @@ void* Reporter::run(void* arg){
             } //ith pollable of poll manager;
         }
         
-        Log_info("Total RPCs: %d, Throughput %f/s",job_count, job_count*1000.0/(reporter->period_) );
+        Log_info("Total RPCs: %d, Throughput %f/s",job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
+        last_job_count = job_count;
         job_count=0;
         diff_count=0;
     }

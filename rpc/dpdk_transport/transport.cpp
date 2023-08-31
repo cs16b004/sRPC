@@ -243,15 +243,23 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         //Log_debug("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
         std::string src_addr = ipv4_to_string(src_ip) + ":" + std::to_string(src_port);
         std::string lookup_addr = src_addr + ("::" + std::to_string(dest_port));
-        uint8_t* data_ptr = pkt_ptr + udp_hdr_offset + sizeof(rte_udp_hdr);
+        uint8_t* data_ptr = pkt_ptr + data_offset;
         //   for (int i=0; i < pkt_size; ++i) {
         //         if (! (i % 16) && i)
         //                 printf("\n");
 
         //         printf("0x%02x ", data_ptr[i]);
         // }
-        // printf("\n\n");
+       // printf("\n\n");
         uint8_t pkt_type;
+        #ifdef RPC_STATISTICS
+        //read pkt id last 8 bytes are reserved for pkt id
+        uint64_t pkt_id;
+        rte_memcpy((uint8_t*) &pkt_id, pkt_ptr + rx_info->buf[i]->data_len - sizeof(uint64_t), sizeof(uint64_t));
+   
+        Log_debug("Received packet with id %lld. total size %d, id offset: %d",pkt_id, rx_info->buf[i]->data_len, rx_info->buf[i]->data_len - sizeof(uint64_t) );
+        pkt_rx_ts[pkt_id] = rrr::rdtsc();
+        #endif
         Log_debug("Processing incoming packet for %s",src_addr.c_str());
         mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
         data_ptr += sizeof(uint8_t); 
@@ -270,7 +278,7 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
                 }
                 #endif
                  if (n>0){
-                  Log_debug("%d bytes written to fd %d, read end %d",
+                Log_debug("%d bytes written to fd %d, read end %d",
                             n,rx_info->dpdk_th->out_connections[addr_lookup_table[lookup_addr]]->wfd,
                             rx_info->dpdk_th->out_connections[addr_lookup_table[lookup_addr]]->in_fd_);
                 }
@@ -359,16 +367,26 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
     uint8_t* pkt_buf = rte_pktmbuf_mtod(tx_info->buf[tx_info->count], uint8_t*);
 
     int hdr_len = make_pkt_header(pkt_buf, length, conn_id);
-    /* We want to have uniform distribution accross all of rx threads */
-    /* tx_info->udp_port_id = (tx_info->udp_port_id + 1) % rx_queue_; */
+    int data_offset = hdr_len;
     /** Copy Packet Type*/ 
-    memcpy(pkt_buf + hdr_len,&pkt_type,sizeof(uint8_t));
-    memcpy(pkt_buf + hdr_len + sizeof(uint8_t), payload, length);
+    memcpy(pkt_buf + data_offset,&pkt_type,sizeof(uint8_t));
+    data_offset+=sizeof(uint8_t); // data offset after copying pkt type
+     // copy rpc_data
+    memcpy(pkt_buf + data_offset, payload, length); //copy rpc data
+    data_offset+=length;
 
-    int data_size = hdr_len + sizeof(uint8_t)  + length;
+
+     #ifdef RPC_STATISTICS // add a pkt id to each packet sent , to see where it spends the most time.
+        pkt_counter++;
+        Log_debug("Setting ID offset: %d,", data_offset);
+        rte_memcpy(pkt_buf + data_offset, (uint8_t*)&pkt_counter, sizeof(uint64_t));
+        data_offset+= sizeof(uint64_t);
+    #endif
+
+    int data_size = data_offset; 
     if(data_size < 64){
         memcpy(pkt_buf + data_size, padd, 64-data_size);
-       // Log_debug("Padding %d bytes because data_size: %d",64-data_size,data_size);
+       
     }
     data_size = std::max(data_size,64);
 
@@ -379,6 +397,8 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
      tx_info->buf[tx_info->count]->l3_len = sizeof(struct rte_ipv4_hdr);
      tx_info->buf[tx_info->count]->l4_len = sizeof(struct rte_udp_hdr);
     tx_info->buf[tx_info->count]->data_len = data_size;
+
+    
     Log_debug("send packet to server %s with size of %d, pkt type 0x%2x",out_connections[conn_id]->out_addr.to_string().c_str(), data_size,pkt_type);
 
     tx_info->count++;
@@ -577,9 +597,9 @@ void DpdkTransport::addr_config(std::string host_name,
         /*     addr = &dest_addr_; */
 
         auto it = addr->find(host_name);
-        
-        verify(it == addr->end());
         Log_info("Adding a host with name %s : info :\n %s",net.name.c_str(),net.to_string().c_str());
+        verify(it == addr->end());
+        
         addr->emplace(std::piecewise_construct,
                       std::forward_as_tuple(net.name),
                       std::forward_as_tuple(net.mac.c_str(),

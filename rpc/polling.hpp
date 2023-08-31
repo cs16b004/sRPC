@@ -36,17 +36,14 @@ protected:
           
         }
         uint64_t read_and_set_counter(uint8_t id){
-            uint64_t ret = counters[id];
-            c_locks[id].lock();
-            counters[id] = 0;
-            c_locks[id].unlock();
-            return ret;
+            
+            return counters[id];
         }
 
         void count(uint8_t counter_id){
-            c_locks[counter_id].lock();
+            
             counters[counter_id]++;
-            c_locks[counter_id].unlock();
+            
         }
     #endif
     // RefCounted class requires protected destructor

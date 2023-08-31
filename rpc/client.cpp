@@ -124,9 +124,9 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
     *this << v64(fu->xid_);
     *this << rpc_id;
     #ifdef RPC_STATISTICS
-        std::timespec ts;
-        std::timespec_get(&ts, TIME_UTC);
-       rJob->start_book.insert(std::make_pair(fu->xid_, ts));
+    //     std::timespec ts;
+    //     std::timespec_get(&ts, TIME_UTC);
+    //    rJob->start_book.insert(std::make_pair(fu->xid_, ts));
     #endif
     // one ref is already in pending_fu_
     return (Future *) fu->ref_copy();
@@ -185,9 +185,9 @@ void UDPClient::handle_read(){
                 fu->error_code_ = v_error_code.get();
                 fu->reply_.read_from_marshal(in_, packet_size - v_reply_xid.val_size() - v_error_code.val_size());
                 #ifdef RPC_STATISTICS
-                std::timespec ts;
-                std::timespec_get(&ts, TIME_UTC);
-                rJob->end_book.insert(std::make_pair(fu->xid_,ts));
+                // std::timespec ts;
+                // std::timespec_get(&ts, TIME_UTC);
+                // rJob->end_book.insert(std::make_pair(fu->xid_,ts));
                 #endif
                 fu->notify_ready();
                // Log_debug("Running reply future for %d",v_reply_xid);
@@ -356,8 +356,8 @@ void TCPClient::handle_read() {
                 fu->notify_ready();
                 #ifdef RPC_STATISTICS
               
-                std::timespec ts;
-                std::timespec_get(&ts, TIME_UTC);
+                // std::timespec ts;
+                // std::timespec_get(&ts, TIME_UTC);
                // rJob->end_book.insert(std::make_pair(fu->xid_,ts));
                // Log_info("Inserted into %p",&(rJob->end_book));
                 #endif 
@@ -415,8 +415,8 @@ Future* TCPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) 
     *this << v64(fu->xid_);
     *this << rpc_id;
     #ifdef RPC_STATISTICS
-        std::timespec ts;
-        std::timespec_get(&ts, TIME_UTC);
+        // std::timespec ts;
+        // std::timespec_get(&ts, TIME_UTC);
         //rJob->start_book.insert(std::make_pair(fu->xid_, ts));
     #endif
     // one ref is already in pending_fu_

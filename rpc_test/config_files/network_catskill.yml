@@ -17,7 +17,7 @@ network:
       ip: 192.168.2.125
       port: 8000
 
-  - ampere02:
+  - ampere03:
       id: 3
       mac: 1c:02:dd:51:b2:af
       ip: 192.168.2.126

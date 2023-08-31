@@ -11,11 +11,7 @@ int main(int argc, char **argv) {
     
     rrr::Config::create_config(argc, argv);
     rrr::Config* conf = rrr::Config::get_config();
-    
-    #ifdef DPDK
-     rrr::DpdkTransport::create_transport(conf);
-    #endif
-    
+        
     Benchmarks bm(conf);
     bm.create_server();
     
