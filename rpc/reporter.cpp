@@ -53,14 +53,14 @@ std::vector<double> compute_percentile(std::unordered_map<uint64_t,std::timespec
     }
     //sorted_sample
     std::sort(std::begin(sample), std::end(sample), std::less<double>{});
-    uint32_t sample_size = sample.size();
-    uint32_t mid  = sample_size/2;
+    uint64_t sample_size = sample.size();
+    uint64_t mid  = sample_size/2;
     double median = (sample_size%2==1)? sample[mid]: (sample[mid]+sample[mid+1])/2;
-    uint32_t percentile_99th_i  =  (99*sample_size%100 == 0)? 99*sample_size/100: 99*sample_size/100+1; 
-    double percentile_99th = sample[percentile_99th_i];
+    uint64_t percentile_9999th_i  =  (9999*sample_size%10000 == 0)? 9999*sample_size/10000: (9999*sample_size/10000+1); 
+    double percentile_9999th = sample[percentile_9999th_i];
     percentiles.push_back(median);
-    percentiles.push_back(percentile_99th);
-    Log_info("Sample size %d, Median Latency: %f 99th: %f",sample_size,median,percentile_99th);
+    percentiles.push_back(percentile_9999th);
+    Log_info("Sample size %d, Median Latency: %f 99.99th: %f",sample_size,median,percentile_9999th);
     return percentiles;           
         
 }
