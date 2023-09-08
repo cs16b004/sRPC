@@ -14,6 +14,7 @@ class PollThread;
 class Reporter{
     protected:
         uint16_t period_; //period in milliseconds
+        bool is_client = false;
         #ifdef DPDK
         DpdkTransport *tl;
 
@@ -25,7 +26,7 @@ class Reporter{
         bool stop=false;
 
     public:
-        Reporter(uint16_t period, rrr::PollMgr* pm): period_(period), pm_(pm){
+        Reporter(uint16_t period, rrr::PollMgr* pm, bool is_clt): period_(period), pm_(pm), is_client(is_clt){
                 recorder = new pthread_t;
                 #ifdef DPDK
                 tl = DpdkTransport::get_transport();

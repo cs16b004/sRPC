@@ -2,7 +2,7 @@
 
 void Benchmarks::create_server(){
 
-     csi = new BenchmarkServiceImpl(conf->input_size_);
+     csi = new BenchmarkServiceImpl(conf->output_size_/64);
 
 
     pollmgr_ = new rrr::PollMgr(conf->server_poll_threads_);
@@ -21,7 +21,7 @@ void Benchmarks::create_server(){
     
     size_t idx = conf->server_address_.find(":");
     if (idx == std::string::npos) {
-        rrr::Log::error(__LINE__, __FILE__,"Badd address %s", conf->server_address_.c_str());
+        rrr::Log::error(__LINE__, __FILE__,"Bad address %s", conf->server_address_.c_str());
         return;
     }
    // std::string server_ip = conf->server_address_.substr(0, idx);
@@ -29,7 +29,7 @@ void Benchmarks::create_server(){
 
     
     
-    rrr::Reporter rep(5000,pollmgr_);
+    rrr::Reporter rep(5000,pollmgr_,false);
     
     server->start((std::string("0.0.0.0:") + port).c_str());
 
@@ -61,7 +61,7 @@ void Benchmarks::create_proxies(){
         service_proxies = new BenchmarkProxy*[conf->client_connections_];
 
         uint16_t input_size;
-        input_size = conf->input_size_/sizeof(rrr::i64);
+        input_size = conf->input_size_/64;
         for (int i=0; i < conf->client_connections_; i++) {
             #ifdef DPDK
                 rrr::UDPClient *client = new rrr::UDPClient(pollmgr_);
@@ -113,7 +113,7 @@ void Benchmarks::create_client_threads(){
         pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]) == 0;
     }
     set_cpu_affinity();
-    rrr::Reporter rep(500,pollmgr_);
+    rrr::Reporter rep(500,pollmgr_, true);
     rep.launch();
 
     

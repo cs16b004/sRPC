@@ -3,7 +3,10 @@
 #include <cstdint>
 #include "transport.hpp"
 #include "utils.hpp"
+#define _GNU_SOURCE
+#include <utmpx.h>
 
+   
 
 #define DPDK_RX_DESC_SIZE           1024
 #define DPDK_TX_DESC_SIZE           1024
@@ -459,18 +462,37 @@ void DpdkTransport::init(Config* config) {
         const char* argv_str = config->get_dpdk_options();
         tx_threads_ = config->num_rx_threads_;
         rx_threads_ = config->num_tx_threads_;
-       
+        std::bitset<128> affinity_mask;
+         for(int i=config->core_affinity_mask_[0];i <= config->core_affinity_mask_[1];i++)
+            affinity_mask.set(i);
         gettimeofday(&start_clock, NULL);
         main_thread = std::thread([this, argv_str](){
             this->init_dpdk_main_thread(argv_str);
         });
-    }
-    
-    init_lock.unlock();
 
-    
-    //sleep(200);
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        int core_id;
+        for(core_id=0; core_id< affinity_mask.size(); core_id++){
+            if (affinity_mask.test(core_id)){
+                //Log_debug("Setting cpu affinity to cpu: %d for thread id %s-%d",core_id,stringify(type_).c_str(),thread_id_);
+                CPU_SET(core_id, &cpuset);
+            }
+        }
+
+        int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+        assert((core_id <= num_cores));
+
+        int err = pthread_setaffinity_np(main_thread.native_handle(), sizeof(cpu_set_t), &cpuset);
+        if (err < 0) {
+            Log_error("Couldn't set affinity of thread DPDK_INIT_THREAD to core %d", core_id);
+            return;
+        }
+    }
+     init_lock.unlock();
+ 
 }
+    
 void DpdkTransport::create_transport(Config* config){
     if (transport_l == nullptr){
         transport_l = new DpdkTransport;
@@ -482,6 +504,17 @@ DpdkTransport* DpdkTransport::get_transport(){
     return transport_l;
 }
 void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
+    bool in_numa_node=false;
+    Config* conf = Config::get_config();
+    while(1){
+        if(sched_getcpu() >= (conf->cpu_info_.numa)*(conf->cpu_info_.core_per_numa)
+                || sched_getcpu() <= (conf->cpu_info_.numa +1)*(conf->cpu_info_.core_per_numa) ){
+            break;
+        }else{
+            Log_info("Waiting for scheduled on right node");
+            sleep(1);
+        }
+    }
     std::vector<const char*> dpdk_argv;
     char* tmp_arg = const_cast<char*>(argv_str);
     const char* arg_tok = strtok(tmp_arg, " ");
@@ -560,8 +593,8 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
     uint16_t lcore;
     rx_lcore_lim += numa_id * Config::get_config()->cpu_info_.core_per_numa;
     tx_lcore_lim += numa_id * Config::get_config()->cpu_info_.core_per_numa;
-    Log_info("rx_core limit: %d tx_core limit: %d",rx_lcore_lim,tx_lcore_lim);
-    for (lcore = numa_id * Config::get_config()->cpu_info_.core_per_numa + 1; lcore < rx_lcore_lim+1; lcore++) {
+    Log_info("rx_core limit: %d tx_core limit: %d, my core_id %d ",rx_lcore_lim+1,tx_lcore_lim+1, sched_getcpu());
+    for (lcore = numa_id * Config::get_config()->cpu_info_.core_per_numa + 1; lcore < rx_lcore_lim +1 ; lcore++) {
             
             int retval = rte_eal_remote_launch(dpdk_rx_loop, &thread_rx_info[lcore%rx_threads_], lcore );
             if (retval < 0)

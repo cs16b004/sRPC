@@ -19,14 +19,18 @@ class BenchmarkProxy:CounterProxy{
      std::vector<rrr::i32> out;
     public:
     BenchmarkProxy(uint16_t in_size, rrr::Client* cl): CounterProxy(cl), input_size(in_size){
+        
         for(int i=0;i<input_size;i++){
             in.push_back((rrr::i64)rand());
         }
+
+
     }
     void add_bench(){
        // add_bench(in,&out);
     }
     rrr::Future* add_bench_async(){
+        //rrr::Log::info(__LINE__,__FILE__, "Input size  = %d * 64",input_size);
         return async_add_bench(in);
     }
     void close(){
@@ -40,8 +44,13 @@ private:
     uint16_t out_size=1;
     rrr::PollMgr* pollmgr_;
     uint64_t count_=0;
+    std::vector<rrr::i32> out_vector;
 public:
-    BenchmarkServiceImpl(uint16_t num_out): out_size(num_out){}
+    BenchmarkServiceImpl(uint16_t num_out): out_size(num_out){
+        for(int i=0;i<num_out;i++){
+            out_vector.push_back((rrr::i32)1);
+        }
+    }
 
     void add() {
         count_++;
@@ -57,10 +66,9 @@ public:
         *out = a+1; 
     }
     void add_bench(const std::vector<rrr::i64>& in, std::vector<rrr::i32>* out ) {
+       // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
         count_++;
-        for(int i=0;i<out_size;i++){
-            (*out).push_back(1) ;
-        }
+        out = &out_vector;
     }
 };
 class Benchmarks{

@@ -64,33 +64,37 @@ void* Reporter::run(void* arg){
         double poll_count=0;
         for(int i=0;i<reporter->pm_->n_threads_;i++){
             for(auto poll_job: reporter->pm_->poll_threads_[i]->poll_set_){
-                job_count+= poll_job->read_and_set_counter(0);
+               
                 // deep copy the books to avoid locks;
-                poll_job->ts_lock.lock();
-                for (const auto& pair : poll_job->end_book) {
+                if(reporter->is_client){
+                    poll_job->ts_lock.lock();
+                    for (const auto& pair : poll_job->end_book) {
                         end_book_copy[pair.first] = deepCopyTimespec(pair.second);
-                }
-                for(const auto& pair: poll_job->start_book){
+                    }
+                    for(const auto& pair: poll_job->start_book){
                         start_book_copy[pair.first] = deepCopyTimespec(pair.second);
-                }
+                    }
                     poll_job->end_book.clear();
                     poll_job->start_book.clear();
                     lat_avg+= rrr::compute_avg(start_book_copy,end_book_copy);
                     start_book_copy.clear();
                     end_book_copy.clear();
                     poll_count++;
-                poll_job->ts_lock.unlock();
+                    poll_job->ts_lock.unlock();
+                }
+                else
+                     job_count+= poll_job->read_and_set_counter(0);
             }
 
-          
-            
-            }
-            Log_info("Across all poll, Average Latency %f micro-sec",lat_avg/poll_count);
-            Log_info("Total RPCs: %d, Throughput %f/s",job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
+        }
+            if(reporter->is_client)
+                Log_info("Across all poll, Average Latency %f micro-sec",lat_avg/poll_count);
+            else
+                Log_info("Total RPCs: %d, Throughput %f/s",job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
             last_job_count = job_count;
             job_count=0;
             diff_count=0; //ith pollable of poll manager;
-        }
+    }
     Log::info("Reporter Thread Stopped");
 }
 }
