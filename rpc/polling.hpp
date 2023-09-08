@@ -6,13 +6,14 @@
 //#include "rrr.hpp"
 #include "base/misc.hpp"
 #include <bitset>
-
+#include <ctime>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "base/all.hpp"
 
 #include "utils.hpp"
+#include <atomic>
 
 using rrr::FrequentJob;
 
@@ -23,28 +24,24 @@ class Pollable: public rrr::RefCounted {
 protected:
      #ifdef RPC_STATISTICS
         friend class Reporter;
+        std::unordered_map<uint64_t,std::timespec> start_book;
+        std::unordered_map<uint64_t,std::timespec> end_book;
+        
+        std::atomic<uint16_t> start_book_counter=0;
+        std::atomic<uint16_t> end_book_counter=0;
+        std::atomic<bool> consumed=false;
+        rrr::SpinLock ts_lock;
+    
         uint64_t clamps[200*1000] = {0};
         uint64_t counters[6] = {0};
         uint64_t batch_record[10000] = {0};
         uint16_t batch_id=0;
         SpinLock c_locks[6];
-        void record_batch(size_t batch_size){
-       
-            batch_record[batch_id] = batch_size;
-            batch_id++;
-            batch_id %= 10000;
-          
-        }
-        uint64_t read_and_set_counter(uint8_t id){
-            
-            return counters[id];
-        }
-
-        void count(uint8_t counter_id){
-            
-            counters[counter_id]++;
-            
-        }
+        void record_batch(size_t batch_size);
+        uint64_t read_and_set_counter(uint8_t id);
+        void count(uint8_t counter_id);
+        void put_start_ts(uint64_t xid);
+        void put_end_ts(uint64_t xid);
     #endif
     // RefCounted class requires protected destructor
     virtual ~Pollable() {}

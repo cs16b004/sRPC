@@ -15,45 +15,7 @@ namespace rrr {
 #ifdef RPC_STATISTICS
 class ReportLatencyJob: public FrequentJob{
     public:
-        std::unordered_map<uint64_t, std::timespec> start_book;
-        std::unordered_map<uint64_t, std::timespec> end_book;
-        ReportLatencyJob(){
-            #ifdef DPDK
-            set_period(10*100*100);
-            #else
-            set_period(300*1000);
-            #endif
-        }
-        double diff_timespec(const struct timespec &time1, const struct timespec &time0) {
-        if (time1.tv_sec - time0.tv_sec ==0)
-            return (time1.tv_nsec - time0.tv_nsec);
-        else{
-            //Log_info("Difference in seconds !!!! %d",time1.tv_sec - time0.tv_sec);
-            return 1000*1000*1000.0 + time1.tv_nsec - time0.tv_nsec ;
-        }
-        }
-        void run(){
-            uint64_t count=0;
-          
-                double_t nano_diff_sum = 0;
-                uint64_t freq = 0;
-               // Log_info("Read from %p",&end_book);
-               if(end_book.empty()){
-                return;
-               }
-                for(auto rec : end_book){
-                    if(start_book.find(rec.first) != start_book.end()){
-                        nano_diff_sum+= diff_timespec(rec.second,start_book[rec.first])/end_book.size(); 
-                        freq++;
-                    }
-                }
-                double_t avg_lat= nano_diff_sum;
-                Log_info("Sample Size : %d Average Latency in nano sec: %lf",freq,avg_lat);
-                
-                start_book.clear();
-                end_book.clear();
-            return;
-        }
+        
 };
 
 #endif
@@ -162,10 +124,7 @@ public:
 class Client: public Pollable {
 
 protected:
-    #ifdef RPC_STATISTICS
-        ReportLatencyJob* rJob;
-        friend class Reporter;
-    #endif
+    
     Marshal in_, out_;
     PollMgr* pollmgr_;
     enum {

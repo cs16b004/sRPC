@@ -17,11 +17,21 @@
 #include <rte_ip.h>
 #include <sys/time.h>
 #include <mutex>
+
+
+#define DEV_TX_OFFLOAD_VLAN_INSERT RTE_ETH_TX_OFFLOAD_VLAN_INSERT
+#define DEV_TX_OFFLOAD_IPV4_CKSUM RTE_ETH_TX_OFFLOAD_IPV4_CKSUM
+#define DEV_TX_OFFLOAD_UDP_CKSUM  RTE_ETH_TX_OFFLOAD_UDP_CKSUM
+#define DEV_TX_OFFLOAD_TCP_CKSUM  RTE_ETH_TX_OFFLOAD_TCP_CKSUM
+#define DEV_TX_OFFLOAD_SCTP_CKSUM RTE_ETH_TX_OFFLOAD_SCTP_CKSUM
+#define DEV_TX_OFFLOAD_TCP_TSO DEV_TX_OFFLOAD_TCP_CKSUM
+
 namespace rrr{
     
     struct Request;
     class UDPConnection;
     class UDPClient;
+    class Reporter;
     // Pakcet Type    
     const uint8_t SM = 0x07;
     const uint8_t RR = 0x09;
@@ -78,6 +88,9 @@ namespace rrr{
         friend class UDPServer;
         friend class UDPClient;
         friend class UDPConnection;
+        #ifdef RPC_STATISTICS
+        friend class Reporter;
+        #endif
     private:
         static DpdkTransport* transport_l;
         uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
@@ -107,7 +120,7 @@ namespace rrr{
         std::map<std::string, NetAddress> dest_addr_;
         SpinLock sm_queue_l;
         std::queue<Marshal*> sm_queue;
-        #ifdef RPC_STATISTICS
+        #ifdef RPC_MICRO_STATISTICS
         std::unordered_map<uint64_t,uint64_t> pkt_rx_ts;
         std::unordered_map<uint64_t,uint64_t> pkt_process_ts;
         std::unordered_map<uint64_t,uint64_t> pkt_complete_ts;

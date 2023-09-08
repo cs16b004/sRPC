@@ -191,8 +191,8 @@ static void gen_eth_header(rte_ether_hdr* eth_header, const uint8_t* src_mac,
   rte_ether_addr d_adr ;
   memcpy(s_adr.addr_bytes, src_mac, 6);
   memcpy(d_adr.addr_bytes, dst_mac, 6);
-  memcpy(&(eth_header->d_addr),&d_adr,sizeof(rte_ether_addr));
-  memcpy(&(eth_header->s_addr),&s_adr,sizeof(rte_ether_addr));
+  memcpy(&(eth_header->dst_addr),&d_adr,sizeof(rte_ether_addr));
+  memcpy(&(eth_header->src_addr),&s_adr,sizeof(rte_ether_addr));
    eth_header->ether_type = rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4);
 }
 

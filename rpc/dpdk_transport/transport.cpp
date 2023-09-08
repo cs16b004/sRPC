@@ -252,13 +252,16 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         // }
        // printf("\n\n");
         uint8_t pkt_type;
-        #ifdef RPC_STATISTICS
+        #ifdef RPC_MICRO_STATISTICS
         //read pkt id last 8 bytes are reserved for pkt id
         uint64_t pkt_id;
         rte_memcpy((uint8_t*) &pkt_id, pkt_ptr + rx_info->buf[i]->data_len - sizeof(uint64_t), sizeof(uint64_t));
    
-        Log_debug("Received packet with id %lld. total size %d, id offset: %d",pkt_id, rx_info->buf[i]->data_len, rx_info->buf[i]->data_len - sizeof(uint64_t) );
-        pkt_rx_ts[pkt_id] = rrr::rdtsc();
+        
+        uint64_t ts = rrr::rdtsc();
+        pkt_rx_ts[pkt_id] = ts;
+        Log_debug("Received packet with id %lld. total size %d, id offset: %d, data offset %d, ts: %lld",
+            pkt_id, rx_info->buf[i]->data_len, rx_info->buf[i]->data_len - sizeof(uint64_t), data_offset+1,  ts);
         #endif
         Log_debug("Processing incoming packet for %s",src_addr.c_str());
         mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
@@ -376,7 +379,7 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
     data_offset+=length;
 
 
-     #ifdef RPC_STATISTICS // add a pkt id to each packet sent , to see where it spends the most time.
+     #ifdef RPC_MICRO_STATISTICS // add a pkt id to each packet sent , to see where it spends the most time.
         pkt_counter++;
         Log_debug("Setting ID offset: %d,", data_offset);
         rte_memcpy(pkt_buf + data_offset, (uint8_t*)&pkt_counter, sizeof(uint64_t));
@@ -390,7 +393,7 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
     }
     data_size = std::max(data_size,64);
 
-    tx_info->buf[tx_info->count]->ol_flags = (PKT_TX_IPV4| PKT_TX_IP_CKSUM | PKT_TX_UDP_CKSUM);
+    tx_info->buf[tx_info->count]->ol_flags =  RTE_MBUF_F_TX_IPV4 | RTE_MBUF_F_TX_IP_CKSUM | RTE_MBUF_F_TX_UDP_CKSUM;
     tx_info->buf[tx_info->count]->nb_segs = 1;
     tx_info->buf[tx_info->count]->pkt_len = data_size;
      tx_info->buf[tx_info->count]->l2_len = sizeof(struct rte_ether_hdr);
@@ -617,13 +620,7 @@ int DpdkTransport::port_init(uint16_t port_id) {
     struct rte_eth_dev_info dev_info;
     struct rte_eth_txconf txconf;
     struct rte_eth_rxconf rxconf;
-    struct rte_device *dev;
-
-    dev = rte_eth_devices[port_id].device;
-    if (dev == nullptr) {
-        Log_error("Port %d is already removed", port_id);
-        return -1;
-    }
+     
 
     if (!rte_eth_dev_is_valid_port(port_id))
         return -1;
@@ -640,9 +637,6 @@ int DpdkTransport::port_init(uint16_t port_id) {
     memset(&txconf, 0x0, sizeof(struct rte_eth_txconf));
     memset(&rxconf, 0x0, sizeof(struct rte_eth_rxconf));
     port_conf = {
-		.rxmode = {
-			.split_hdr_size = 0,
-		},
 		.txmode = {
 			.offloads =
 				DEV_TX_OFFLOAD_VLAN_INSERT |
@@ -656,7 +650,8 @@ int DpdkTransport::port_init(uint16_t port_id) {
     
     port_conf.txmode.offloads &= dev_info.tx_offload_capa;
 
-    rxconf = dev_info.default_rxconf;
+     memcpy((void*)(&rxconf) , (void*)&(dev_info.default_rxconf),sizeof(struct rte_eth_rxconf));
+
 	rxconf.offloads = port_conf.rxmode.offloads;
     
     retval = rte_eth_dev_configure(port_id, rx_queue_, tx_queue_, &port_conf);
@@ -734,11 +729,7 @@ int DpdkTransport::port_close(uint16_t port_id) {
 }
 
 int DpdkTransport::port_reset(uint16_t port_id) {
-    struct rte_device* dev = rte_eth_devices[port_id].device;
-    if (dev == nullptr) {
-        Log_error("Port %d is already removed", port_id);
-        return -1;
-    }
+   
 
     int retval = port_close(port_id);
     if (retval < 0) {
@@ -767,18 +758,11 @@ void DpdkTransport::shutdown() {
 
   //  qdma_port_info::print_opennic_regs(port_info_[0].user_bar_idx);
     for (int port_id = 0; port_id < port_num_; port_id++) {
-        struct rte_device *dev = rte_eth_devices[port_id].device;
-        if (dev == nullptr) {
-            Log_error("Port %d is already removed", port_id);
-            continue;
-        }
+        
 
         rte_eth_dev_stop(port_id);
         rte_eth_dev_close(port_id);
-        int ret = rte_dev_remove(dev);
-        if (ret < 0)
-            Log_error("Failed to remove device on port: %d", port_id);
-
+        
     }
 
     rte_eal_cleanup();

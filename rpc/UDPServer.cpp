@@ -74,8 +74,8 @@ void UDPConnection::handle_read() {
     }
 
     int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
-    #ifdef RPC_STATISTICS
-      
+    #ifdef RPC_MICRO_STATISTICS
+     std::unordered_map<uint64_t, uint64_t> rx_pkt_ids;
     #endif
     if (bytes_read == 0) {
       
@@ -96,18 +96,20 @@ void UDPConnection::handle_read() {
 
             Request* req = new Request;
             verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
-             #ifdef RPC_STATISTICS
+            
+            v64 v_xid;
+            req->m >> v_xid;
+            req->xid = v_xid.get();
+            complete_requests.push_back(req);
+            #ifdef RPC_MICRO_STATISTICS
             // Read packet ID
             Marshal id;
             uint64_t pkt_id;
             id.read_from_marshal(in_,sizeof(uint64_t));
             id >> pkt_id;
-            rx_pkt_ids.push_back(pkt_id);
+            Log_debug("Packet Id processed by app thread %d", pkt_id);
+            rx_pkt_ids[v_xid.get()] = pkt_id;
             #endif
-            v64 v_xid;
-            req->m >> v_xid;
-            req->xid = v_xid.get();
-            complete_requests.push_back(req);
 
         } else {
             // Log_debug("packet not complete or there's no more packet to process");
@@ -160,6 +162,12 @@ void UDPConnection::handle_read() {
             end_reply();
             delete req;
         }
+        #ifdef RPC_MICRO_STATISTICS
+        uint64_t ts = rrr::rdtsc();
+
+        (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
+        Log_debug("Putting ts %lld in %lld", ts,rx_pkt_ids[req->xid]);
+        #endif
     }
 }
 

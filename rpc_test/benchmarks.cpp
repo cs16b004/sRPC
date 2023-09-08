@@ -72,6 +72,7 @@ void Benchmarks::create_proxies(){
             client->connect(conf->server_address_.c_str());
             service_proxies[i] = new BenchmarkProxy(input_size,client);
         }
+       
 }
 void* Benchmarks::launch_client_thread(void *arg){
     benchmark_thread_info* ct = (benchmark_thread_info*)arg;
@@ -89,6 +90,7 @@ void* Benchmarks::launch_client_thread(void *arg){
         #endif
     }
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d stopped", ct->tid);
+      
     int *a  = new int;
     return (void*) a;
 }
@@ -111,6 +113,8 @@ void Benchmarks::create_client_threads(){
         pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]) == 0;
     }
     set_cpu_affinity();
+    rrr::Reporter rep(500,pollmgr_);
+    rep.launch();
 
     
     

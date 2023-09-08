@@ -6,14 +6,18 @@
 #include "polling.hpp"
 #include "base/threading.hpp"
 #include "base/logging.hpp"
-
-
+#include "dpdk_transport/transport.hpp"
+#include <unordered_map>
 namespace rrr{
 class PollThread;
+
 class Reporter{
     protected:
         uint16_t period_; //period in milliseconds
+        #ifdef DPDK
+        DpdkTransport *tl;
 
+        #endif
        // rrr::ThreadPool* thp_ ; //threadpool to collect stats from 
         rrr::PollMgr* pm_ ; //poll manager to collect stats from
         
@@ -23,7 +27,9 @@ class Reporter{
     public:
         Reporter(uint16_t period, rrr::PollMgr* pm): period_(period), pm_(pm){
                 recorder = new pthread_t;
-                
+                #ifdef DPDK
+                tl = DpdkTransport::get_transport();
+                #endif
             }
         void launch();
         static void* run(void* arg);
@@ -31,6 +37,8 @@ class Reporter{
         void trigger_shutdown(){
             stop = true;
         }
+       // double compute_avg(std::unordered_map<uint64_t,std::timespec>& end_book, 
+       //         std::unordered_map<uint64_t,std::timespec>& start_book);
         
 };
 }

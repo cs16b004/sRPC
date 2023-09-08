@@ -91,6 +91,14 @@ class Benchmarks{
     void observe_client();
     void observe_server();
     void stop_client();
+    double diff_timespec(const struct timespec &time1, const struct timespec &time0) {
+        if (time1.tv_sec - time0.tv_sec ==0)
+            return (time1.tv_nsec - time0.tv_nsec);
+        else{
+            //Log_info("Difference in seconds !!!! %d",time1.tv_sec - time0.tv_sec);
+            return 1000*1000*1000.0 + time1.tv_nsec - time0.tv_nsec ;
+        }
+        }
  
 
     
