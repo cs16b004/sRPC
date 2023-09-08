@@ -37,6 +37,33 @@ double compute_avg(std::unordered_map<uint64_t,std::timespec>& start_book,
 
 
 }
+std::vector<double> compute_percentile(std::unordered_map<uint64_t,std::timespec>& start_book,
+    std::unordered_map<uint64_t,std::timespec>& end_book){
+            
+    std::vector<double> percentiles;
+    std::vector<double>sample;
+    if(end_book.empty()){
+        return percentiles;
+    }
+    for(auto rec : end_book){
+        if(start_book.find(rec.first) != start_book.end()){
+            sample.push_back(diff_timespec(rec.second,start_book[rec.first])); 
+                      
+        }
+    }
+    //sorted_sample
+    std::sort(std::begin(sample), std::end(sample), std::less<double>{});
+    uint32_t sample_size = sample.size();
+    uint32_t mid  = sample_size/2;
+    double median = (sample_size%2==1)? sample[mid]: (sample[mid]+sample[mid+1])/2;
+    uint32_t percentile_99th_i  =  (99*sample_size%100 == 0)? 99*sample_size/100: 99*sample_size/100+1; 
+    double percentile_99th = sample[percentile_99th_i];
+    percentiles.push_back(median);
+    percentiles.push_back(percentile_99th);
+    Log_info("Sample size %d, Median Latency: %f 99th: %f",sample_size,median,percentile_99th);
+    return percentiles;           
+        
+}
 std::timespec deepCopyTimespec(const std::timespec& src) {
     std::timespec copy;
     copy.tv_sec = src.tv_sec;
@@ -76,11 +103,16 @@ void* Reporter::run(void* arg){
                     }
                     poll_job->end_book.clear();
                     poll_job->start_book.clear();
-                    lat_avg+= rrr::compute_avg(start_book_copy,end_book_copy);
-                    start_book_copy.clear();
-                    end_book_copy.clear();
                     poll_count++;
                     poll_job->ts_lock.unlock();
+                    
+                    lat_avg+= rrr::compute_avg(start_book_copy,end_book_copy);
+                    
+                    compute_percentile(start_book_copy,end_book_copy);
+
+                    start_book_copy.clear();
+                    end_book_copy.clear();
+                    
                 }
                 else
                      job_count+= poll_job->read_and_set_counter(0);
