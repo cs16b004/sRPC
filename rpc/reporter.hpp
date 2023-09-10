@@ -12,7 +12,7 @@ namespace rrr{
 class PollThread;
 
 class Reporter{
-    protected:
+    public:
         uint16_t period_; //period in milliseconds
         bool is_client = false;
         #ifdef DPDK
@@ -37,6 +37,8 @@ class Reporter{
         
         void trigger_shutdown(){
             stop = true;
+            void ** ret;
+            Pthread_join(*recorder, ret);
         }
        // double compute_avg(std::unordered_map<uint64_t,std::timespec>& end_book, 
        //         std::unordered_map<uint64_t,std::timespec>& start_book);

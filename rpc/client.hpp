@@ -168,17 +168,22 @@ public:
 
     template<class T>
     Client& operator <<(const T& v) {
+       
         if (status_ == CONNECTED) {
             this->out_ << v;
         }
+       
         return *this;
+        
     }
 
     // NOTE: this function is used *internally* by Python extension
     Client& operator <<(Marshal& m) {
+      
         if (status_ == CONNECTED) {
             this->out_.read_from_marshal(m, m.content_size());
         }
+      
         return *this;
     }    
 };
@@ -195,7 +200,7 @@ class UDPClient: public Client{
     public:
         void handle_read();
         void handle_write(){
-            verify(0);
+            pollmgr_->update_mode(this, Pollable::READ);
         }
         void handle_error(){
             verify(0);

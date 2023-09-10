@@ -11,8 +11,8 @@ namespace rrr{
         }
  }
 void Reporter::launch(){
-    Pthread_create(recorder,nullptr,this->run,this);
-    Pthread_join(*recorder,nullptr);
+    Pthread_create(recorder,nullptr,Reporter::run,this);
+
 }
 double compute_avg(std::unordered_map<uint64_t,std::timespec>& start_book,
                 std::unordered_map<uint64_t,std::timespec>& end_book){
@@ -79,8 +79,12 @@ void* Reporter::run(void* arg){
   
     std::unordered_map<uint64_t, std::timespec> start_book_copy;
     std::unordered_map<uint64_t, std::timespec> end_book_copy;
+    int i=0;
     while(! reporter->stop){
+        
         usleep(reporter->period_ * 1000);
+        i+=reporter->period_ * 1000;
+        Log_debug("Time since launched %fs, stop flag %d",i*1.0/(1000*1000),reporter->stop);
         #ifdef RPC_MICRO_STATISTICS
             for(auto entry: reporter->tl->pkt_process_ts){
                 Log_debug("diff for id %d -> %d cycles",entry.first, entry.second - reporter->tl->pkt_rx_ts[entry.first] );

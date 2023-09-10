@@ -168,7 +168,28 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
     Log_info("Entering TX thread %d at lcore %d",tx_info->thread_id,rte_lcore_id());
     dpdk_th->initialize_tx_mbufs(arg);
     while(!dpdk_th->force_quit){
-        dpdk_th->tx_loop_one(reinterpret_cast<dpdk_thread_info*>(arg));
+        //usleep(1000);
+        unsigned lcore_id = rte_lcore_id();
+    std::vector<Marshal*> requests;
+    if(unlikely(dpdk_th->config_->client_connections_ < dpdk_th->out_connections.size()))
+        dpdk_th->conn_lock.lock();
+    for(auto const& entry:tx_info->dpdk_th->out_connections){
+       
+        verify(entry.second != nullptr);
+        entry.second->outl.lock();
+            if(!entry.second->out_messages.empty()){
+                 TransportMarshal* req = entry.second->out_messages.front();
+                    
+                 dpdk_th->send(req->payload,req->n_bytes,entry.first,tx_info,rrr::RR);
+                 
+                entry.second->out_messages.pop();
+            }
+        entry.second->outl.unlock();
+        
+    }
+    if(unlikely(dpdk_th->config_->client_connections_ < dpdk_th->out_connections.size()))
+        dpdk_th->conn_lock.unlock();
+        //dpdk_th->tx_loop_one(reinterpret_cast<dpdk_thread_info*>(arg));
     }
     return 0;
 }
@@ -183,11 +204,12 @@ void DpdkTransport::tx_loop_one(dpdk_thread_info *arg){
         verify(entry.second != nullptr);
         entry.second->outl.lock();
             if(!entry.second->out_messages.empty()){
-                 Marshal* req = entry.second->out_messages.front();
-                 size_t n_bytes = req->content_size();
-                 uint8_t payload[n_bytes];
-                 req->read(payload,n_bytes);
-                 send(payload,n_bytes,entry.first,tx_info,rrr::RR);
+                 TransportMarshal* req = entry.second->out_messages.front();
+                 assert(req != nullptr);
+                 assert(tx_info != nullptr);
+
+                    
+                 send(req->payload,req->n_bytes,entry.first,tx_info,0x09);
                  
                 entry.second->out_messages.pop();
             }

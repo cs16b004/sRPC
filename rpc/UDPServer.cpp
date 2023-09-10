@@ -56,11 +56,14 @@ void UDPConnection::end_reply() {
     // always enable write events since the code above gauranteed there
     // will be some data to send
     server_->pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
-     Marshal *new_reply = new Marshal() ;
-     new_reply->read_from_marshal(out_,out_.content_size());
-
+    uint32_t n_bytes = out_.content_size();
+     TransportMarshal *new_reply = new TransportMarshal(n_bytes) ;
+    out_.read(new_reply->payload, n_bytes);
+       ((UDPServer*)server_)->transport_->out_connections[connId]->outl.lock();
+ ((UDPServer*)server_)->transport_->out_connections[connId]->out_messages.push(new_reply);
+    ((UDPServer*)server_)->transport_->out_connections[connId]->outl.unlock();
     //Log_debug("Reply content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
-    ((UDPServer*)server_)->transport_->out_connections[connId]->out_messages.push(new_reply);
+   
 
     out_l_.unlock();
 

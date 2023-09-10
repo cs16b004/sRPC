@@ -72,12 +72,20 @@ namespace rrr{
         std::string getAddr();
         std::string to_string();
     };
-    
+    struct TransportMarshal{
+        uint8_t *payload;
+        uint32_t n_bytes;
+        TransportMarshal(uint32_t size){
+            payload = new uint8_t[size];
+            n_bytes = size;
+
+        }
+    };
     struct TransportConnection{
         int in_fd_;
         int wfd;
         SpinLock outl;
-        std::queue<Marshal*> out_messages;
+        std::queue<TransportMarshal*> out_messages;
         NetAddress out_addr;
         //My port nbumber ;
         uint16_t udp_port;

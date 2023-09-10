@@ -14,7 +14,7 @@ struct benchmark_thread_info;
 class BenchmarkProxy:CounterProxy{
     private:
     uint16_t input_size;
-
+    
     std::vector<rrr::i64> in;
      std::vector<rrr::i32> out;
     public:
@@ -75,6 +75,7 @@ class Benchmarks{
     BenchmarkServiceImpl *csi;
     BenchmarkProxy** service_proxies;
     pthread_t** client_threads;
+    rrr::Reporter* rep;
     std::bitset<128> affinity_mask;
 
     struct benchmark_thread_info** thread_info;

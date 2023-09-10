@@ -29,16 +29,16 @@ void Benchmarks::create_server(){
 
     
     
-    rrr::Reporter rep(5000,pollmgr_,false);
+    rep = new rrr::Reporter(5000,pollmgr_,false);
     
     server->start((std::string("0.0.0.0:") + port).c_str());
 
-    rep.launch();
+    rep->launch();
     
     observe_server();
 
     server->stop();
-    rep.trigger_shutdown();
+    rep->trigger_shutdown();
 
     #ifdef DPDK
         rrr::DpdkTransport::get_transport()->trigger_shutdown();
@@ -104,7 +104,7 @@ void Benchmarks::create_client_threads(){
     int ret;
     for(int j=0;j<conf->num_client_threads_;j++){
         client_threads[j] = (pthread_t*) malloc(sizeof(pthread_t));
-        rrr::Log::info("New client thread created %d",j);
+        rrr::Log::info(__LINE__,__FILE__,"New client thread created %d, with client %d",j, j%conf->client_connections_);
 
     }
     //set_cpu_affinity();
@@ -113,8 +113,8 @@ void Benchmarks::create_client_threads(){
         pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]) == 0;
     }
     set_cpu_affinity();
-    rrr::Reporter rep(500,pollmgr_, true);
-    rep.launch();
+     rep = new rrr::Reporter(500,pollmgr_, true);
+    rep->launch();
 
     
     
@@ -160,7 +160,7 @@ void Benchmarks::set_cpu_affinity(){
 
 }
 void Benchmarks::stop_client(){
-    
+        
        for(int i=0; i< conf->num_client_threads_; i++){
          thread_info[i]->stop = true;
          
@@ -171,6 +171,7 @@ void Benchmarks::stop_client(){
        for(int i=0; i< conf->client_connections_; i++){
             service_proxies[i]->close();
        }
+       rep->trigger_shutdown();
        pollmgr_->release();
        
 }
