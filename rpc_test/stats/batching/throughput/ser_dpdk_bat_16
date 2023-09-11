@@ -1,0 +1,89 @@
+I [config.cpp:55] 2023-09-11 22:22:39.547 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:100] 2023-09-11 22:22:39.550 | Loading CPU Config
+I [config.cpp:55] 2023-09-11 22:22:39.550 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:55] 2023-09-11 22:22:39.551 | Loading configuration from : config_files/host_catskill.yml
+I [config.cpp:55] 2023-09-11 22:22:39.552 | Loading configuration from : config_files/network_catskill.yml
+I [config.cpp:55] 2023-09-11 22:22:39.554 | Loading configuration from : config_files/benchmarks.yml
+I [transport.cpp:694] 2023-09-11 22:22:39.557 | Setting up network info....
+I [transport.cpp:710] 2023-09-11 22:22:39.557 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 22:22:39.557 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 22:22:39.557 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 22:22:39.557 | Adding a host with name ampere03 : info :
+ [ Name: ampere03
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:699] 2023-09-11 22:22:39.557 | Configuring local address 4, 172.19.0.121
+I [transport.cpp:710] 2023-09-11 22:22:39.557 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:710] 2023-09-11 22:22:39.557 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:534] 2023-09-11 22:22:39.557 | Thread counter 0, num_rx_threads 1, tx_threads 1
+I [transport.cpp:1035] 2023-09-11 22:22:40.226 | Flow isolation enabled for port 0
+
+I [transport.cpp:1105] 2023-09-11 22:22:40.258 | IP Address to be queued 172.19.0.121
+I [transport.cpp:1133] 2023-09-11 22:22:40.282 | Flow Rule Added for IP Address : 172.19.0.121
+I [transport.cpp:655] 2023-09-11 22:22:40.282 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:661] 2023-09-11 22:22:40.282 | Total Cores available: 33
+I [transport.cpp:670] 2023-09-11 22:22:40.282 | rx_core limit: 2 tx_core limit: 3, my core_id 0 
+I [transport.cpp:273] 2023-09-11 22:22:40.282 | Enter receive thread 0 on core 1 on port_id 0 on queue 0
+I [transport.cpp:216] 2023-09-11 22:22:40.282 | Entering TX thread 0 at lcore 2
+I [UDPServer.cpp:334] 2023-09-11 22:22:40.283 | Starting Server Loop
+I 2023-09-11 22:22:40.283 | Reporter Thread Launched, Observing 1 poll threads
+I [reporter.cpp:131] 2023-09-11 22:22:42.784 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 22:22:44.560 | SM REQ to connect 172.19.0.122:9000
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 22:22:44.560 | Chosen threads for new conn: 1, tx-thread 0, next_thread_ 1
+I [transport.cpp:124] 2023-09-11 22:22:44.560 | Added [172.19.0.122:9000::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9000
+], fd r: 156, w: 157
+I [reporter.cpp:131] 2023-09-11 22:22:45.284 | Total RPCs: 0, Throughput 0.000000/s
+I [reporter.cpp:131] 2023-09-11 22:22:47.785 | Total RPCs: 244976, Throughput 97990.400000/s
+I [reporter.cpp:131] 2023-09-11 22:22:50.285 | Total RPCs: 275567, Throughput 110226.800000/s
+I [reporter.cpp:131] 2023-09-11 22:22:52.785 | Total RPCs: 289870, Throughput 115948.000000/s
+I [reporter.cpp:131] 2023-09-11 22:22:55.285 | Total RPCs: 283471, Throughput 113388.400000/s
+I [reporter.cpp:131] 2023-09-11 22:22:57.785 | Total RPCs: 286953, Throughput 114781.200000/s
+I [reporter.cpp:131] 2023-09-11 22:23:00.285 | Total RPCs: 298021, Throughput 119208.400000/s
+I [reporter.cpp:131] 2023-09-11 22:23:02.785 | Total RPCs: 295062, Throughput 118024.800000/s
+I [reporter.cpp:131] 2023-09-11 22:23:05.286 | Total RPCs: 294160, Throughput 117664.000000/s
+I [reporter.cpp:131] 2023-09-11 22:23:07.786 | Total RPCs: 45536, Throughput 18214.400000/s
+I [reporter.cpp:131] 2023-09-11 22:23:10.286 | Total RPCs: 0, Throughput 0.000000/s
+I [reporter.cpp:131] 2023-09-11 22:23:12.786 | Total RPCs: 0, Throughput 0.000000/s
