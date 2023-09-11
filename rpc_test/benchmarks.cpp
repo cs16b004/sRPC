@@ -29,7 +29,7 @@ void Benchmarks::create_server(){
 
     
     
-    rep = new rrr::Reporter(5000,pollmgr_,false);
+    rep = new rrr::Reporter(2500,pollmgr_,false);
     
     server->start((std::string("0.0.0.0:") + port).c_str());
 
@@ -85,7 +85,7 @@ void* Benchmarks::launch_client_thread(void *arg){
         fg.wait_all();
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG
-        break;
+        //break;
         #endif
         #endif
     }

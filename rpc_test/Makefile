@@ -16,7 +16,7 @@ debug: all
 stat: CXXFLAGS += -g3 -O0 -DRPC_STATISTICS
 stat: all 
 
-dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS -DLOG_LEVEL_AS_DEBUG
+dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS
 dpdk_debug: all
 
 dpdk_stat: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS

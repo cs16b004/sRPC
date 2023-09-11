@@ -52,15 +52,17 @@ std::vector<double> compute_percentile(std::unordered_map<uint64_t,std::timespec
         }
     }
     //sorted_sample
-    std::sort(std::begin(sample), std::end(sample), std::less<double>{});
-    uint64_t sample_size = sample.size();
-    uint64_t mid  = sample_size/2;
-    double median = (sample_size%2==1)? sample[mid]: (sample[mid]+sample[mid+1])/2;
-    uint64_t percentile_9999th_i  =  (9999*sample_size%10000 == 0)? 9999*sample_size/10000: (9999*sample_size/10000+1); 
-    double percentile_9999th = sample[percentile_9999th_i];
-    percentiles.push_back(median);
-    percentiles.push_back(percentile_9999th);
-    Log_info("Sample size %d, Median Latency: %f 99.99th: %f",sample_size,median,percentile_9999th);
+    if(sample.size() > 0){
+        std::sort(std::begin(sample), std::end(sample), std::less<double>{});
+        uint64_t sample_size = sample.size();
+        uint64_t mid  = sample_size/2;
+        double median = (sample_size%2==1)? sample[mid]: (sample[mid]+sample[mid+1])/2;
+        uint64_t percentile_9999th_i  =  (9999*sample_size%10000 == 0)? 9999*sample_size/10000: (9999*sample_size/10000+1); 
+        double percentile_9999th = sample[percentile_9999th_i];
+        percentiles.push_back(median);
+        percentiles.push_back(percentile_9999th);
+        Log_info("Sample size %d, Median Latency: %f 99.99th: %f",sample_size,median,percentile_9999th);
+    }
     return percentiles;           
         
 }

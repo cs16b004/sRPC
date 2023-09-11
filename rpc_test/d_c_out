@@ -1,0 +1,84 @@
+I [config.cpp:55] 2023-09-10 22:38:52.520 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:100] 2023-09-10 22:38:52.522 | Loading CPU Config
+I [config.cpp:55] 2023-09-10 22:38:52.523 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:55] 2023-09-10 22:38:52.524 | Loading configuration from : config_files/host_greenport.yml
+I [config.cpp:55] 2023-09-10 22:38:52.525 | Loading configuration from : config_files/network_greenport.yml
+I [config.cpp:55] 2023-09-10 22:38:52.527 | Loading configuration from : config_files/benchmarks.yml
+I [transport.cpp:688] 2023-09-10 22:38:52.529 | Setting up network info....
+I [transport.cpp:704] 2023-09-10 22:38:52.529 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:704] 2023-09-10 22:38:52.529 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:704] 2023-09-10 22:38:52.529 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:704] 2023-09-10 22:38:52.529 | Adding a host with name ampere03 : info :
+ [ Name: ampere03
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:704] 2023-09-10 22:38:52.529 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:693] 2023-09-10 22:38:52.529 | Configuring local address 5, 172.19.0.122
+I [transport.cpp:704] 2023-09-10 22:38:52.529 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+D [polling.cpp:90] 2023-09-10 22:38:52.530 | Poll Thread 0 started
+D [polling.cpp:90] 2023-09-10 22:38:52.531 | Poll Thread 1 started
+D [polling.cpp:90] 2023-09-10 22:38:52.533 | Poll Thread 2 started
+D [polling.cpp:90] 2023-09-10 22:38:52.534 | Poll Thread 3 started
+I [transport.cpp:1029] 2023-09-10 22:38:54.114 | Flow isolation enabled for port 0
+
+D [transport.cpp:810] 2023-09-10 22:38:54.166 | Create rx thread 0 info on port 0 and queue 0
+D [transport.cpp:810] 2023-09-10 22:38:54.166 | Create rx thread 1 info on port 0 and queue 1
+D [transport.cpp:816] 2023-09-10 22:38:54.166 | Create tx thread 0 info on port 0 and queue 0
+D [transport.cpp:816] 2023-09-10 22:38:54.166 | Create tx thread 1 info on port 0 and queue 1
+I [transport.cpp:1099] 2023-09-10 22:38:54.166 | IP Address to be queued 172.19.0.122
+I [transport.cpp:1127] 2023-09-10 22:38:54.183 | Flow Rule Added for IP Address : 172.19.0.122
+I [transport.cpp:649] 2023-09-10 22:38:54.183 | DPDK tx threads 2, rx threads 2
+I [transport.cpp:655] 2023-09-10 22:38:54.183 | Total Cores available: 33
+I [transport.cpp:664] 2023-09-10 22:38:54.183 | rx_core limit: 3 tx_core limit: 5, my core_id 0 
+I [transport.cpp:273] 2023-09-10 22:38:54.183 | Enter receive thread 1 on core 1 on port_id 0 on queue 1
+I [transport.cpp:273] 2023-09-10 22:38:54.183 | Enter receive thread 0 on core 2 on port_id 0 on queue 0
+I [transport.cpp:216] 2023-09-10 22:38:54.184 | Entering TX thread 1 at lcore 3
+I [transport.cpp:216] 2023-09-10 22:38:54.184 | Entering TX thread 0 at lcore 4
+D [transport.cpp:147] 2023-09-10 22:38:54.185 | Connecting to a server : 172.19.0.121:8501
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:171] 2023-09-10 22:38:54.187 | Chosen threads for new conn: 0  is rx-thread: 0, tx-thread 19
+D [transport.cpp:475] 2023-09-10 22:38:54.187 | Sending Packet from connID 1, thread 0
+D [transport.cpp:476] 2023-09-10 22:38:54.188 | send packet to server 
+[ IP: 172.19.0.121
+  mac: e4:1d:2d:f2:9e:5c
+ port: 8501
+] with size of 73, pkt type 0x 7

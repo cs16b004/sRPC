@@ -87,6 +87,7 @@ namespace rrr{
         SpinLock outl;
         std::queue<TransportMarshal*> out_messages;
         NetAddress out_addr;
+        NetAddress src_addr;
         //My port nbumber ;
         uint16_t udp_port;
         bool connected_ = false;
@@ -101,6 +102,8 @@ namespace rrr{
         #endif
     private:
         static DpdkTransport* transport_l;
+        std::map<std::string,uint32_t> addr_lookup_table;
+        std::map<uint32_t, TransportConnection*> out_connections;
         uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
         uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
@@ -108,21 +111,20 @@ namespace rrr{
         int port_num_ = 0;
         int tx_threads_ = 0;
         int rx_threads_ = 0;
-        uint16_t conn_counter=0;
-        SpinLock conn_lock;
+        
         uint16_t rx_queue_ = 1, tx_queue_ = 1;
         struct rte_mempool **tx_mbuf_pool;
         struct rte_mempool **rx_mbuf_pool;
         uint16_t u_port_counter = 9000;
+        uint16_t conn_counter=0;
         rrr::SpinLock pc_l;
       //  std::map<uint16_t,rrr::Connection*> connections_;
-        SpinLock connLock;
+        SpinLock conn_th_lock;
         SpinLock init_lock;
         
         bool initiated=false;
         
-        std::map<std::string,uint32_t> addr_lookup_table;
-        std::map<uint32_t, TransportConnection*> out_connections;
+        uint64_t next_thread_ = 0;
         
         std::map<std::string, NetAddress> src_addr_;
         std::map<std::string, NetAddress> dest_addr_;
@@ -137,8 +139,8 @@ namespace rrr{
         #endif
         
 
-        struct dpdk_thread_info *thread_rx_info{nullptr};
-        struct dpdk_thread_info *thread_tx_info{nullptr};
+        struct dpdk_thread_info **thread_rx_info{nullptr};
+        struct dpdk_thread_info **thread_tx_info{nullptr};
         struct qdma_port_info *port_info_{nullptr};
         struct timeval start_clock, current;
         
@@ -163,7 +165,7 @@ namespace rrr{
         
         void process_incoming_packets(dpdk_thread_info* rx_buf_info);
       
-        int make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id);
+        
         int isolate(uint8_t phy_port);
         void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
         void send(uint8_t* payload, unsigned length,
@@ -208,6 +210,10 @@ public:
         int queue_id;
         int count = 0;
         int max_size=100;
+        uint16_t conn_counter=0;
+        SpinLock conn_lock;
+        std::map<uint32_t, TransportConnection*> out_connections;
+        std::map<std::string,uint32_t> addr_lookup_table;
         packet_stats stat;
         int udp_port_id = 0;
         struct rte_mbuf **buf{nullptr};
@@ -217,6 +223,7 @@ public:
         void init(DpdkTransport* th, int th_id, int p_id,
                   int q_id, int burst_size);
         int buf_alloc(struct rte_mempool* mbuf_pool);
+        int make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id);
 
         ~dpdk_thread_info() {
             if (buf)
