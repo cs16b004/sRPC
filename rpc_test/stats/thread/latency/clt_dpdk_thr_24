@@ -1,0 +1,775 @@
+I [config.cpp:55] 2023-09-11 23:45:11.644 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:100] 2023-09-11 23:45:11.646 | Loading CPU Config
+I [config.cpp:55] 2023-09-11 23:45:11.647 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:55] 2023-09-11 23:45:11.648 | Loading configuration from : config_files/host_greenport.yml
+I [config.cpp:55] 2023-09-11 23:45:11.649 | Loading configuration from : config_files/network_greenport.yml
+I [config.cpp:55] 2023-09-11 23:45:11.651 | Loading configuration from : config_files/benchmarks.yml
+I [transport.cpp:694] 2023-09-11 23:45:11.652 | Setting up network info....
+I [transport.cpp:710] 2023-09-11 23:45:11.652 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:45:11.652 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 23:45:11.652 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:45:11.652 | Adding a host with name ampere03 : info :
+ [ Name: ampere03
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 23:45:11.652 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:699] 2023-09-11 23:45:11.652 | Configuring local address 5, 172.19.0.122
+I [transport.cpp:710] 2023-09-11 23:45:11.652 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:534] 2023-09-11 23:45:11.652 | Thread counter 0, num_rx_threads 1, tx_threads 1
+I [transport.cpp:1035] 2023-09-11 23:45:13.415 | Flow isolation enabled for port 0
+
+I [transport.cpp:1105] 2023-09-11 23:45:13.457 | IP Address to be queued 172.19.0.122
+I [transport.cpp:1133] 2023-09-11 23:45:13.475 | Flow Rule Added for IP Address : 172.19.0.122
+I [transport.cpp:655] 2023-09-11 23:45:13.475 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:661] 2023-09-11 23:45:13.475 | Total Cores available: 33
+I [transport.cpp:670] 2023-09-11 23:45:13.475 | rx_core limit: 2 tx_core limit: 3, my core_id 0 
+I [transport.cpp:273] 2023-09-11 23:45:13.475 | Enter receive thread 0 on core 1 on port_id 0 on queue 0
+I [transport.cpp:216] 2023-09-11 23:45:13.475 | Entering TX thread 0 at lcore 2
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:13.475 | Chosen threads for new conn: 1 is tx-thread 0, counter 1
+I [transport.cpp:194] 2023-09-11 23:45:13.526 | Connected to 172.19.0.121:8501::9000, fd r: 159, w: 160
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:13.528 | Chosen threads for new conn: 2 is tx-thread 0, counter 2
+I [transport.cpp:194] 2023-09-11 23:45:14.480 | Connected to 172.19.0.121:8501::9001, fd r: 161, w: 162
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:14.482 | Chosen threads for new conn: 3 is tx-thread 0, counter 3
+I [transport.cpp:194] 2023-09-11 23:45:15.484 | Connected to 172.19.0.121:8501::9002, fd r: 163, w: 164
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:15.486 | Chosen threads for new conn: 4 is tx-thread 0, counter 4
+I [transport.cpp:194] 2023-09-11 23:45:16.488 | Connected to 172.19.0.121:8501::9003, fd r: 165, w: 166
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:16.490 | Chosen threads for new conn: 5 is tx-thread 0, counter 5
+I [transport.cpp:194] 2023-09-11 23:45:17.492 | Connected to 172.19.0.121:8501::9004, fd r: 167, w: 168
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:17.495 | Chosen threads for new conn: 6 is tx-thread 0, counter 6
+I [transport.cpp:194] 2023-09-11 23:45:18.497 | Connected to 172.19.0.121:8501::9005, fd r: 169, w: 170
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:18.499 | Chosen threads for new conn: 7 is tx-thread 0, counter 7
+I [transport.cpp:194] 2023-09-11 23:45:19.501 | Connected to 172.19.0.121:8501::9006, fd r: 171, w: 172
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:19.504 | Chosen threads for new conn: 8 is tx-thread 0, counter 8
+I [transport.cpp:194] 2023-09-11 23:45:20.505 | Connected to 172.19.0.121:8501::9007, fd r: 173, w: 174
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:20.510 | Chosen threads for new conn: 9 is tx-thread 0, counter 9
+I [transport.cpp:194] 2023-09-11 23:45:21.512 | Connected to 172.19.0.121:8501::9008, fd r: 175, w: 176
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:21.517 | Chosen threads for new conn: 10 is tx-thread 0, counter 10
+I [transport.cpp:194] 2023-09-11 23:45:22.518 | Connected to 172.19.0.121:8501::9009, fd r: 177, w: 178
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:22.521 | Chosen threads for new conn: 11 is tx-thread 0, counter 11
+I [transport.cpp:194] 2023-09-11 23:45:23.522 | Connected to 172.19.0.121:8501::9010, fd r: 179, w: 180
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:23.526 | Chosen threads for new conn: 12 is tx-thread 0, counter 12
+I [transport.cpp:194] 2023-09-11 23:45:24.527 | Connected to 172.19.0.121:8501::9011, fd r: 181, w: 182
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:24.530 | Chosen threads for new conn: 13 is tx-thread 0, counter 13
+I [transport.cpp:194] 2023-09-11 23:45:25.531 | Connected to 172.19.0.121:8501::9012, fd r: 183, w: 184
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:25.533 | Chosen threads for new conn: 14 is tx-thread 0, counter 14
+I [transport.cpp:194] 2023-09-11 23:45:26.535 | Connected to 172.19.0.121:8501::9013, fd r: 185, w: 186
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:26.538 | Chosen threads for new conn: 15 is tx-thread 0, counter 15
+I [transport.cpp:194] 2023-09-11 23:45:27.539 | Connected to 172.19.0.121:8501::9014, fd r: 187, w: 188
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:27.543 | Chosen threads for new conn: 16 is tx-thread 0, counter 16
+I [transport.cpp:194] 2023-09-11 23:45:28.544 | Connected to 172.19.0.121:8501::9015, fd r: 189, w: 190
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:28.548 | Chosen threads for new conn: 17 is tx-thread 0, counter 17
+I [transport.cpp:194] 2023-09-11 23:45:29.550 | Connected to 172.19.0.121:8501::9016, fd r: 191, w: 192
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:29.553 | Chosen threads for new conn: 18 is tx-thread 0, counter 18
+I [transport.cpp:194] 2023-09-11 23:45:30.555 | Connected to 172.19.0.121:8501::9017, fd r: 193, w: 194
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:30.557 | Chosen threads for new conn: 19 is tx-thread 0, counter 19
+I [transport.cpp:194] 2023-09-11 23:45:31.558 | Connected to 172.19.0.121:8501::9018, fd r: 195, w: 196
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:31.560 | Chosen threads for new conn: 20 is tx-thread 0, counter 20
+I [transport.cpp:194] 2023-09-11 23:45:32.562 | Connected to 172.19.0.121:8501::9019, fd r: 197, w: 198
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:32.570 | Chosen threads for new conn: 21 is tx-thread 0, counter 21
+I [transport.cpp:194] 2023-09-11 23:45:33.571 | Connected to 172.19.0.121:8501::9020, fd r: 199, w: 200
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:33.574 | Chosen threads for new conn: 22 is tx-thread 0, counter 22
+I [transport.cpp:194] 2023-09-11 23:45:34.576 | Connected to 172.19.0.121:8501::9021, fd r: 201, w: 202
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:34.580 | Chosen threads for new conn: 23 is tx-thread 0, counter 23
+I [transport.cpp:194] 2023-09-11 23:45:35.582 | Connected to 172.19.0.121:8501::9022, fd r: 203, w: 204
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:45:35.586 | Chosen threads for new conn: 24 is tx-thread 0, counter 24
+I [transport.cpp:194] 2023-09-11 23:45:36.587 | Connected to 172.19.0.121:8501::9023, fd r: 205, w: 206
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 0, with client 0
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 1, with client 1
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 2, with client 2
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 3, with client 3
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 4, with client 4
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 5, with client 5
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 6, with client 6
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 7, with client 7
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 8, with client 8
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 9, with client 9
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 10, with client 10
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 11, with client 11
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 12, with client 12
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 13, with client 13
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 14, with client 14
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 15, with client 15
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 16, with client 16
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 17, with client 17
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 18, with client 18
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 19, with client 19
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 20, with client 20
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 21, with client 21
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 22, with client 22
+I [benchmarks.cpp:107] 2023-09-11 23:45:36.587 | New client thread created 23, with client 23
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.587 | Benchmark thread: 0 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.587 | Benchmark thread: 2 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.587 | Benchmark thread: 1 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.587 | Benchmark thread: 4 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 5 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 3 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 6 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 7 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 8 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 9 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 10 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.588 | Benchmark thread: 11 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 12 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 13 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 14 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 15 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 16 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 17 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 19 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 18 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 20 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 21 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 22 launched
+I [benchmarks.cpp:79] 2023-09-11 23:45:36.589 | Benchmark thread: 23 launched
+I 2023-09-11 23:45:36.590 | Reporter Thread Launched, Observing 4 poll threads
+I [reporter.cpp:66] 2023-09-11 23:45:37.112 | Sample size 6182, Median Latency: 2281368.000000 99.99th: 4781768.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.130 | Sample size 6354, Median Latency: 2293057.000000 99.99th: 15210328.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.148 | Sample size 6478, Median Latency: 2271811.500000 99.99th: 16414379.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.165 | Sample size 6945, Median Latency: 2245067.000000 99.99th: 7374257.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.183 | Sample size 7140, Median Latency: 2278630.500000 99.99th: 8560804.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.201 | Sample size 7312, Median Latency: 2286349.000000 99.99th: 8683494.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.220 | Sample size 7452, Median Latency: 2303743.500000 99.99th: 10224174.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.239 | Sample size 7630, Median Latency: 2298376.500000 99.99th: 12170706.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.258 | Sample size 7864, Median Latency: 2327326.500000 99.99th: 10740050.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.279 | Sample size 8054, Median Latency: 2311359.000000 99.99th: 9730707.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.304 | Sample size 8784, Median Latency: 2216032.500000 99.99th: 4912451.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.329 | Sample size 8979, Median Latency: 2239982.000000 99.99th: 12514515.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.355 | Sample size 9159, Median Latency: 2202897.000000 99.99th: 15423767.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.381 | Sample size 9353, Median Latency: 2198140.000000 99.99th: 15112047.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.401 | Sample size 9581, Median Latency: 2217351.000000 99.99th: 15732356.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.425 | Sample size 9677, Median Latency: 2209239.000000 99.99th: 15747442.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.448 | Sample size 9854, Median Latency: 2201225.000000 99.99th: 15669006.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.475 | Sample size 11141, Median Latency: 2140189.000000 99.99th: 5590973.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.501 | Sample size 11323, Median Latency: 2129014.000000 99.99th: 17204804.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.526 | Sample size 11498, Median Latency: 2137094.000000 99.99th: 17217682.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.553 | Sample size 11749, Median Latency: 2147722.000000 99.99th: 16357626.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.580 | Sample size 11876, Median Latency: 2158818.500000 99.99th: 16815699.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.582 | Sample size 118, Median Latency: 985952489.000000 99.99th: 986408033.000000
+I [reporter.cpp:66] 2023-09-11 23:45:37.607 | Sample size 12117, Median Latency: 2148394.000000 99.99th: 17563558.000000
+I [reporter.cpp:131] 2023-09-11 23:45:37.609 | Across all poll, Average Latency 23145891.470436 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:38.136 | Sample size 12689, Median Latency: 2131427.000000 99.99th: 12548456.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.164 | Sample size 12781, Median Latency: 2139854.000000 99.99th: 13689949.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.193 | Sample size 12895, Median Latency: 2153923.000000 99.99th: 15978581.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.222 | Sample size 12753, Median Latency: 2208892.000000 99.99th: 9899500.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.251 | Sample size 12781, Median Latency: 2190566.000000 99.99th: 15906557.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.280 | Sample size 12832, Median Latency: 2202315.500000 99.99th: 16000541.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.309 | Sample size 12902, Median Latency: 2229532.000000 99.99th: 16524154.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.338 | Sample size 12903, Median Latency: 2202559.000000 99.99th: 17178832.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.367 | Sample size 12969, Median Latency: 2191575.000000 99.99th: 17263355.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.396 | Sample size 13075, Median Latency: 2225363.000000 99.99th: 16511031.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.426 | Sample size 13077, Median Latency: 2200070.000000 99.99th: 15673181.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.455 | Sample size 13065, Median Latency: 2202665.000000 99.99th: 16513405.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.485 | Sample size 13070, Median Latency: 2223178.500000 99.99th: 16627023.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.513 | Sample size 13145, Median Latency: 2227254.000000 99.99th: 17979438.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.535 | Sample size 13186, Median Latency: 2235670.500000 99.99th: 18924770.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.557 | Sample size 13155, Median Latency: 2272688.000000 99.99th: 16368658.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.580 | Sample size 13159, Median Latency: 2265569.000000 99.99th: 19251747.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.602 | Sample size 13169, Median Latency: 2226979.000000 99.99th: 16539587.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.624 | Sample size 13147, Median Latency: 2228743.000000 99.99th: 16675701.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.646 | Sample size 13139, Median Latency: 2226344.000000 99.99th: 16566107.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.668 | Sample size 13208, Median Latency: 2264248.500000 99.99th: 16382316.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.690 | Sample size 13146, Median Latency: 2266308.500000 99.99th: 16009280.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.712 | Sample size 13205, Median Latency: 2225736.000000 99.99th: 12254363.000000
+I [reporter.cpp:66] 2023-09-11 23:45:38.734 | Sample size 13321, Median Latency: 2275576.000000 99.99th: 14977963.000000
+I [reporter.cpp:131] 2023-09-11 23:45:38.736 | Across all poll, Average Latency 2372818.813403 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:39.259 | Sample size 13733, Median Latency: 2207184.000000 99.99th: 17274258.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.282 | Sample size 13749, Median Latency: 2187575.000000 99.99th: 15523683.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.306 | Sample size 13709, Median Latency: 2191734.000000 99.99th: 13436954.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.329 | Sample size 12842, Median Latency: 2293665.000000 99.99th: 16814862.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.352 | Sample size 12745, Median Latency: 2282086.000000 99.99th: 17130613.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.374 | Sample size 12729, Median Latency: 2301736.000000 99.99th: 17518179.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.396 | Sample size 12627, Median Latency: 2291589.000000 99.99th: 16395395.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.418 | Sample size 12633, Median Latency: 2273859.000000 99.99th: 16284130.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.441 | Sample size 12543, Median Latency: 2284430.000000 99.99th: 17721502.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.463 | Sample size 12540, Median Latency: 2302739.500000 99.99th: 12639819.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.485 | Sample size 12287, Median Latency: 2296634.000000 99.99th: 14470772.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.506 | Sample size 12192, Median Latency: 2329611.000000 99.99th: 14134017.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.528 | Sample size 12123, Median Latency: 2311821.000000 99.99th: 14034997.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.549 | Sample size 12042, Median Latency: 2309080.500000 99.99th: 13939774.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.570 | Sample size 12006, Median Latency: 2300881.000000 99.99th: 14257107.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.591 | Sample size 12004, Median Latency: 2312893.500000 99.99th: 13212861.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.612 | Sample size 12001, Median Latency: 2296454.000000 99.99th: 14304299.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.633 | Sample size 12038, Median Latency: 2304080.000000 99.99th: 11956400.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.654 | Sample size 11998, Median Latency: 2294357.000000 99.99th: 14520839.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.675 | Sample size 11998, Median Latency: 2307053.500000 99.99th: 15415285.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.696 | Sample size 12000, Median Latency: 2332864.000000 99.99th: 14630088.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.716 | Sample size 11879, Median Latency: 2297831.000000 99.99th: 15993636.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.737 | Sample size 11965, Median Latency: 2298732.000000 99.99th: 14528805.000000
+I [reporter.cpp:66] 2023-09-11 23:45:39.757 | Sample size 11956, Median Latency: 2291426.000000 99.99th: 14529873.000000
+I [reporter.cpp:131] 2023-09-11 23:45:39.759 | Across all poll, Average Latency 2452147.999075 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:40.287 | Sample size 12300, Median Latency: 2253688.000000 99.99th: 13539702.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.308 | Sample size 12312, Median Latency: 2253561.000000 99.99th: 19034998.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.330 | Sample size 12312, Median Latency: 2253662.500000 99.99th: 19382771.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.350 | Sample size 11803, Median Latency: 2325535.000000 99.99th: 14641203.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.370 | Sample size 11820, Median Latency: 2329809.000000 99.99th: 12663177.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.391 | Sample size 11808, Median Latency: 2338604.500000 99.99th: 12538072.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.411 | Sample size 11763, Median Latency: 2332946.000000 99.99th: 12671785.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.431 | Sample size 11707, Median Latency: 2298628.000000 99.99th: 13953917.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.451 | Sample size 11720, Median Latency: 2341389.500000 99.99th: 14224660.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.471 | Sample size 11793, Median Latency: 2351344.000000 99.99th: 11413974.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.492 | Sample size 11664, Median Latency: 2310065.000000 99.99th: 14239257.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.513 | Sample size 11640, Median Latency: 2317914.000000 99.99th: 13029714.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.533 | Sample size 11577, Median Latency: 2295158.000000 99.99th: 13733663.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.554 | Sample size 11640, Median Latency: 2326687.000000 99.99th: 13958391.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.574 | Sample size 11618, Median Latency: 2308328.000000 99.99th: 14280425.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.594 | Sample size 11586, Median Latency: 2318430.500000 99.99th: 15249846.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.614 | Sample size 11617, Median Latency: 2313035.000000 99.99th: 13708837.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.635 | Sample size 11722, Median Latency: 2326810.500000 99.99th: 10952881.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.656 | Sample size 11701, Median Latency: 2320430.000000 99.99th: 12064864.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.676 | Sample size 11691, Median Latency: 2306204.000000 99.99th: 12935162.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.697 | Sample size 11642, Median Latency: 2292135.000000 99.99th: 14311293.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.717 | Sample size 11628, Median Latency: 2296141.500000 99.99th: 14598013.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.738 | Sample size 11637, Median Latency: 2321457.000000 99.99th: 14574656.000000
+I [reporter.cpp:66] 2023-09-11 23:45:40.758 | Sample size 11592, Median Latency: 2294815.500000 99.99th: 14445947.000000
+I [reporter.cpp:131] 2023-09-11 23:45:40.760 | Across all poll, Average Latency 2467524.077897 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:41.280 | Sample size 12119, Median Latency: 2231139.000000 99.99th: 11416245.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.301 | Sample size 12133, Median Latency: 2236214.000000 99.99th: 11228657.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.323 | Sample size 12125, Median Latency: 2239660.000000 99.99th: 11590588.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.344 | Sample size 11654, Median Latency: 2284841.000000 99.99th: 14113254.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.365 | Sample size 11633, Median Latency: 2305837.000000 99.99th: 14465071.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.385 | Sample size 11633, Median Latency: 2287949.000000 99.99th: 14882945.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.405 | Sample size 11625, Median Latency: 2267645.000000 99.99th: 13897779.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.425 | Sample size 11479, Median Latency: 2249791.000000 99.99th: 16116337.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.445 | Sample size 11609, Median Latency: 2280269.000000 99.99th: 12152389.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.465 | Sample size 11582, Median Latency: 2290500.500000 99.99th: 12939610.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.485 | Sample size 11518, Median Latency: 2295988.500000 99.99th: 13870405.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.505 | Sample size 11561, Median Latency: 2328954.000000 99.99th: 14382020.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.525 | Sample size 11529, Median Latency: 2317973.000000 99.99th: 14171448.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.545 | Sample size 11546, Median Latency: 2324569.500000 99.99th: 13421338.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.565 | Sample size 11535, Median Latency: 2311618.000000 99.99th: 13699310.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.584 | Sample size 11519, Median Latency: 2321394.000000 99.99th: 13840131.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.604 | Sample size 11527, Median Latency: 2304656.000000 99.99th: 14455891.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.625 | Sample size 11461, Median Latency: 2331681.000000 99.99th: 14536437.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.645 | Sample size 11499, Median Latency: 2322004.000000 99.99th: 12246010.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.665 | Sample size 11508, Median Latency: 2341236.000000 99.99th: 11977567.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.685 | Sample size 11418, Median Latency: 2340075.500000 99.99th: 14550967.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.706 | Sample size 11394, Median Latency: 2330374.000000 99.99th: 14793888.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.725 | Sample size 11404, Median Latency: 2318787.500000 99.99th: 13992971.000000
+I [reporter.cpp:66] 2023-09-11 23:45:41.746 | Sample size 11408, Median Latency: 2317440.500000 99.99th: 14699162.000000
+I [reporter.cpp:131] 2023-09-11 23:45:41.747 | Across all poll, Average Latency 2443205.612625 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:42.267 | Sample size 11889, Median Latency: 2274981.000000 99.99th: 10892951.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.288 | Sample size 11888, Median Latency: 2274449.000000 99.99th: 11857218.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.308 | Sample size 11892, Median Latency: 2262103.500000 99.99th: 13378139.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.329 | Sample size 11346, Median Latency: 2350851.500000 99.99th: 14435802.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.349 | Sample size 11330, Median Latency: 2333678.500000 99.99th: 14865650.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.368 | Sample size 11329, Median Latency: 2342065.000000 99.99th: 14910333.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.387 | Sample size 11393, Median Latency: 2348942.000000 99.99th: 12696405.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.406 | Sample size 11282, Median Latency: 2317304.500000 99.99th: 14624671.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.425 | Sample size 11313, Median Latency: 2320414.000000 99.99th: 13767197.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.444 | Sample size 11283, Median Latency: 2307574.000000 99.99th: 13671374.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.463 | Sample size 11444, Median Latency: 2307876.500000 99.99th: 12981818.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.482 | Sample size 11451, Median Latency: 2359893.000000 99.99th: 10290554.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.501 | Sample size 11402, Median Latency: 2335342.500000 99.99th: 13058509.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.520 | Sample size 11341, Median Latency: 2333425.000000 99.99th: 13756172.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.539 | Sample size 11319, Median Latency: 2324389.000000 99.99th: 13627229.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.558 | Sample size 11333, Median Latency: 2338901.000000 99.99th: 12621006.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.576 | Sample size 11234, Median Latency: 2262579.500000 99.99th: 13806259.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.595 | Sample size 11227, Median Latency: 2262985.000000 99.99th: 14436709.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.614 | Sample size 11269, Median Latency: 2298445.000000 99.99th: 14361096.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.634 | Sample size 11280, Median Latency: 2301037.500000 99.99th: 12723061.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.652 | Sample size 11328, Median Latency: 2303721.500000 99.99th: 12796373.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.671 | Sample size 11275, Median Latency: 2299320.000000 99.99th: 13000867.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.690 | Sample size 11189, Median Latency: 2237261.000000 99.99th: 13227031.000000
+I [reporter.cpp:66] 2023-09-11 23:45:42.709 | Sample size 11221, Median Latency: 2270857.000000 99.99th: 12977360.000000
+I [reporter.cpp:131] 2023-09-11 23:45:42.710 | Across all poll, Average Latency 2420609.541173 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:43.229 | Sample size 11724, Median Latency: 2250628.000000 99.99th: 10699009.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.249 | Sample size 11703, Median Latency: 2244140.000000 99.99th: 13504393.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.270 | Sample size 11701, Median Latency: 2241547.000000 99.99th: 13530792.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.289 | Sample size 11118, Median Latency: 2271932.500000 99.99th: 13501472.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.308 | Sample size 11151, Median Latency: 2269102.000000 99.99th: 12809874.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.327 | Sample size 11097, Median Latency: 2283024.000000 99.99th: 13165985.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.346 | Sample size 11154, Median Latency: 2286434.500000 99.99th: 13512837.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.365 | Sample size 11135, Median Latency: 2272958.000000 99.99th: 13044884.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.384 | Sample size 11076, Median Latency: 2280696.000000 99.99th: 13455919.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.403 | Sample size 11092, Median Latency: 2273106.500000 99.99th: 13579608.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.423 | Sample size 11201, Median Latency: 2284516.000000 99.99th: 13520143.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.443 | Sample size 11219, Median Latency: 2309834.000000 99.99th: 12553045.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.462 | Sample size 11111, Median Latency: 2279280.000000 99.99th: 13110789.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.482 | Sample size 11146, Median Latency: 2271600.500000 99.99th: 13189946.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.501 | Sample size 11147, Median Latency: 2279242.000000 99.99th: 14342707.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.520 | Sample size 11158, Median Latency: 2293108.000000 99.99th: 14141460.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.539 | Sample size 11152, Median Latency: 2289313.500000 99.99th: 14015021.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.558 | Sample size 11183, Median Latency: 2258740.000000 99.99th: 13352956.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.576 | Sample size 11149, Median Latency: 2262075.000000 99.99th: 13293437.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.595 | Sample size 11064, Median Latency: 2284894.500000 99.99th: 13577395.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.613 | Sample size 11087, Median Latency: 2301242.000000 99.99th: 13330781.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.631 | Sample size 11092, Median Latency: 2282279.000000 99.99th: 13123750.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.649 | Sample size 11139, Median Latency: 2268765.000000 99.99th: 13159602.000000
+I [reporter.cpp:66] 2023-09-11 23:45:43.668 | Sample size 11089, Median Latency: 2271178.000000 99.99th: 12832382.000000
+I [reporter.cpp:131] 2023-09-11 23:45:43.669 | Across all poll, Average Latency 2377912.031173 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:44.189 | Sample size 11638, Median Latency: 2274604.000000 99.99th: 9578968.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.209 | Sample size 11652, Median Latency: 2268325.500000 99.99th: 10292014.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.230 | Sample size 11632, Median Latency: 2250079.000000 99.99th: 13071992.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.249 | Sample size 11079, Median Latency: 2287483.000000 99.99th: 14771808.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.269 | Sample size 11090, Median Latency: 2272927.000000 99.99th: 13475751.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.288 | Sample size 11095, Median Latency: 2311183.000000 99.99th: 14532416.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.307 | Sample size 11155, Median Latency: 2286088.000000 99.99th: 12899321.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.325 | Sample size 11078, Median Latency: 2294191.500000 99.99th: 13544712.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.344 | Sample size 11146, Median Latency: 2307009.000000 99.99th: 13640847.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.362 | Sample size 11094, Median Latency: 2308715.500000 99.99th: 13975502.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.381 | Sample size 11141, Median Latency: 2299913.000000 99.99th: 14342759.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.399 | Sample size 11134, Median Latency: 2314109.000000 99.99th: 12767294.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.418 | Sample size 11092, Median Latency: 2292457.500000 99.99th: 12691335.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.436 | Sample size 11036, Median Latency: 2293092.500000 99.99th: 13411214.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.454 | Sample size 11037, Median Latency: 2287270.000000 99.99th: 13592027.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.473 | Sample size 10978, Median Latency: 2279914.000000 99.99th: 13208246.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.491 | Sample size 11035, Median Latency: 2287099.000000 99.99th: 12418083.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.510 | Sample size 11096, Median Latency: 2271835.500000 99.99th: 13020561.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.528 | Sample size 11085, Median Latency: 2273771.000000 99.99th: 13068574.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.547 | Sample size 11153, Median Latency: 2285414.000000 99.99th: 13128428.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.565 | Sample size 11098, Median Latency: 2268459.000000 99.99th: 13003407.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.584 | Sample size 11016, Median Latency: 2251473.000000 99.99th: 13613485.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.602 | Sample size 11079, Median Latency: 2284197.000000 99.99th: 12892688.000000
+I [reporter.cpp:66] 2023-09-11 23:45:44.620 | Sample size 11088, Median Latency: 2273192.000000 99.99th: 12752305.000000
+I [reporter.cpp:131] 2023-09-11 23:45:44.622 | Across all poll, Average Latency 2389519.725384 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:45.141 | Sample size 11570, Median Latency: 2232706.000000 99.99th: 13851496.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.161 | Sample size 11589, Median Latency: 2232353.000000 99.99th: 13841541.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.182 | Sample size 11643, Median Latency: 2230030.000000 99.99th: 9940675.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.201 | Sample size 11054, Median Latency: 2234091.500000 99.99th: 12848682.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.221 | Sample size 11028, Median Latency: 2251767.500000 99.99th: 14341711.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.240 | Sample size 11041, Median Latency: 2245737.000000 99.99th: 12909451.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.260 | Sample size 11030, Median Latency: 2289309.500000 99.99th: 13251787.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.279 | Sample size 11041, Median Latency: 2269715.000000 99.99th: 13208439.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.298 | Sample size 11095, Median Latency: 2277194.000000 99.99th: 12887713.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.318 | Sample size 11090, Median Latency: 2276403.000000 99.99th: 14355400.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.337 | Sample size 11084, Median Latency: 2264966.000000 99.99th: 12617749.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.356 | Sample size 11099, Median Latency: 2300905.000000 99.99th: 12856179.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.376 | Sample size 11156, Median Latency: 2287416.500000 99.99th: 12605044.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.409 | Sample size 11161, Median Latency: 2295821.000000 99.99th: 12719484.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.435 | Sample size 11099, Median Latency: 2290315.000000 99.99th: 22559468.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.461 | Sample size 11231, Median Latency: 2316634.000000 99.99th: 21674398.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.486 | Sample size 11297, Median Latency: 2320005.000000 99.99th: 22321730.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.513 | Sample size 11641, Median Latency: 2240203.000000 99.99th: 12534204.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.540 | Sample size 11728, Median Latency: 2251321.500000 99.99th: 14218398.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.567 | Sample size 11792, Median Latency: 2245892.000000 99.99th: 16605452.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.594 | Sample size 11795, Median Latency: 2246001.000000 99.99th: 16823120.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.621 | Sample size 11839, Median Latency: 2245149.000000 99.99th: 16955922.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.648 | Sample size 11822, Median Latency: 2227073.000000 99.99th: 17847629.000000
+I [reporter.cpp:66] 2023-09-11 23:45:45.675 | Sample size 11908, Median Latency: 2264813.500000 99.99th: 17933671.000000
+I [reporter.cpp:131] 2023-09-11 23:45:45.677 | Across all poll, Average Latency 2398464.719653 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:46.210 | Sample size 13055, Median Latency: 2203068.000000 99.99th: 11448639.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.240 | Sample size 13059, Median Latency: 2207150.000000 99.99th: 23415068.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.268 | Sample size 13098, Median Latency: 2191484.000000 99.99th: 22923639.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.298 | Sample size 12856, Median Latency: 2220324.500000 99.99th: 13764668.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.327 | Sample size 12923, Median Latency: 2241467.000000 99.99th: 18261939.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.358 | Sample size 13041, Median Latency: 2255634.000000 99.99th: 18991625.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.387 | Sample size 13071, Median Latency: 2243091.000000 99.99th: 19072857.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.417 | Sample size 13113, Median Latency: 2226149.000000 99.99th: 19025625.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.447 | Sample size 13133, Median Latency: 2255299.000000 99.99th: 18976033.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.477 | Sample size 13137, Median Latency: 2242506.000000 99.99th: 18922940.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.508 | Sample size 13647, Median Latency: 2197360.000000 99.99th: 22000694.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.539 | Sample size 13673, Median Latency: 2259978.000000 99.99th: 21343890.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.570 | Sample size 13755, Median Latency: 2214358.000000 99.99th: 20807196.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.601 | Sample size 13712, Median Latency: 2221263.000000 99.99th: 25343351.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.633 | Sample size 13778, Median Latency: 2195137.500000 99.99th: 20840992.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.664 | Sample size 13831, Median Latency: 2248051.000000 99.99th: 19352417.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.695 | Sample size 13867, Median Latency: 2230904.000000 99.99th: 21983591.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.728 | Sample size 14154, Median Latency: 2200409.000000 99.99th: 17616518.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.761 | Sample size 14164, Median Latency: 2206585.500000 99.99th: 17892017.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.793 | Sample size 14187, Median Latency: 2216029.000000 99.99th: 20575479.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.833 | Sample size 14224, Median Latency: 2230028.000000 99.99th: 20425913.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.866 | Sample size 14265, Median Latency: 2236063.000000 99.99th: 24759171.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.900 | Sample size 14277, Median Latency: 2214095.000000 99.99th: 24320301.000000
+I [reporter.cpp:66] 2023-09-11 23:45:46.934 | Sample size 14279, Median Latency: 2218660.000000 99.99th: 24444951.000000
+I [reporter.cpp:131] 2023-09-11 23:45:46.936 | Across all poll, Average Latency 2424981.332250 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:47.476 | Sample size 15547, Median Latency: 2132423.000000 99.99th: 17876667.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.513 | Sample size 15623, Median Latency: 2133670.000000 99.99th: 26153014.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.549 | Sample size 15676, Median Latency: 2134125.500000 99.99th: 25935692.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.583 | Sample size 14817, Median Latency: 2206953.000000 99.99th: 19314310.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.618 | Sample size 14890, Median Latency: 2211063.500000 99.99th: 19208715.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.652 | Sample size 14946, Median Latency: 2217629.000000 99.99th: 18916567.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.687 | Sample size 14884, Median Latency: 2213175.500000 99.99th: 21457857.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.723 | Sample size 15082, Median Latency: 2224945.500000 99.99th: 19748869.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.758 | Sample size 15138, Median Latency: 2245413.500000 99.99th: 20260508.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.793 | Sample size 15130, Median Latency: 2248410.000000 99.99th: 21273498.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.829 | Sample size 15397, Median Latency: 2221801.000000 99.99th: 20845570.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.865 | Sample size 15374, Median Latency: 2232391.500000 99.99th: 19332340.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.901 | Sample size 15373, Median Latency: 2237455.000000 99.99th: 20286579.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.937 | Sample size 15351, Median Latency: 2226513.000000 99.99th: 20467913.000000
+I [reporter.cpp:66] 2023-09-11 23:45:47.974 | Sample size 15368, Median Latency: 2218565.000000 99.99th: 22631579.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.010 | Sample size 15436, Median Latency: 2232707.000000 99.99th: 22040458.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.046 | Sample size 15445, Median Latency: 2219197.000000 99.99th: 22482408.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.082 | Sample size 15649, Median Latency: 2218419.000000 99.99th: 23847800.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.118 | Sample size 15572, Median Latency: 2208828.000000 99.99th: 23161312.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.154 | Sample size 15620, Median Latency: 2196226.000000 99.99th: 23059946.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.181 | Sample size 15576, Median Latency: 2198125.500000 99.99th: 23428215.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.205 | Sample size 15476, Median Latency: 2211011.000000 99.99th: 23414050.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.228 | Sample size 15498, Median Latency: 2209523.000000 99.99th: 21079418.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.252 | Sample size 15485, Median Latency: 2216425.000000 99.99th: 20794635.000000
+I [reporter.cpp:131] 2023-09-11 23:45:48.253 | Across all poll, Average Latency 2439377.531333 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:48.775 | Sample size 16169, Median Latency: 2135874.000000 99.99th: 21551397.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.799 | Sample size 16098, Median Latency: 2132751.500000 99.99th: 18614195.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.822 | Sample size 16033, Median Latency: 2134112.000000 99.99th: 14677131.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.844 | Sample size 14545, Median Latency: 2208002.000000 99.99th: 22440439.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.866 | Sample size 14444, Median Latency: 2203946.500000 99.99th: 22297262.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.887 | Sample size 14356, Median Latency: 2223838.000000 99.99th: 21141641.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.908 | Sample size 14284, Median Latency: 2206409.000000 99.99th: 20701936.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.930 | Sample size 14158, Median Latency: 2201573.500000 99.99th: 19698358.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.951 | Sample size 14155, Median Latency: 2231827.000000 99.99th: 19073618.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.972 | Sample size 14023, Median Latency: 2229191.000000 99.99th: 16419258.000000
+I [reporter.cpp:66] 2023-09-11 23:45:48.993 | Sample size 13121, Median Latency: 2243786.000000 99.99th: 22710405.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.013 | Sample size 13066, Median Latency: 2276839.500000 99.99th: 22215853.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.033 | Sample size 12938, Median Latency: 2263492.000000 99.99th: 22309629.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.053 | Sample size 12822, Median Latency: 2241571.000000 99.99th: 20128590.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.073 | Sample size 12765, Median Latency: 2244706.000000 99.99th: 19315863.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.092 | Sample size 12629, Median Latency: 2273187.000000 99.99th: 20518288.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.111 | Sample size 12510, Median Latency: 2237295.500000 99.99th: 14324160.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.129 | Sample size 11885, Median Latency: 2299626.000000 99.99th: 20286871.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.148 | Sample size 11710, Median Latency: 2280453.500000 99.99th: 20289614.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.165 | Sample size 11667, Median Latency: 2293275.000000 99.99th: 17552436.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.184 | Sample size 11594, Median Latency: 2299361.000000 99.99th: 12873818.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.202 | Sample size 11542, Median Latency: 2314387.500000 99.99th: 13104193.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.219 | Sample size 11429, Median Latency: 2275597.000000 99.99th: 13881275.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.236 | Sample size 11442, Median Latency: 2266577.500000 99.99th: 13024663.000000
+I [reporter.cpp:131] 2023-09-11 23:45:49.237 | Across all poll, Average Latency 2445553.155674 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:49.754 | Sample size 11990, Median Latency: 2242060.500000 99.99th: 13582437.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.771 | Sample size 11978, Median Latency: 2219683.500000 99.99th: 12741501.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.788 | Sample size 11907, Median Latency: 2206173.000000 99.99th: 11626684.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.805 | Sample size 10969, Median Latency: 2257119.000000 99.99th: 19970166.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.821 | Sample size 10950, Median Latency: 2262025.500000 99.99th: 20295183.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.837 | Sample size 10947, Median Latency: 2265924.000000 99.99th: 20454831.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.853 | Sample size 10931, Median Latency: 2245811.000000 99.99th: 18519102.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.870 | Sample size 10943, Median Latency: 2268864.000000 99.99th: 14240626.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.887 | Sample size 10887, Median Latency: 2235559.000000 99.99th: 14529651.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.904 | Sample size 10943, Median Latency: 2267223.000000 99.99th: 11615842.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.920 | Sample size 10671, Median Latency: 2251003.000000 99.99th: 14186851.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.936 | Sample size 10646, Median Latency: 2265782.500000 99.99th: 14193655.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.952 | Sample size 10631, Median Latency: 2273214.000000 99.99th: 14318182.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.967 | Sample size 10636, Median Latency: 2263727.500000 99.99th: 14415665.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.984 | Sample size 10641, Median Latency: 2264174.000000 99.99th: 12971755.000000
+I [reporter.cpp:66] 2023-09-11 23:45:49.000 | Sample size 10641, Median Latency: 2278558.000000 99.99th: 12858070.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.016 | Sample size 10646, Median Latency: 2250163.500000 99.99th: 12210173.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.032 | Sample size 10416, Median Latency: 2267816.000000 99.99th: 13303803.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.047 | Sample size 10409, Median Latency: 2241305.000000 99.99th: 13175347.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.062 | Sample size 10399, Median Latency: 2243682.000000 99.99th: 12785394.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.077 | Sample size 10400, Median Latency: 2266722.500000 99.99th: 12495578.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.093 | Sample size 10372, Median Latency: 2254930.500000 99.99th: 12087843.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.109 | Sample size 10324, Median Latency: 2205375.000000 99.99th: 14238773.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.124 | Sample size 10335, Median Latency: 2246774.000000 99.99th: 14245023.000000
+I [reporter.cpp:131] 2023-09-11 23:45:50.125 | Across all poll, Average Latency 2393245.368977 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:50.640 | Sample size 10673, Median Latency: 2270427.000000 99.99th: 11790538.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.655 | Sample size 10706, Median Latency: 2277769.500000 99.99th: 10636659.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.671 | Sample size 10708, Median Latency: 2274939.000000 99.99th: 10377162.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.686 | Sample size 10109, Median Latency: 2300665.000000 99.99th: 11535635.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.701 | Sample size 10091, Median Latency: 2310541.000000 99.99th: 11624846.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.716 | Sample size 10089, Median Latency: 2332838.000000 99.99th: 11581954.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.732 | Sample size 10106, Median Latency: 2334785.500000 99.99th: 11679752.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.747 | Sample size 10032, Median Latency: 2339092.500000 99.99th: 12665020.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.763 | Sample size 10017, Median Latency: 2322276.000000 99.99th: 12748697.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.778 | Sample size 9964, Median Latency: 2308877.000000 99.99th: 14458005.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.793 | Sample size 10083, Median Latency: 2305222.000000 99.99th: 11220313.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.808 | Sample size 10039, Median Latency: 2321791.000000 99.99th: 13701396.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.822 | Sample size 10094, Median Latency: 2322340.000000 99.99th: 11039751.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.837 | Sample size 10035, Median Latency: 2331378.000000 99.99th: 13637937.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.853 | Sample size 10085, Median Latency: 2349118.000000 99.99th: 10242178.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.868 | Sample size 10040, Median Latency: 2353387.500000 99.99th: 12147264.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.883 | Sample size 10102, Median Latency: 2328724.000000 99.99th: 10151000.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.898 | Sample size 9949, Median Latency: 2335121.000000 99.99th: 14477203.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.913 | Sample size 9961, Median Latency: 2342984.000000 99.99th: 13956925.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.928 | Sample size 10045, Median Latency: 2348695.000000 99.99th: 12272563.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.943 | Sample size 10034, Median Latency: 2348846.000000 99.99th: 11946851.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.958 | Sample size 10015, Median Latency: 2343118.000000 99.99th: 11985806.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.973 | Sample size 9944, Median Latency: 2327617.500000 99.99th: 12785771.000000
+I [reporter.cpp:66] 2023-09-11 23:45:50.988 | Sample size 9968, Median Latency: 2326692.000000 99.99th: 12664426.000000
+I [reporter.cpp:131] 2023-09-11 23:45:50.989 | Across all poll, Average Latency 2457103.067677 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:51.511 | Sample size 10376, Median Latency: 2274390.500000 99.99th: 10486054.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.526 | Sample size 10402, Median Latency: 2274891.000000 99.99th: 16635789.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.541 | Sample size 10398, Median Latency: 2287196.500000 99.99th: 15877548.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.556 | Sample size 10025, Median Latency: 2376346.000000 99.99th: 11620302.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.571 | Sample size 10034, Median Latency: 2373071.000000 99.99th: 11818043.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.586 | Sample size 10035, Median Latency: 2374418.000000 99.99th: 11899331.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.601 | Sample size 10009, Median Latency: 2373770.000000 99.99th: 11063908.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.618 | Sample size 10025, Median Latency: 2347969.000000 99.99th: 11884015.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.633 | Sample size 9964, Median Latency: 2350225.000000 99.99th: 14701353.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.648 | Sample size 9976, Median Latency: 2347061.000000 99.99th: 14840316.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.664 | Sample size 10150, Median Latency: 2291703.500000 99.99th: 10273907.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.679 | Sample size 10154, Median Latency: 2315141.000000 99.99th: 10410768.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.695 | Sample size 10157, Median Latency: 2327391.000000 99.99th: 10251413.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.710 | Sample size 10175, Median Latency: 2310497.000000 99.99th: 10450401.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.726 | Sample size 10139, Median Latency: 2312076.000000 99.99th: 10125439.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.741 | Sample size 10090, Median Latency: 2322135.000000 99.99th: 13001241.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.756 | Sample size 10155, Median Latency: 2312012.000000 99.99th: 10296498.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.771 | Sample size 10205, Median Latency: 2303550.000000 99.99th: 11588626.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.786 | Sample size 10188, Median Latency: 2293854.500000 99.99th: 11988923.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.802 | Sample size 10198, Median Latency: 2313377.000000 99.99th: 11658538.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.818 | Sample size 10209, Median Latency: 2330484.000000 99.99th: 11260823.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.833 | Sample size 10220, Median Latency: 2313650.000000 99.99th: 11115556.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.848 | Sample size 10217, Median Latency: 2292484.000000 99.99th: 11341924.000000
+I [reporter.cpp:66] 2023-09-11 23:45:51.864 | Sample size 10205, Median Latency: 2308985.000000 99.99th: 10493707.000000
+I [reporter.cpp:131] 2023-09-11 23:45:51.865 | Across all poll, Average Latency 2468256.490464 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:52.387 | Sample size 10501, Median Latency: 2262107.000000 99.99th: 9394672.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.403 | Sample size 10512, Median Latency: 2265151.500000 99.99th: 17639409.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.418 | Sample size 10522, Median Latency: 2262429.000000 99.99th: 17807945.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.434 | Sample size 10088, Median Latency: 2307357.000000 99.99th: 16024384.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.449 | Sample size 10153, Median Latency: 2315271.000000 99.99th: 11710302.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.465 | Sample size 10090, Median Latency: 2325595.500000 99.99th: 14962584.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.481 | Sample size 10146, Median Latency: 2333019.500000 99.99th: 11817170.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.496 | Sample size 10163, Median Latency: 2319518.000000 99.99th: 11086994.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.512 | Sample size 10164, Median Latency: 2328607.000000 99.99th: 11159121.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.527 | Sample size 10158, Median Latency: 2316737.000000 99.99th: 11121618.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.542 | Sample size 10151, Median Latency: 2325447.000000 99.99th: 10401836.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.558 | Sample size 10144, Median Latency: 2329108.000000 99.99th: 10690103.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.574 | Sample size 10151, Median Latency: 2322883.000000 99.99th: 11273951.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.589 | Sample size 10110, Median Latency: 2324860.500000 99.99th: 12617550.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.605 | Sample size 10147, Median Latency: 2340106.000000 99.99th: 12482219.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.620 | Sample size 10094, Median Latency: 2373020.500000 99.99th: 14465975.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.635 | Sample size 10161, Median Latency: 2332440.000000 99.99th: 12426173.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.650 | Sample size 10148, Median Latency: 2306890.500000 99.99th: 12151965.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.666 | Sample size 10171, Median Latency: 2320016.000000 99.99th: 11125746.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.681 | Sample size 10154, Median Latency: 2328226.000000 99.99th: 11016343.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.696 | Sample size 10150, Median Latency: 2344610.000000 99.99th: 11107369.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.712 | Sample size 10166, Median Latency: 2346713.000000 99.99th: 11035501.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.727 | Sample size 10095, Median Latency: 2293501.000000 99.99th: 12427025.000000
+I [reporter.cpp:66] 2023-09-11 23:45:52.742 | Sample size 10157, Median Latency: 2334468.000000 99.99th: 10459811.000000
+I [reporter.cpp:131] 2023-09-11 23:45:52.743 | Across all poll, Average Latency 2473422.948713 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:53.266 | Sample size 10437, Median Latency: 2278518.000000 99.99th: 11565987.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.282 | Sample size 10469, Median Latency: 2265352.000000 99.99th: 19451772.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.297 | Sample size 10457, Median Latency: 2280818.000000 99.99th: 19923758.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.312 | Sample size 10129, Median Latency: 2320034.000000 99.99th: 10955993.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.328 | Sample size 10103, Median Latency: 2306429.000000 99.99th: 12517858.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.343 | Sample size 10073, Median Latency: 2307079.000000 99.99th: 12581316.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.359 | Sample size 10100, Median Latency: 2312622.000000 99.99th: 11677298.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.374 | Sample size 10040, Median Latency: 2286167.500000 99.99th: 13191061.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.389 | Sample size 10028, Median Latency: 2288836.500000 99.99th: 13423642.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.403 | Sample size 10093, Median Latency: 2329575.000000 99.99th: 12764353.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.419 | Sample size 10161, Median Latency: 2305517.000000 99.99th: 12411896.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.434 | Sample size 10154, Median Latency: 2341356.500000 99.99th: 10623914.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.449 | Sample size 10138, Median Latency: 2345010.500000 99.99th: 11214812.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.465 | Sample size 10128, Median Latency: 2357719.500000 99.99th: 11362070.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.480 | Sample size 10102, Median Latency: 2329536.500000 99.99th: 12875350.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.495 | Sample size 10094, Median Latency: 2360716.500000 99.99th: 13508258.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.510 | Sample size 10073, Median Latency: 2334276.000000 99.99th: 13169098.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.526 | Sample size 10170, Median Latency: 2342525.000000 99.99th: 10487882.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.540 | Sample size 10158, Median Latency: 2332220.500000 99.99th: 10692145.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.555 | Sample size 10156, Median Latency: 2325115.500000 99.99th: 11262978.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.571 | Sample size 10142, Median Latency: 2303078.000000 99.99th: 11036838.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.587 | Sample size 10142, Median Latency: 2343129.500000 99.99th: 11142508.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.602 | Sample size 10157, Median Latency: 2327585.000000 99.99th: 11253401.000000
+I [reporter.cpp:66] 2023-09-11 23:45:53.617 | Sample size 10164, Median Latency: 2341942.500000 99.99th: 11713826.000000
+I [reporter.cpp:131] 2023-09-11 23:45:53.618 | Across all poll, Average Latency 2450904.581630 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:54.142 | Sample size 10484, Median Latency: 2277602.500000 99.99th: 10000054.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.157 | Sample size 10523, Median Latency: 2269809.000000 99.99th: 17754307.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.172 | Sample size 10520, Median Latency: 2268090.500000 99.99th: 17405330.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.187 | Sample size 10202, Median Latency: 2303070.000000 99.99th: 11741389.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.203 | Sample size 10203, Median Latency: 2312479.000000 99.99th: 10896906.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.218 | Sample size 10220, Median Latency: 2292416.000000 99.99th: 10800399.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.233 | Sample size 10160, Median Latency: 2282774.500000 99.99th: 12817923.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.248 | Sample size 10221, Median Latency: 2275728.000000 99.99th: 10222123.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.262 | Sample size 10211, Median Latency: 2280986.000000 99.99th: 10401368.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.277 | Sample size 10207, Median Latency: 2296282.000000 99.99th: 10358520.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.292 | Sample size 10136, Median Latency: 2338899.500000 99.99th: 13242455.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.308 | Sample size 10138, Median Latency: 2348678.500000 99.99th: 12904101.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.323 | Sample size 10091, Median Latency: 2331301.000000 99.99th: 14176139.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.338 | Sample size 10165, Median Latency: 2301883.000000 99.99th: 14165042.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.353 | Sample size 10164, Median Latency: 2323991.000000 99.99th: 14535062.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.368 | Sample size 10101, Median Latency: 2353213.000000 99.99th: 14111211.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.383 | Sample size 10165, Median Latency: 2315407.000000 99.99th: 12386722.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.399 | Sample size 10208, Median Latency: 2293329.500000 99.99th: 10574105.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.414 | Sample size 10204, Median Latency: 2299100.500000 99.99th: 10640961.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.430 | Sample size 10203, Median Latency: 2330438.000000 99.99th: 10680407.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.445 | Sample size 10207, Median Latency: 2342364.000000 99.99th: 10995638.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.461 | Sample size 10226, Median Latency: 2345604.500000 99.99th: 10140743.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.476 | Sample size 10217, Median Latency: 2298616.000000 99.99th: 11218223.000000
+I [reporter.cpp:66] 2023-09-11 23:45:54.491 | Sample size 10223, Median Latency: 2306285.000000 99.99th: 11065024.000000
+I [reporter.cpp:131] 2023-09-11 23:45:54.492 | Across all poll, Average Latency 2447925.493660 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:55.015 | Sample size 10432, Median Latency: 2269910.500000 99.99th: 9674537.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.030 | Sample size 10459, Median Latency: 2271595.000000 99.99th: 16492363.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.045 | Sample size 10466, Median Latency: 2265435.000000 99.99th: 16521505.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.060 | Sample size 10149, Median Latency: 2294095.000000 99.99th: 11661143.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.075 | Sample size 10108, Median Latency: 2297666.500000 99.99th: 12295113.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.090 | Sample size 10091, Median Latency: 2299970.000000 99.99th: 12119346.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.104 | Sample size 10089, Median Latency: 2303293.000000 99.99th: 11720580.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.119 | Sample size 10154, Median Latency: 2346634.500000 99.99th: 11614089.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.134 | Sample size 10047, Median Latency: 2302862.000000 99.99th: 12522962.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.148 | Sample size 10158, Median Latency: 2337397.000000 99.99th: 9881947.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.164 | Sample size 10058, Median Latency: 2293300.500000 99.99th: 12431172.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.179 | Sample size 10100, Median Latency: 2331566.500000 99.99th: 11516233.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.194 | Sample size 10094, Median Latency: 2300588.500000 99.99th: 10605878.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.209 | Sample size 10096, Median Latency: 2306179.500000 99.99th: 10636542.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.224 | Sample size 10080, Median Latency: 2332026.000000 99.99th: 11239856.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.239 | Sample size 10077, Median Latency: 2323165.000000 99.99th: 10327017.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.254 | Sample size 10104, Median Latency: 2326343.500000 99.99th: 11724645.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.269 | Sample size 10105, Median Latency: 2328939.000000 99.99th: 11766839.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.285 | Sample size 10097, Median Latency: 2348253.000000 99.99th: 10914334.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.300 | Sample size 10114, Median Latency: 2346000.000000 99.99th: 12292838.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.315 | Sample size 10093, Median Latency: 2357290.000000 99.99th: 10764361.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.331 | Sample size 10096, Median Latency: 2347727.000000 99.99th: 12122549.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.346 | Sample size 10094, Median Latency: 2360907.000000 99.99th: 10931364.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.361 | Sample size 10099, Median Latency: 2348553.000000 99.99th: 12237812.000000
+I [reporter.cpp:131] 2023-09-11 23:45:55.362 | Across all poll, Average Latency 2456476.908549 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:55.882 | Sample size 10287, Median Latency: 2280240.000000 99.99th: 9573102.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.896 | Sample size 10298, Median Latency: 2269719.000000 99.99th: 14892656.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.911 | Sample size 10284, Median Latency: 2266145.000000 99.99th: 15421422.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.926 | Sample size 9913, Median Latency: 2329216.000000 99.99th: 14334518.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.941 | Sample size 9914, Median Latency: 2331615.500000 99.99th: 14448311.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.955 | Sample size 9913, Median Latency: 2335386.000000 99.99th: 14605876.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.969 | Sample size 9920, Median Latency: 2338587.000000 99.99th: 14146872.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.984 | Sample size 9916, Median Latency: 2327549.500000 99.99th: 14774910.000000
+I [reporter.cpp:66] 2023-09-11 23:45:55.999 | Sample size 9974, Median Latency: 2346283.500000 99.99th: 10976951.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.013 | Sample size 9969, Median Latency: 2347717.000000 99.99th: 12009440.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.028 | Sample size 9914, Median Latency: 2338770.000000 99.99th: 10401732.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.043 | Sample size 9915, Median Latency: 2400043.000000 99.99th: 10055812.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.058 | Sample size 9911, Median Latency: 2344990.000000 99.99th: 10323611.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.073 | Sample size 9895, Median Latency: 2396184.000000 99.99th: 10954973.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.088 | Sample size 9826, Median Latency: 2331121.500000 99.99th: 13048498.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.103 | Sample size 9852, Median Latency: 2388617.500000 99.99th: 12910023.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.118 | Sample size 9798, Median Latency: 2330815.500000 99.99th: 13179466.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.133 | Sample size 9903, Median Latency: 2383235.000000 99.99th: 10256182.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.148 | Sample size 9824, Median Latency: 2337964.500000 99.99th: 15342046.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.162 | Sample size 9797, Median Latency: 2329600.000000 99.99th: 15291007.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.177 | Sample size 9855, Median Latency: 2352083.000000 99.99th: 11958656.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.192 | Sample size 9827, Median Latency: 2348141.000000 99.99th: 12599538.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.207 | Sample size 9803, Median Latency: 2322793.000000 99.99th: 11966582.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.221 | Sample size 9844, Median Latency: 2332576.500000 99.99th: 11847345.000000
+I [reporter.cpp:131] 2023-09-11 23:45:56.222 | Across all poll, Average Latency 2472275.294134 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:56.737 | Sample size 10346, Median Latency: 2262845.000000 99.99th: 10447966.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.752 | Sample size 10347, Median Latency: 2235615.000000 99.99th: 11499785.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.767 | Sample size 10336, Median Latency: 2250221.500000 99.99th: 11690828.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.782 | Sample size 10021, Median Latency: 2312710.000000 99.99th: 10043988.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.797 | Sample size 10036, Median Latency: 2320072.000000 99.99th: 9852898.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.811 | Sample size 10028, Median Latency: 2324032.500000 99.99th: 10068244.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.826 | Sample size 9979, Median Latency: 2286892.000000 99.99th: 12728787.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.842 | Sample size 10030, Median Latency: 2326080.000000 99.99th: 10079203.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.857 | Sample size 10036, Median Latency: 2333326.000000 99.99th: 10556138.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.872 | Sample size 10030, Median Latency: 2299272.000000 99.99th: 10762214.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.887 | Sample size 9917, Median Latency: 2316228.000000 99.99th: 12203362.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.902 | Sample size 9918, Median Latency: 2350040.000000 99.99th: 12726937.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.917 | Sample size 9970, Median Latency: 2368067.500000 99.99th: 11633830.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.932 | Sample size 9984, Median Latency: 2349314.000000 99.99th: 11339119.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.947 | Sample size 9985, Median Latency: 2360674.000000 99.99th: 11833322.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.962 | Sample size 9916, Median Latency: 2354744.500000 99.99th: 12143731.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.977 | Sample size 9961, Median Latency: 2365640.000000 99.99th: 12064299.000000
+I [reporter.cpp:66] 2023-09-11 23:45:56.992 | Sample size 9784, Median Latency: 2297111.500000 99.99th: 12447474.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.007 | Sample size 9800, Median Latency: 2309877.000000 99.99th: 12499536.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.022 | Sample size 9794, Median Latency: 2269401.000000 99.99th: 12651981.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.037 | Sample size 9824, Median Latency: 2302067.000000 99.99th: 12184426.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.051 | Sample size 9864, Median Latency: 2285150.500000 99.99th: 11702690.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.066 | Sample size 9850, Median Latency: 2309938.000000 99.99th: 12433285.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.081 | Sample size 9870, Median Latency: 2294992.500000 99.99th: 12269055.000000
+I [reporter.cpp:131] 2023-09-11 23:45:57.082 | Across all poll, Average Latency 2432731.639980 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:57.596 | Sample size 10304, Median Latency: 2263178.000000 99.99th: 9846736.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.611 | Sample size 10337, Median Latency: 2291264.000000 99.99th: 9494213.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.626 | Sample size 10334, Median Latency: 2283772.000000 99.99th: 10265560.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.641 | Sample size 9978, Median Latency: 2321279.500000 99.99th: 11132834.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.656 | Sample size 9980, Median Latency: 2317484.000000 99.99th: 10616687.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.670 | Sample size 9974, Median Latency: 2335843.000000 99.99th: 11108085.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.684 | Sample size 9980, Median Latency: 2321304.000000 99.99th: 10976910.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.700 | Sample size 9962, Median Latency: 2323970.000000 99.99th: 12055297.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.715 | Sample size 9969, Median Latency: 2342127.000000 99.99th: 11761176.000000
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.724 | Benchmark thread: 20 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.724 | Benchmark thread: 21 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 10 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 17 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 3 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 15 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 2 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 5 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 13 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 0 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.725 | Benchmark thread: 18 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 14 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 22 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 11 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 6 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 23 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 16 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 19 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 7 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 1 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.726 | Benchmark thread: 8 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.727 | Benchmark thread: 4 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.727 | Benchmark thread: 9 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:45:57.727 | Benchmark thread: 12 stopped
+I [reporter.cpp:66] 2023-09-11 23:45:57.730 | Sample size 9970, Median Latency: 2348508.500000 99.99th: 10441752.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.744 | Sample size 9900, Median Latency: 2322324.000000 99.99th: 10578858.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.759 | Sample size 9780, Median Latency: 2312215.000000 99.99th: 10495812.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.773 | Sample size 9660, Median Latency: 2264118.500000 99.99th: 9843495.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.787 | Sample size 9540, Median Latency: 2265983.000000 99.99th: 9824304.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.800 | Sample size 9360, Median Latency: 2260234.500000 99.99th: 12470861.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.813 | Sample size 9300, Median Latency: 2295440.500000 99.99th: 9817568.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.826 | Sample size 8460, Median Latency: 2360099.000000 99.99th: 13557229.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.839 | Sample size 8400, Median Latency: 2370411.500000 99.99th: 10115452.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.851 | Sample size 8280, Median Latency: 2365123.500000 99.99th: 10004434.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.863 | Sample size 8160, Median Latency: 2342088.500000 99.99th: 9995498.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.875 | Sample size 8040, Median Latency: 2337487.500000 99.99th: 10035395.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.886 | Sample size 7920, Median Latency: 2320087.000000 99.99th: 10963757.000000
+I [reporter.cpp:66] 2023-09-11 23:45:57.897 | Sample size 7800, Median Latency: 2332533.500000 99.99th: 4918953.000000
+I [reporter.cpp:131] 2023-09-11 23:45:57.898 | Across all poll, Average Latency 2411632.406259 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:45:58.406 | Sample size 1620, Median Latency: 2192649.000000 99.99th: 9844568.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.412 | Sample size 1500, Median Latency: 2150666.500000 99.99th: 8560274.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.415 | Sample size 1380, Median Latency: 2097569.500000 99.99th: 5049698.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.416 | Sample size 660, Median Latency: 3132360.500000 99.99th: 14297110.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.417 | Sample size 600, Median Latency: 2783362.500000 99.99th: 14364363.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.418 | Sample size 540, Median Latency: 3161707.500000 99.99th: 9592994.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.418 | Sample size 360, Median Latency: 3823143.000000 99.99th: 10371118.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.419 | Sample size 300, Median Latency: 2941616.000000 99.99th: 9587293.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.419 | Sample size 180, Median Latency: 2633617.500000 99.99th: 8776905.000000
+I [reporter.cpp:66] 2023-09-11 23:45:58.419 | Sample size 60, Median Latency: 2494453.500000 99.99th: 2826323.000000
+I [reporter.cpp:131] 2023-09-11 23:45:58.420 | Across all poll, Average Latency 1372164.663371 micro-sec
+I [reporter.cpp:131] 2023-09-11 23:45:58.921 | Across all poll, Average Latency 0.000000 micro-sec
+I [reporter.cpp:131] 2023-09-11 23:45:59.422 | Across all poll, Average Latency 0.000000 micro-sec
+I [transport.cpp:881] 2023-09-11 23:45:59.436 | Log Rx tid: 0, port id: 0, qid: 0
+I [transport.cpp:887] 2023-09-11 23:45:59.436 | Number of packets: TX: 5923884, RX: 0

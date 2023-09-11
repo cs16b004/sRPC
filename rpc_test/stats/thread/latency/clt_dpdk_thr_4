@@ -1,0 +1,369 @@
+I [config.cpp:55] 2023-09-11 23:21:46.679 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:100] 2023-09-11 23:21:46.681 | Loading CPU Config
+I [config.cpp:55] 2023-09-11 23:21:46.681 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:55] 2023-09-11 23:21:46.683 | Loading configuration from : config_files/host_greenport.yml
+I [config.cpp:55] 2023-09-11 23:21:46.684 | Loading configuration from : config_files/network_greenport.yml
+I [config.cpp:55] 2023-09-11 23:21:46.686 | Loading configuration from : config_files/benchmarks.yml
+I [transport.cpp:694] 2023-09-11 23:21:46.688 | Setting up network info....
+I [transport.cpp:710] 2023-09-11 23:21:46.688 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:21:46.688 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 23:21:46.688 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:21:46.688 | Adding a host with name ampere03 : info :
+ [ Name: ampere03
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 23:21:46.688 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:699] 2023-09-11 23:21:46.688 | Configuring local address 5, 172.19.0.122
+I [transport.cpp:710] 2023-09-11 23:21:46.688 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:534] 2023-09-11 23:21:46.688 | Thread counter 0, num_rx_threads 1, tx_threads 1
+I [transport.cpp:1035] 2023-09-11 23:21:47.962 | Flow isolation enabled for port 0
+
+I [transport.cpp:1105] 2023-09-11 23:21:47.003 | IP Address to be queued 172.19.0.122
+I [transport.cpp:1133] 2023-09-11 23:21:48.021 | Flow Rule Added for IP Address : 172.19.0.122
+I [transport.cpp:655] 2023-09-11 23:21:48.021 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:661] 2023-09-11 23:21:48.021 | Total Cores available: 33
+I [transport.cpp:670] 2023-09-11 23:21:48.021 | rx_core limit: 2 tx_core limit: 3, my core_id 0 
+I [transport.cpp:273] 2023-09-11 23:21:48.021 | Enter receive thread 0 on core 1 on port_id 0 on queue 0
+I [transport.cpp:216] 2023-09-11 23:21:48.021 | Entering TX thread 0 at lcore 2
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:21:48.022 | Chosen threads for new conn: 1 is tx-thread 0, counter 1
+I [transport.cpp:194] 2023-09-11 23:21:48.072 | Connected to 172.19.0.121:8501::9000, fd r: 156, w: 157
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:21:48.073 | Chosen threads for new conn: 2 is tx-thread 0, counter 2
+I [transport.cpp:194] 2023-09-11 23:21:49.024 | Connected to 172.19.0.121:8501::9001, fd r: 158, w: 159
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:21:49.025 | Chosen threads for new conn: 3 is tx-thread 0, counter 3
+I [transport.cpp:194] 2023-09-11 23:21:50.027 | Connected to 172.19.0.121:8501::9002, fd r: 160, w: 161
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:21:50.028 | Chosen threads for new conn: 4 is tx-thread 0, counter 4
+I [transport.cpp:194] 2023-09-11 23:21:51.029 | Connected to 172.19.0.121:8501::9003, fd r: 162, w: 163
+I [benchmarks.cpp:107] 2023-09-11 23:21:51.029 | New client thread created 0, with client 0
+I [benchmarks.cpp:107] 2023-09-11 23:21:51.029 | New client thread created 1, with client 1
+I [benchmarks.cpp:107] 2023-09-11 23:21:51.029 | New client thread created 2, with client 2
+I [benchmarks.cpp:107] 2023-09-11 23:21:51.029 | New client thread created 3, with client 3
+I [benchmarks.cpp:79] 2023-09-11 23:21:51.029 | Benchmark thread: 0 launched
+I [benchmarks.cpp:79] 2023-09-11 23:21:51.029 | Benchmark thread: 1 launched
+I [benchmarks.cpp:79] 2023-09-11 23:21:51.029 | Benchmark thread: 2 launched
+I [benchmarks.cpp:79] 2023-09-11 23:21:51.029 | Benchmark thread: 3 launched
+I 2023-09-11 23:21:51.029 | Reporter Thread Launched, Observing 1 poll threads
+I [reporter.cpp:35] 2023-09-11 23:21:51.588 | Sample Size : 38138 Average Latency in nano sec: 455720.117285
+I [reporter.cpp:64] 2023-09-11 23:21:51.619 | Sample size 38138, Median Latency: 506428.000000 99.99th: 4937879.000000
+I [reporter.cpp:35] 2023-09-11 23:21:51.673 | Sample Size : 41093 Average Latency in nano sec: 564533.646460
+I [reporter.cpp:64] 2023-09-11 23:21:51.705 | Sample size 41093, Median Latency: 521748.000000 99.99th: 46804094.000000
+I [reporter.cpp:35] 2023-09-11 23:21:51.768 | Sample Size : 43843 Average Latency in nano sec: 602626.116050
+I [reporter.cpp:64] 2023-09-11 23:21:51.803 | Sample size 43843, Median Latency: 512467.000000 99.99th: 46884765.000000
+I [reporter.cpp:129] 2023-09-11 23:21:51.809 | Across all poll, Average Latency 405719.969949 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:52.328 | Sample Size : 15364 Average Latency in nano sec: 816110.017894
+I [reporter.cpp:64] 2023-09-11 23:21:52.340 | Sample size 15364, Median Latency: 781506.000000 99.99th: 6879563.000000
+I [reporter.cpp:35] 2023-09-11 23:21:52.395 | Sample Size : 44880 Average Latency in nano sec: 697939.194936
+I [reporter.cpp:64] 2023-09-11 23:21:52.430 | Sample size 44880, Median Latency: 533353.000000 99.99th: 44344517.000000
+I [reporter.cpp:35] 2023-09-11 23:21:52.488 | Sample Size : 43980 Average Latency in nano sec: 747845.124537
+I [reporter.cpp:64] 2023-09-11 23:21:52.523 | Sample size 43980, Median Latency: 531320.000000 99.99th: 44123676.000000
+I [reporter.cpp:35] 2023-09-11 23:21:52.569 | Sample Size : 43080 Average Latency in nano sec: 790663.697821
+I [reporter.cpp:64] 2023-09-11 23:21:52.590 | Sample size 43080, Median Latency: 536429.500000 99.99th: 39993615.000000
+I [reporter.cpp:129] 2023-09-11 23:21:52.594 | Across all poll, Average Latency 763139.508797 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:53.131 | Sample Size : 33960 Average Latency in nano sec: 1095333.306385
+I [reporter.cpp:64] 2023-09-11 23:21:53.150 | Sample size 33960, Median Latency: 797174.500000 99.99th: 39389910.000000
+I [reporter.cpp:35] 2023-09-11 23:21:53.181 | Sample Size : 34891 Average Latency in nano sec: 1045334.545017
+I [reporter.cpp:64] 2023-09-11 23:21:53.198 | Sample size 34891, Median Latency: 796685.000000 99.99th: 39556192.000000
+I [reporter.cpp:35] 2023-09-11 23:21:53.233 | Sample Size : 40140 Average Latency in nano sec: 830763.303458
+I [reporter.cpp:64] 2023-09-11 23:21:53.252 | Sample size 40140, Median Latency: 549562.500000 99.99th: 33310298.000000
+I [reporter.cpp:35] 2023-09-11 23:21:53.286 | Sample Size : 38306 Average Latency in nano sec: 832025.941198
+I [reporter.cpp:64] 2023-09-11 23:21:53.305 | Sample size 38306, Median Latency: 548755.500000 99.99th: 32779694.000000
+I [reporter.cpp:129] 2023-09-11 23:21:53.308 | Across all poll, Average Latency 950864.274015 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:53.833 | Sample Size : 31980 Average Latency in nano sec: 1013418.749251
+I [reporter.cpp:64] 2023-09-11 23:21:53.849 | Sample size 31980, Median Latency: 797921.000000 99.99th: 24646696.000000
+I [reporter.cpp:35] 2023-09-11 23:21:53.876 | Sample Size : 31320 Average Latency in nano sec: 1036434.954653
+I [reporter.cpp:64] 2023-09-11 23:21:53.891 | Sample size 31320, Median Latency: 870265.500000 99.99th: 24815691.000000
+I [reporter.cpp:35] 2023-09-11 23:21:53.918 | Sample Size : 31200 Average Latency in nano sec: 1026612.167083
+I [reporter.cpp:64] 2023-09-11 23:21:53.933 | Sample size 31200, Median Latency: 888124.500000 99.99th: 23898627.000000
+I [reporter.cpp:35] 2023-09-11 23:21:53.970 | Sample Size : 44301 Average Latency in nano sec: 629873.657043
+I [reporter.cpp:64] 2023-09-11 23:21:53.992 | Sample size 44301, Median Latency: 537841.000000 99.99th: 19678247.000000
+I [reporter.cpp:129] 2023-09-11 23:21:53.996 | Across all poll, Average Latency 926584.882007 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:54.529 | Sample Size : 43800 Average Latency in nano sec: 659559.216917
+I [reporter.cpp:64] 2023-09-11 23:21:54.551 | Sample size 43800, Median Latency: 537372.000000 99.99th: 26628688.000000
+I [reporter.cpp:35] 2023-09-11 23:21:54.579 | Sample Size : 31011 Average Latency in nano sec: 1066918.388749
+I [reporter.cpp:64] 2023-09-11 23:21:54.594 | Sample size 31011, Median Latency: 869494.000000 99.99th: 27038619.000000
+I [reporter.cpp:35] 2023-09-11 23:21:54.622 | Sample Size : 32231 Average Latency in nano sec: 1016513.227540
+I [reporter.cpp:64] 2023-09-11 23:21:54.638 | Sample size 32231, Median Latency: 798506.000000 99.99th: 26391229.000000
+I [reporter.cpp:35] 2023-09-11 23:21:54.666 | Sample Size : 31800 Average Latency in nano sec: 1025459.026979
+I [reporter.cpp:64] 2023-09-11 23:21:54.681 | Sample size 31800, Median Latency: 808246.000000 99.99th: 25846002.000000
+I [reporter.cpp:129] 2023-09-11 23:21:54.684 | Across all poll, Average Latency 942112.465047 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:55.218 | Sample Size : 32100 Average Latency in nano sec: 965897.382494
+I [reporter.cpp:64] 2023-09-11 23:21:55.234 | Sample size 32100, Median Latency: 795255.500000 99.99th: 19494018.000000
+I [reporter.cpp:35] 2023-09-11 23:21:55.267 | Sample Size : 34260 Average Latency in nano sec: 906323.414248
+I [reporter.cpp:64] 2023-09-11 23:21:55.284 | Sample size 34260, Median Latency: 782038.500000 99.99th: 28371590.000000
+I [reporter.cpp:35] 2023-09-11 23:21:55.321 | Sample Size : 40689 Average Latency in nano sec: 736870.227662
+I [reporter.cpp:64] 2023-09-11 23:21:55.341 | Sample size 40689, Median Latency: 542176.000000 99.99th: 28977956.000000
+I [reporter.cpp:35] 2023-09-11 23:21:55.371 | Sample Size : 31620 Average Latency in nano sec: 1041745.136679
+I [reporter.cpp:64] 2023-09-11 23:21:55.387 | Sample size 31620, Median Latency: 801072.000000 99.99th: 28486913.000000
+I [reporter.cpp:129] 2023-09-11 23:21:55.390 | Across all poll, Average Latency 912709.040271 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:55.914 | Sample Size : 31140 Average Latency in nano sec: 1033226.382692
+I [reporter.cpp:64] 2023-09-11 23:21:55.929 | Sample size 31140, Median Latency: 809731.500000 99.99th: 27229498.000000
+I [reporter.cpp:35] 2023-09-11 23:21:55.960 | Sample Size : 36447 Average Latency in nano sec: 845605.864529
+I [reporter.cpp:64] 2023-09-11 23:21:55.978 | Sample size 36447, Median Latency: 622461.000000 99.99th: 26929138.000000
+I [reporter.cpp:35] 2023-09-11 23:21:56.010 | Sample Size : 36791 Average Latency in nano sec: 832543.270561
+I [reporter.cpp:64] 2023-09-11 23:21:56.028 | Sample size 36791, Median Latency: 575073.000000 99.99th: 21188659.000000
+I [reporter.cpp:35] 2023-09-11 23:21:56.056 | Sample Size : 32295 Average Latency in nano sec: 979190.585301
+I [reporter.cpp:64] 2023-09-11 23:21:56.072 | Sample size 32295, Median Latency: 797059.000000 99.99th: 22686410.000000
+I [reporter.cpp:129] 2023-09-11 23:21:56.075 | Across all poll, Average Latency 922641.525771 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:56.600 | Sample Size : 32520 Average Latency in nano sec: 962647.411786
+I [reporter.cpp:64] 2023-09-11 23:21:56.616 | Sample size 32520, Median Latency: 790772.500000 99.99th: 22158184.000000
+I [reporter.cpp:35] 2023-09-11 23:21:56.652 | Sample Size : 43720 Average Latency in nano sec: 671173.190969
+I [reporter.cpp:64] 2023-09-11 23:21:56.674 | Sample size 43720, Median Latency: 539733.000000 99.99th: 22609334.000000
+I [reporter.cpp:35] 2023-09-11 23:21:56.707 | Sample Size : 31788 Average Latency in nano sec: 1019362.261551
+I [reporter.cpp:64] 2023-09-11 23:21:56.723 | Sample size 31788, Median Latency: 800611.000000 99.99th: 28844343.000000
+I [reporter.cpp:35] 2023-09-11 23:21:56.753 | Sample Size : 32340 Average Latency in nano sec: 997900.899830
+I [reporter.cpp:64] 2023-09-11 23:21:56.768 | Sample size 32340, Median Latency: 799119.000000 99.99th: 28680375.000000
+I [reporter.cpp:129] 2023-09-11 23:21:56.771 | Across all poll, Average Latency 912770.941034 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:57.311 | Sample Size : 37973 Average Latency in nano sec: 811392.545155
+I [reporter.cpp:64] 2023-09-11 23:21:57.329 | Sample size 37973, Median Latency: 546987.000000 99.99th: 28954646.000000
+I [reporter.cpp:35] 2023-09-11 23:21:57.357 | Sample Size : 31200 Average Latency in nano sec: 1047755.726552
+I [reporter.cpp:64] 2023-09-11 23:21:57.372 | Sample size 31200, Median Latency: 849859.500000 99.99th: 34456376.000000
+I [reporter.cpp:35] 2023-09-11 23:21:57.399 | Sample Size : 30780 Average Latency in nano sec: 1062542.216972
+I [reporter.cpp:64] 2023-09-11 23:21:57.414 | Sample size 30780, Median Latency: 901187.000000 99.99th: 34308795.000000
+I [reporter.cpp:35] 2023-09-11 23:21:57.446 | Sample Size : 38248 Average Latency in nano sec: 799167.474556
+I [reporter.cpp:64] 2023-09-11 23:21:57.465 | Sample size 38248, Median Latency: 548145.500000 99.99th: 32387950.000000
+I [reporter.cpp:129] 2023-09-11 23:21:57.468 | Across all poll, Average Latency 930214.490809 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:57.993 | Sample Size : 30900 Average Latency in nano sec: 1025152.467991
+I [reporter.cpp:64] 2023-09-11 23:21:58.008 | Sample size 30900, Median Latency: 892924.500000 99.99th: 22525705.000000
+I [reporter.cpp:35] 2023-09-11 23:21:58.035 | Sample Size : 31140 Average Latency in nano sec: 999817.702660
+I [reporter.cpp:64] 2023-09-11 23:21:58.050 | Sample size 31140, Median Latency: 804534.500000 99.99th: 22149558.000000
+I [reporter.cpp:35] 2023-09-11 23:21:58.077 | Sample Size : 30900 Average Latency in nano sec: 1018189.383236
+I [reporter.cpp:64] 2023-09-11 23:21:58.092 | Sample size 30900, Median Latency: 840450.000000 99.99th: 22712667.000000
+I [reporter.cpp:35] 2023-09-11 23:21:58.128 | Sample Size : 44003 Average Latency in nano sec: 635778.101351
+I [reporter.cpp:64] 2023-09-11 23:21:58.150 | Sample size 44003, Median Latency: 537567.000000 99.99th: 19460493.000000
+I [reporter.cpp:129] 2023-09-11 23:21:58.154 | Across all poll, Average Latency 919734.413810 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:58.682 | Sample Size : 31920 Average Latency in nano sec: 981779.362289
+I [reporter.cpp:64] 2023-09-11 23:21:58.698 | Sample size 31920, Median Latency: 793253.000000 99.99th: 26245127.000000
+I [reporter.cpp:35] 2023-09-11 23:21:58.733 | Sample Size : 37800 Average Latency in nano sec: 816940.685737
+I [reporter.cpp:64] 2023-09-11 23:21:58.752 | Sample size 37800, Median Latency: 552627.500000 99.99th: 26043965.000000
+I [reporter.cpp:35] 2023-09-11 23:21:58.782 | Sample Size : 32064 Average Latency in nano sec: 1023276.607526
+I [reporter.cpp:64] 2023-09-11 23:21:58.797 | Sample size 32064, Median Latency: 798145.000000 99.99th: 26616766.000000
+I [reporter.cpp:35] 2023-09-11 23:21:58.831 | Sample Size : 38601 Average Latency in nano sec: 800824.077941
+I [reporter.cpp:64] 2023-09-11 23:21:58.850 | Sample size 38601, Median Latency: 546810.000000 99.99th: 26239801.000000
+I [reporter.cpp:129] 2023-09-11 23:21:58.854 | Across all poll, Average Latency 905705.183373 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:21:59.380 | Sample Size : 33220 Average Latency in nano sec: 960523.677948
+I [reporter.cpp:64] 2023-09-11 23:21:59.396 | Sample size 33220, Median Latency: 785073.000000 99.99th: 26836502.000000
+I [reporter.cpp:35] 2023-09-11 23:21:59.423 | Sample Size : 31140 Average Latency in nano sec: 1035597.408494
+I [reporter.cpp:64] 2023-09-11 23:21:59.439 | Sample size 31140, Median Latency: 845479.000000 99.99th: 27446440.000000
+I [reporter.cpp:35] 2023-09-11 23:21:59.473 | Sample Size : 40380 Average Latency in nano sec: 731116.005792
+I [reporter.cpp:64] 2023-09-11 23:21:59.492 | Sample size 40380, Median Latency: 541899.000000 99.99th: 27554522.000000
+I [reporter.cpp:35] 2023-09-11 23:21:59.522 | Sample Size : 32940 Average Latency in nano sec: 961465.347039
+I [reporter.cpp:64] 2023-09-11 23:21:59.538 | Sample size 32940, Median Latency: 788729.500000 99.99th: 23931023.000000
+I [reporter.cpp:129] 2023-09-11 23:21:59.541 | Across all poll, Average Latency 922175.609818 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:00.065 | Sample Size : 31004 Average Latency in nano sec: 1019393.016409
+I [reporter.cpp:64] 2023-09-11 23:22:00.080 | Sample size 31004, Median Latency: 852957.000000 99.99th: 23734787.000000
+I [reporter.cpp:35] 2023-09-11 23:22:00.109 | Sample Size : 33720 Average Latency in nano sec: 924198.072647
+I [reporter.cpp:64] 2023-09-11 23:22:00.126 | Sample size 33720, Median Latency: 785001.000000 99.99th: 23618248.000000
+I [reporter.cpp:35] 2023-09-11 23:22:00.160 | Sample Size : 40662 Average Latency in nano sec: 732691.899656
+I [reporter.cpp:64] 2023-09-11 23:22:00.180 | Sample size 40662, Median Latency: 541703.500000 99.99th: 20709534.000000
+I [reporter.cpp:35] 2023-09-11 23:22:00.209 | Sample Size : 31380 Average Latency in nano sec: 1013509.384319
+I [reporter.cpp:64] 2023-09-11 23:22:00.224 | Sample size 31380, Median Latency: 803434.000000 99.99th: 24278927.000000
+I [reporter.cpp:129] 2023-09-11 23:22:00.226 | Across all poll, Average Latency 922448.093258 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:00.761 | Sample Size : 31643 Average Latency in nano sec: 994301.970707
+I [reporter.cpp:64] 2023-09-11 23:22:00.777 | Sample size 31643, Median Latency: 792796.000000 99.99th: 27091373.000000
+I [reporter.cpp:35] 2023-09-11 23:22:00.804 | Sample Size : 31080 Average Latency in nano sec: 1045151.056391
+I [reporter.cpp:64] 2023-09-11 23:22:00.819 | Sample size 31080, Median Latency: 826507.500000 99.99th: 29438811.000000
+I [reporter.cpp:35] 2023-09-11 23:22:00.847 | Sample Size : 33180 Average Latency in nano sec: 955725.803219
+I [reporter.cpp:64] 2023-09-11 23:22:00.864 | Sample size 33180, Median Latency: 788476.000000 99.99th: 29333885.000000
+I [reporter.cpp:35] 2023-09-11 23:22:00.899 | Sample Size : 41700 Average Latency in nano sec: 699571.348731
+I [reporter.cpp:64] 2023-09-11 23:22:00.919 | Sample size 41700, Median Latency: 538693.000000 99.99th: 29844883.000000
+I [reporter.cpp:129] 2023-09-11 23:22:00.923 | Across all poll, Average Latency 923687.544762 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:01.457 | Sample Size : 30720 Average Latency in nano sec: 1039689.084113
+I [reporter.cpp:64] 2023-09-11 23:22:01.472 | Sample size 30720, Median Latency: 944382.000000 99.99th: 25348837.000000
+I [reporter.cpp:35] 2023-09-11 23:22:01.499 | Sample Size : 31020 Average Latency in nano sec: 1049610.889060
+I [reporter.cpp:64] 2023-09-11 23:22:01.514 | Sample size 31020, Median Latency: 818334.500000 99.99th: 30793145.000000
+I [reporter.cpp:35] 2023-09-11 23:22:01.549 | Sample Size : 41571 Average Latency in nano sec: 729319.852718
+I [reporter.cpp:64] 2023-09-11 23:22:01.570 | Sample size 41571, Median Latency: 543470.000000 99.99th: 28754521.000000
+I [reporter.cpp:35] 2023-09-11 23:22:01.600 | Sample Size : 33720 Average Latency in nano sec: 966534.291593
+I [reporter.cpp:64] 2023-09-11 23:22:01.616 | Sample size 33720, Median Latency: 791197.000000 99.99th: 29333219.000000
+I [reporter.cpp:129] 2023-09-11 23:22:01.619 | Across all poll, Average Latency 946288.529371 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:02.144 | Sample Size : 32084 Average Latency in nano sec: 989448.879044
+I [reporter.cpp:64] 2023-09-11 23:22:02.160 | Sample size 32084, Median Latency: 794744.000000 99.99th: 24938058.000000
+I [reporter.cpp:35] 2023-09-11 23:22:02.195 | Sample Size : 42600 Average Latency in nano sec: 695250.859119
+I [reporter.cpp:64] 2023-09-11 23:22:02.217 | Sample size 42600, Median Latency: 541673.500000 99.99th: 25158050.000000
+I [reporter.cpp:35] 2023-09-11 23:22:02.246 | Sample Size : 33240 Average Latency in nano sec: 970226.715015
+I [reporter.cpp:64] 2023-09-11 23:22:02.262 | Sample size 33240, Median Latency: 793689.000000 99.99th: 25015058.000000
+I [reporter.cpp:35] 2023-09-11 23:22:02.294 | Sample Size : 31559 Average Latency in nano sec: 1019115.937611
+I [reporter.cpp:64] 2023-09-11 23:22:02.309 | Sample size 31559, Median Latency: 806535.000000 99.99th: 25620091.000000
+I [reporter.cpp:129] 2023-09-11 23:22:02.312 | Across all poll, Average Latency 918510.597697 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:02.839 | Sample Size : 33120 Average Latency in nano sec: 944283.904002
+I [reporter.cpp:64] 2023-09-11 23:22:02.855 | Sample size 33120, Median Latency: 784916.000000 99.99th: 25134804.000000
+I [reporter.cpp:35] 2023-09-11 23:22:02.888 | Sample Size : 38400 Average Latency in nano sec: 794221.453510
+I [reporter.cpp:64] 2023-09-11 23:22:02.907 | Sample size 38400, Median Latency: 548889.000000 99.99th: 22973351.000000
+I [reporter.cpp:35] 2023-09-11 23:22:02.937 | Sample Size : 33827 Average Latency in nano sec: 923205.320686
+I [reporter.cpp:64] 2023-09-11 23:22:02.953 | Sample size 33827, Median Latency: 786326.000000 99.99th: 23296086.000000
+I [reporter.cpp:35] 2023-09-11 23:22:02.982 | Sample Size : 32247 Average Latency in nano sec: 978201.872026
+I [reporter.cpp:64] 2023-09-11 23:22:02.997 | Sample size 32247, Median Latency: 792657.000000 99.99th: 22846559.000000
+I [reporter.cpp:129] 2023-09-11 23:22:02.000 | Across all poll, Average Latency 909978.137556 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:03.530 | Sample Size : 37920 Average Latency in nano sec: 789183.024776
+I [reporter.cpp:64] 2023-09-11 23:22:03.548 | Sample size 37920, Median Latency: 546495.000000 99.99th: 22668202.000000
+I [reporter.cpp:35] 2023-09-11 23:22:03.582 | Sample Size : 38314 Average Latency in nano sec: 797728.174491
+I [reporter.cpp:64] 2023-09-11 23:22:03.600 | Sample size 38314, Median Latency: 547493.000000 99.99th: 23569074.000000
+I [reporter.cpp:35] 2023-09-11 23:22:03.628 | Sample Size : 31620 Average Latency in nano sec: 1019747.912437
+I [reporter.cpp:64] 2023-09-11 23:22:03.644 | Sample size 31620, Median Latency: 797971.000000 99.99th: 23542283.000000
+I [reporter.cpp:35] 2023-09-11 23:22:03.672 | Sample Size : 31740 Average Latency in nano sec: 999632.769780
+I [reporter.cpp:64] 2023-09-11 23:22:03.687 | Sample size 31740, Median Latency: 796841.000000 99.99th: 23433179.000000
+I [reporter.cpp:129] 2023-09-11 23:22:03.690 | Across all poll, Average Latency 901572.970371 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:04.220 | Sample Size : 37928 Average Latency in nano sec: 785720.808531
+I [reporter.cpp:64] 2023-09-11 23:22:04.240 | Sample size 37928, Median Latency: 544009.500000 99.99th: 24033998.000000
+I [reporter.cpp:35] 2023-09-11 23:22:04.273 | Sample Size : 33900 Average Latency in nano sec: 921334.201060
+I [reporter.cpp:64] 2023-09-11 23:22:04.289 | Sample size 33900, Median Latency: 785026.500000 99.99th: 22614267.000000
+I [reporter.cpp:35] 2023-09-11 23:22:04.319 | Sample Size : 31500 Average Latency in nano sec: 1014492.311153
+I [reporter.cpp:64] 2023-09-11 23:22:04.334 | Sample size 31500, Median Latency: 799637.000000 99.99th: 23168437.000000
+I [reporter.cpp:35] 2023-09-11 23:22:04.366 | Sample Size : 35280 Average Latency in nano sec: 873511.990521
+I [reporter.cpp:64] 2023-09-11 23:22:04.383 | Sample size 35280, Median Latency: 771427.500000 99.99th: 23005988.000000
+I [reporter.cpp:129] 2023-09-11 23:22:04.386 | Across all poll, Average Latency 898764.827816 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:04.911 | Sample Size : 30795 Average Latency in nano sec: 1047125.986154
+I [reporter.cpp:64] 2023-09-11 23:22:04.926 | Sample size 30795, Median Latency: 936391.000000 99.99th: 23307122.000000
+I [reporter.cpp:35] 2023-09-11 23:22:04.963 | Sample Size : 44580 Average Latency in nano sec: 647924.032728
+I [reporter.cpp:64] 2023-09-11 23:22:04.986 | Sample size 44580, Median Latency: 538507.500000 99.99th: 25497882.000000
+I [reporter.cpp:35] 2023-09-11 23:22:05.014 | Sample Size : 31800 Average Latency in nano sec: 1016784.798242
+I [reporter.cpp:64] 2023-09-11 23:22:05.030 | Sample size 31800, Median Latency: 801729.500000 99.99th: 26878434.000000
+I [reporter.cpp:35] 2023-09-11 23:22:05.057 | Sample Size : 31440 Average Latency in nano sec: 1026177.022984
+I [reporter.cpp:64] 2023-09-11 23:22:05.072 | Sample size 31440, Median Latency: 843448.500000 99.99th: 26996396.000000
+I [reporter.cpp:129] 2023-09-11 23:22:05.075 | Across all poll, Average Latency 934502.960027 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:05.601 | Sample Size : 32320 Average Latency in nano sec: 981978.496016
+I [reporter.cpp:64] 2023-09-11 23:22:05.616 | Sample size 32320, Median Latency: 791428.500000 99.99th: 26948784.000000
+I [reporter.cpp:35] 2023-09-11 23:22:05.644 | Sample Size : 31740 Average Latency in nano sec: 995979.202013
+I [reporter.cpp:64] 2023-09-11 23:22:05.660 | Sample size 31740, Median Latency: 802044.000000 99.99th: 21448971.000000
+I [reporter.cpp:35] 2023-09-11 23:22:05.696 | Sample Size : 43920 Average Latency in nano sec: 652117.044065
+I [reporter.cpp:64] 2023-09-11 23:22:05.719 | Sample size 43920, Median Latency: 537839.000000 99.99th: 20144532.000000
+I [reporter.cpp:35] 2023-09-11 23:22:05.747 | Sample Size : 31073 Average Latency in nano sec: 1037513.655111
+I [reporter.cpp:64] 2023-09-11 23:22:05.762 | Sample size 31073, Median Latency: 803687.000000 99.99th: 25540859.000000
+I [reporter.cpp:129] 2023-09-11 23:22:05.765 | Across all poll, Average Latency 916897.099301 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:06.290 | Sample Size : 31680 Average Latency in nano sec: 1000618.461609
+I [reporter.cpp:64] 2023-09-11 23:22:06.305 | Sample size 31680, Median Latency: 794878.500000 99.99th: 26426570.000000
+I [reporter.cpp:35] 2023-09-11 23:22:06.342 | Sample Size : 44064 Average Latency in nano sec: 663916.427370
+I [reporter.cpp:64] 2023-09-11 23:22:06.364 | Sample size 44064, Median Latency: 538862.000000 99.99th: 25481739.000000
+I [reporter.cpp:35] 2023-09-11 23:22:06.393 | Sample Size : 31860 Average Latency in nano sec: 1021845.147086
+I [reporter.cpp:64] 2023-09-11 23:22:06.408 | Sample size 31860, Median Latency: 802609.000000 99.99th: 26857173.000000
+I [reporter.cpp:35] 2023-09-11 23:22:06.435 | Sample Size : 31020 Average Latency in nano sec: 1036474.535187
+I [reporter.cpp:64] 2023-09-11 23:22:06.450 | Sample size 31020, Median Latency: 869065.000000 99.99th: 26426060.000000
+I [reporter.cpp:129] 2023-09-11 23:22:06.453 | Across all poll, Average Latency 930713.642813 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:06.979 | Sample Size : 33300 Average Latency in nano sec: 944430.184323
+I [reporter.cpp:64] 2023-09-11 23:22:06.995 | Sample size 33300, Median Latency: 785932.000000 99.99th: 26224223.000000
+I [reporter.cpp:35] 2023-09-11 23:22:07.028 | Sample Size : 38267 Average Latency in nano sec: 793875.917160
+I [reporter.cpp:64] 2023-09-11 23:22:07.047 | Sample size 38267, Median Latency: 549522.000000 99.99th: 21034623.000000
+I [reporter.cpp:35] 2023-09-11 23:22:07.074 | Sample Size : 31238 Average Latency in nano sec: 1012420.692217
+I [reporter.cpp:64] 2023-09-11 23:22:07.090 | Sample size 31238, Median Latency: 806812.000000 99.99th: 25509991.000000
+I [reporter.cpp:35] 2023-09-11 23:22:07.121 | Sample Size : 37020 Average Latency in nano sec: 819064.363026
+I [reporter.cpp:64] 2023-09-11 23:22:07.139 | Sample size 37020, Median Latency: 558794.500000 99.99th: 24932456.000000
+I [reporter.cpp:129] 2023-09-11 23:22:07.142 | Across all poll, Average Latency 892447.789181 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:07.669 | Sample Size : 33720 Average Latency in nano sec: 915798.601510
+I [reporter.cpp:64] 2023-09-11 23:22:07.685 | Sample size 33720, Median Latency: 782834.000000 99.99th: 25060691.000000
+I [reporter.cpp:35] 2023-09-11 23:22:07.715 | Sample Size : 33900 Average Latency in nano sec: 917033.202931
+I [reporter.cpp:64] 2023-09-11 23:22:07.731 | Sample size 33900, Median Latency: 786397.000000 99.99th: 22555429.000000
+I [reporter.cpp:35] 2023-09-11 23:22:07.759 | Sample Size : 32340 Average Latency in nano sec: 981122.942371
+I [reporter.cpp:64] 2023-09-11 23:22:07.775 | Sample size 32340, Median Latency: 794320.000000 99.99th: 22621765.000000
+I [reporter.cpp:35] 2023-09-11 23:22:07.807 | Sample Size : 37866 Average Latency in nano sec: 796209.871460
+I [reporter.cpp:64] 2023-09-11 23:22:07.826 | Sample size 37866, Median Latency: 548083.500000 99.99th: 23215688.000000
+I [reporter.cpp:129] 2023-09-11 23:22:07.829 | Across all poll, Average Latency 902541.154568 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:08.354 | Sample Size : 31080 Average Latency in nano sec: 1019263.038857
+I [reporter.cpp:64] 2023-09-11 23:22:08.369 | Sample size 31080, Median Latency: 864563.500000 99.99th: 23532253.000000
+I [reporter.cpp:35] 2023-09-11 23:22:08.397 | Sample Size : 32485 Average Latency in nano sec: 963176.948831
+I [reporter.cpp:64] 2023-09-11 23:22:08.413 | Sample size 32485, Median Latency: 791720.000000 99.99th: 23010532.000000
+I [reporter.cpp:35] 2023-09-11 23:22:08.450 | Sample Size : 44396 Average Latency in nano sec: 644300.921847
+I [reporter.cpp:64] 2023-09-11 23:22:08.472 | Sample size 44396, Median Latency: 537772.500000 99.99th: 23224135.000000
+I [reporter.cpp:35] 2023-09-11 23:22:08.500 | Sample Size : 31680 Average Latency in nano sec: 1012058.173032
+I [reporter.cpp:64] 2023-09-11 23:22:08.516 | Sample size 31680, Median Latency: 810060.000000 99.99th: 26414275.000000
+I [reporter.cpp:129] 2023-09-11 23:22:08.519 | Across all poll, Average Latency 909699.770642 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:09.043 | Sample Size : 31416 Average Latency in nano sec: 1014471.198613
+I [reporter.cpp:64] 2023-09-11 23:22:09.059 | Sample size 31416, Median Latency: 798472.500000 99.99th: 26504030.000000
+I [reporter.cpp:35] 2023-09-11 23:22:09.086 | Sample Size : 31377 Average Latency in nano sec: 1018961.528931
+I [reporter.cpp:64] 2023-09-11 23:22:09.101 | Sample size 31377, Median Latency: 802656.000000 99.99th: 26572811.000000
+I [reporter.cpp:35] 2023-09-11 23:22:09.129 | Sample Size : 31669 Average Latency in nano sec: 995408.158246
+I [reporter.cpp:64] 2023-09-11 23:22:09.144 | Sample size 31669, Median Latency: 802383.000000 99.99th: 19637525.000000
+I [reporter.cpp:35] 2023-09-11 23:22:09.180 | Sample Size : 43740 Average Latency in nano sec: 654366.963630
+I [reporter.cpp:64] 2023-09-11 23:22:09.203 | Sample size 43740, Median Latency: 539022.000000 99.99th: 21590465.000000
+I [reporter.cpp:129] 2023-09-11 23:22:09.207 | Across all poll, Average Latency 920801.962355 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:09.741 | Sample Size : 31200 Average Latency in nano sec: 1026734.500929
+I [reporter.cpp:64] 2023-09-11 23:22:09.757 | Sample size 31200, Median Latency: 844625.500000 99.99th: 25803962.000000
+I [reporter.cpp:35] 2023-09-11 23:22:09.787 | Sample Size : 34869 Average Latency in nano sec: 914124.461631
+I [reporter.cpp:64] 2023-09-11 23:22:09.804 | Sample size 34869, Median Latency: 782833.000000 99.99th: 27699550.000000
+I [reporter.cpp:35] 2023-09-11 23:22:09.835 | Sample Size : 36049 Average Latency in nano sec: 881804.929895
+I [reporter.cpp:64] 2023-09-11 23:22:09.853 | Sample size 36049, Median Latency: 770117.000000 99.99th: 28167106.000000
+I [reporter.cpp:35] 2023-09-11 23:22:09.885 | Sample Size : 37380 Average Latency in nano sec: 841250.379915
+I [reporter.cpp:64] 2023-09-11 23:22:09.903 | Sample size 37380, Median Latency: 665623.000000 99.99th: 27908698.000000
+I [reporter.cpp:129] 2023-09-11 23:22:09.906 | Across all poll, Average Latency 915978.568092 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:10.431 | Sample Size : 31397 Average Latency in nano sec: 1016474.426302
+I [reporter.cpp:64] 2023-09-11 23:22:10.446 | Sample size 31397, Median Latency: 800391.000000 99.99th: 24573894.000000
+I [reporter.cpp:35] 2023-09-11 23:22:10.475 | Sample Size : 32880 Average Latency in nano sec: 963466.407245
+I [reporter.cpp:64] 2023-09-11 23:22:10.491 | Sample size 32880, Median Latency: 791820.500000 99.99th: 23171607.000000
+I [reporter.cpp:35] 2023-09-11 23:22:10.525 | Sample Size : 40920 Average Latency in nano sec: 730175.799467
+I [reporter.cpp:64] 2023-09-11 23:22:10.547 | Sample size 40920, Median Latency: 542869.000000 99.99th: 23050025.000000
+I [reporter.cpp:35] 2023-09-11 23:22:10.577 | Sample Size : 33720 Average Latency in nano sec: 935591.316933
+I [reporter.cpp:64] 2023-09-11 23:22:10.593 | Sample size 33720, Median Latency: 788685.000000 99.99th: 24569876.000000
+I [reporter.cpp:129] 2023-09-11 23:22:10.596 | Across all poll, Average Latency 911426.987487 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:11.131 | Sample Size : 33180 Average Latency in nano sec: 947183.540569
+I [reporter.cpp:64] 2023-09-11 23:22:11.147 | Sample size 33180, Median Latency: 785832.000000 99.99th: 23993475.000000
+I [reporter.cpp:35] 2023-09-11 23:22:11.180 | Sample Size : 38220 Average Latency in nano sec: 814300.102717
+I [reporter.cpp:64] 2023-09-11 23:22:11.199 | Sample size 38220, Median Latency: 549670.000000 99.99th: 28657428.000000
+I [reporter.cpp:35] 2023-09-11 23:22:11.229 | Sample Size : 31920 Average Latency in nano sec: 1031446.249093
+I [reporter.cpp:64] 2023-09-11 23:22:11.244 | Sample size 31920, Median Latency: 803090.500000 99.99th: 28731149.000000
+I [reporter.cpp:35] 2023-09-11 23:22:11.276 | Sample Size : 36660 Average Latency in nano sec: 855410.980719
+I [reporter.cpp:64] 2023-09-11 23:22:11.296 | Sample size 36660, Median Latency: 741164.000000 99.99th: 29321944.000000
+I [reporter.cpp:129] 2023-09-11 23:22:11.299 | Across all poll, Average Latency 912085.218274 micro-sec
+I [reporter.cpp:35] 2023-09-11 23:22:11.825 | Sample Size : 33367 Average Latency in nano sec: 939958.727708
+I [reporter.cpp:64] 2023-09-11 23:22:11.841 | Sample size 33367, Median Latency: 785630.000000 99.99th: 22616026.000000
+I [reporter.cpp:35] 2023-09-11 23:22:11.869 | Sample Size : 31160 Average Latency in nano sec: 1041892.489348
+I [reporter.cpp:64] 2023-09-11 23:22:11.884 | Sample size 31160, Median Latency: 893045.500000 99.99th: 22728531.000000
+I [reporter.cpp:35] 2023-09-11 23:22:11.919 | Sample Size : 42600 Average Latency in nano sec: 683803.011017
+I [reporter.cpp:64] 2023-09-11 23:22:11.941 | Sample size 42600, Median Latency: 541363.000000 99.99th: 22355523.000000
+I [reporter.cpp:35] 2023-09-11 23:22:11.969 | Sample Size : 31124 Average Latency in nano sec: 1045752.972742
+I [reporter.cpp:64] 2023-09-11 23:22:11.984 | Sample size 31124, Median Latency: 923757.000000 99.99th: 28082944.000000
+I [reporter.cpp:129] 2023-09-11 23:22:11.987 | Across all poll, Average Latency 927851.800204 micro-sec
+I [benchmarks.cpp:92] 2023-09-11 23:22:12.082 | Benchmark thread: 2 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:22:12.082 | Benchmark thread: 3 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:22:12.083 | Benchmark thread: 1 stopped
+I [benchmarks.cpp:92] 2023-09-11 23:22:12.083 | Benchmark thread: 0 stopped
+I [reporter.cpp:35] 2023-09-11 23:22:12.497 | Sample Size : 10380 Average Latency in nano sec: 1223677.706801
+I [reporter.cpp:64] 2023-09-11 23:22:12.502 | Sample size 10380, Median Latency: 787266.500000 99.99th: 27525575.000000
+I [reporter.cpp:35] 2023-09-11 23:22:12.512 | Sample Size : 11580 Average Latency in nano sec: 876848.789873
+I [reporter.cpp:64] 2023-09-11 23:22:12.518 | Sample size 11580, Median Latency: 538368.500000 99.99th: 27948583.000000
+I [reporter.cpp:35] 2023-09-11 23:22:12.525 | Sample Size : 7320 Average Latency in nano sec: 1132626.567073
+I [reporter.cpp:64] 2023-09-11 23:22:12.528 | Sample size 7320, Median Latency: 1008010.500000 99.99th: 533697.000000
+I [reporter.cpp:129] 2023-09-11 23:22:12.529 | Across all poll, Average Latency 1077717.687915 micro-sec
+I [reporter.cpp:129] 2023-09-11 23:22:13.030 | Across all poll, Average Latency 0.000000 micro-sec
+I [transport.cpp:881] 2023-09-11 23:22:13.179 | Log Rx tid: 0, port id: 0, qid: 0
+I [transport.cpp:887] 2023-09-11 23:22:13.179 | Number of packets: TX: 4199944, RX: 0

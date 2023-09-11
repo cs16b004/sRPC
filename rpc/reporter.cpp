@@ -32,11 +32,12 @@ double compute_avg(std::unordered_map<uint64_t,std::timespec>& start_book,
                     }
                 }
                 double_t avg_lat= nano_diff_sum;
-                Log_info("Sample Size : %d Average Latency in nano sec: %lf",freq,avg_lat);
+                //Log_info("Sample Size : %d Average Latency in nano sec: %lf",freq,avg_lat);
                 return avg_lat;
 
 
 }
+
 std::vector<double> compute_percentile(std::unordered_map<uint64_t,std::timespec>& start_book,
     std::unordered_map<uint64_t,std::timespec>& end_book){
             
@@ -58,6 +59,7 @@ std::vector<double> compute_percentile(std::unordered_map<uint64_t,std::timespec
         uint64_t mid  = sample_size/2;
         double median = (sample_size%2==1)? sample[mid]: (sample[mid]+sample[mid+1])/2;
         uint64_t percentile_9999th_i  =  (9999*sample_size%10000 == 0)? 9999*sample_size/10000: (9999*sample_size/10000+1); 
+        percentile_9999th_i = std::min(sample_size-1,percentile_9999th_i);
         double percentile_9999th = sample[percentile_9999th_i];
         percentiles.push_back(median);
         percentiles.push_back(percentile_9999th);

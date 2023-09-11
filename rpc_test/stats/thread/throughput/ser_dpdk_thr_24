@@ -1,0 +1,283 @@
+I [config.cpp:55] 2023-09-11 23:45:08.803 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:100] 2023-09-11 23:45:08.806 | Loading CPU Config
+I [config.cpp:55] 2023-09-11 23:45:08.806 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:55] 2023-09-11 23:45:08.807 | Loading configuration from : config_files/host_catskill.yml
+I [config.cpp:55] 2023-09-11 23:45:08.808 | Loading configuration from : config_files/network_catskill.yml
+I [config.cpp:55] 2023-09-11 23:45:08.809 | Loading configuration from : config_files/benchmarks.yml
+I [transport.cpp:694] 2023-09-11 23:45:08.815 | Setting up network info....
+I [transport.cpp:710] 2023-09-11 23:45:08.815 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:45:08.815 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 23:45:08.815 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:45:08.815 | Adding a host with name ampere03 : info :
+ [ Name: ampere03
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:699] 2023-09-11 23:45:08.815 | Configuring local address 4, 172.19.0.121
+I [transport.cpp:710] 2023-09-11 23:45:08.815 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:710] 2023-09-11 23:45:08.815 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:534] 2023-09-11 23:45:08.815 | Thread counter 0, num_rx_threads 1, tx_threads 1
+I [transport.cpp:1035] 2023-09-11 23:45:09.594 | Flow isolation enabled for port 0
+
+I [transport.cpp:1105] 2023-09-11 23:45:09.635 | IP Address to be queued 172.19.0.121
+I [transport.cpp:1133] 2023-09-11 23:45:09.661 | Flow Rule Added for IP Address : 172.19.0.121
+I [transport.cpp:655] 2023-09-11 23:45:09.661 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:661] 2023-09-11 23:45:09.661 | Total Cores available: 33
+I [transport.cpp:670] 2023-09-11 23:45:09.661 | rx_core limit: 2 tx_core limit: 3, my core_id 0 
+I [transport.cpp:273] 2023-09-11 23:45:09.661 | Enter receive thread 0 on core 1 on port_id 0 on queue 0
+I [transport.cpp:216] 2023-09-11 23:45:09.662 | Entering TX thread 0 at lcore 2
+I [UDPServer.cpp:334] 2023-09-11 23:45:09.662 | Starting Server Loop
+I 2023-09-11 23:45:09.663 | Reporter Thread Launched, Observing 4 poll threads
+I [reporter.cpp:133] 2023-09-11 23:45:12.163 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:13.477 | SM REQ to connect 172.19.0.122:9000
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:13.477 | Chosen threads for new conn: 1, tx-thread 0, next_thread_ 1
+I [transport.cpp:124] 2023-09-11 23:45:13.477 | Added [172.19.0.122:9000::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9000
+], fd r: 159, w: 160
+I [UDPServer.cpp:349] 2023-09-11 23:45:14.479 | SM REQ to connect 172.19.0.122:9001
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:14.479 | Chosen threads for new conn: 2, tx-thread 0, next_thread_ 2
+I [transport.cpp:124] 2023-09-11 23:45:14.480 | Added [172.19.0.122:9001::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9001
+], fd r: 161, w: 162
+I [reporter.cpp:133] 2023-09-11 23:45:14.663 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:15.482 | SM REQ to connect 172.19.0.122:9002
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:15.482 | Chosen threads for new conn: 3, tx-thread 0, next_thread_ 3
+I [transport.cpp:124] 2023-09-11 23:45:15.482 | Added [172.19.0.122:9002::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9002
+], fd r: 163, w: 164
+I [UDPServer.cpp:349] 2023-09-11 23:45:16.484 | SM REQ to connect 172.19.0.122:9003
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:16.484 | Chosen threads for new conn: 4, tx-thread 0, next_thread_ 4
+I [transport.cpp:124] 2023-09-11 23:45:16.484 | Added [172.19.0.122:9003::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9003
+], fd r: 165, w: 166
+I [reporter.cpp:133] 2023-09-11 23:45:17.163 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:17.486 | SM REQ to connect 172.19.0.122:9004
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:17.488 | Chosen threads for new conn: 5, tx-thread 0, next_thread_ 5
+I [transport.cpp:124] 2023-09-11 23:45:17.488 | Added [172.19.0.122:9004::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9004
+], fd r: 167, w: 168
+I [UDPServer.cpp:349] 2023-09-11 23:45:18.490 | SM REQ to connect 172.19.0.122:9005
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:18.490 | Chosen threads for new conn: 6, tx-thread 0, next_thread_ 6
+I [transport.cpp:124] 2023-09-11 23:45:18.491 | Added [172.19.0.122:9005::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9005
+], fd r: 169, w: 170
+I [UDPServer.cpp:349] 2023-09-11 23:45:19.493 | SM REQ to connect 172.19.0.122:9006
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:19.494 | Chosen threads for new conn: 7, tx-thread 0, next_thread_ 7
+I [transport.cpp:124] 2023-09-11 23:45:19.494 | Added [172.19.0.122:9006::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9006
+], fd r: 171, w: 172
+I [reporter.cpp:133] 2023-09-11 23:45:19.663 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:20.496 | SM REQ to connect 172.19.0.122:9007
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:20.497 | Chosen threads for new conn: 8, tx-thread 0, next_thread_ 8
+I [transport.cpp:124] 2023-09-11 23:45:20.497 | Added [172.19.0.122:9007::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9007
+], fd r: 173, w: 174
+I [UDPServer.cpp:349] 2023-09-11 23:45:21.500 | SM REQ to connect 172.19.0.122:9008
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:21.500 | Chosen threads for new conn: 9, tx-thread 0, next_thread_ 9
+I [transport.cpp:124] 2023-09-11 23:45:21.501 | Added [172.19.0.122:9008::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9008
+], fd r: 175, w: 176
+I [reporter.cpp:133] 2023-09-11 23:45:22.163 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:22.503 | SM REQ to connect 172.19.0.122:9009
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:22.503 | Chosen threads for new conn: 10, tx-thread 0, next_thread_ 10
+I [transport.cpp:124] 2023-09-11 23:45:22.504 | Added [172.19.0.122:9009::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9009
+], fd r: 177, w: 178
+I [UDPServer.cpp:349] 2023-09-11 23:45:23.506 | SM REQ to connect 172.19.0.122:9010
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:23.506 | Chosen threads for new conn: 11, tx-thread 0, next_thread_ 11
+I [transport.cpp:124] 2023-09-11 23:45:23.507 | Added [172.19.0.122:9010::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9010
+], fd r: 179, w: 180
+I [UDPServer.cpp:349] 2023-09-11 23:45:24.509 | SM REQ to connect 172.19.0.122:9011
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:24.513 | Chosen threads for new conn: 12, tx-thread 0, next_thread_ 12
+I [transport.cpp:124] 2023-09-11 23:45:24.514 | Added [172.19.0.122:9011::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9011
+], fd r: 181, w: 182
+I [reporter.cpp:133] 2023-09-11 23:45:24.664 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:25.516 | SM REQ to connect 172.19.0.122:9012
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:25.521 | Chosen threads for new conn: 13, tx-thread 0, next_thread_ 13
+I [transport.cpp:124] 2023-09-11 23:45:25.521 | Added [172.19.0.122:9012::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9012
+], fd r: 183, w: 184
+I [UDPServer.cpp:349] 2023-09-11 23:45:26.523 | SM REQ to connect 172.19.0.122:9013
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:26.530 | Chosen threads for new conn: 14, tx-thread 0, next_thread_ 14
+I [transport.cpp:124] 2023-09-11 23:45:26.530 | Added [172.19.0.122:9013::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9013
+], fd r: 185, w: 186
+I [reporter.cpp:133] 2023-09-11 23:45:27.164 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:27.532 | SM REQ to connect 172.19.0.122:9014
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:27.532 | Chosen threads for new conn: 15, tx-thread 0, next_thread_ 15
+I [transport.cpp:124] 2023-09-11 23:45:27.532 | Added [172.19.0.122:9014::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9014
+], fd r: 187, w: 188
+I [UDPServer.cpp:349] 2023-09-11 23:45:28.534 | SM REQ to connect 172.19.0.122:9015
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:28.537 | Chosen threads for new conn: 16, tx-thread 0, next_thread_ 16
+I [transport.cpp:124] 2023-09-11 23:45:28.537 | Added [172.19.0.122:9015::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9015
+], fd r: 189, w: 190
+I [UDPServer.cpp:349] 2023-09-11 23:45:29.539 | SM REQ to connect 172.19.0.122:9016
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:29.542 | Chosen threads for new conn: 17, tx-thread 0, next_thread_ 17
+I [transport.cpp:124] 2023-09-11 23:45:29.542 | Added [172.19.0.122:9016::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9016
+], fd r: 191, w: 192
+I [reporter.cpp:133] 2023-09-11 23:45:29.664 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:30.544 | SM REQ to connect 172.19.0.122:9017
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:30.546 | Chosen threads for new conn: 18, tx-thread 0, next_thread_ 18
+I [transport.cpp:124] 2023-09-11 23:45:30.546 | Added [172.19.0.122:9017::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9017
+], fd r: 193, w: 194
+I [UDPServer.cpp:349] 2023-09-11 23:45:31.548 | SM REQ to connect 172.19.0.122:9018
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:31.550 | Chosen threads for new conn: 19, tx-thread 0, next_thread_ 19
+I [transport.cpp:124] 2023-09-11 23:45:31.550 | Added [172.19.0.122:9018::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9018
+], fd r: 195, w: 196
+I [reporter.cpp:133] 2023-09-11 23:45:32.164 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:32.552 | SM REQ to connect 172.19.0.122:9019
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:32.552 | Chosen threads for new conn: 20, tx-thread 0, next_thread_ 20
+I [transport.cpp:124] 2023-09-11 23:45:32.552 | Added [172.19.0.122:9019::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9019
+], fd r: 197, w: 198
+I [UDPServer.cpp:349] 2023-09-11 23:45:33.554 | SM REQ to connect 172.19.0.122:9020
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:33.558 | Chosen threads for new conn: 21, tx-thread 0, next_thread_ 21
+I [transport.cpp:124] 2023-09-11 23:45:33.558 | Added [172.19.0.122:9020::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9020
+], fd r: 199, w: 200
+I [UDPServer.cpp:349] 2023-09-11 23:45:34.560 | SM REQ to connect 172.19.0.122:9021
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:34.563 | Chosen threads for new conn: 22, tx-thread 0, next_thread_ 22
+I [transport.cpp:124] 2023-09-11 23:45:34.563 | Added [172.19.0.122:9021::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9021
+], fd r: 201, w: 202
+I [reporter.cpp:133] 2023-09-11 23:45:34.664 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:349] 2023-09-11 23:45:35.565 | SM REQ to connect 172.19.0.122:9022
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:35.567 | Chosen threads for new conn: 23, tx-thread 0, next_thread_ 23
+I [transport.cpp:124] 2023-09-11 23:45:35.567 | Added [172.19.0.122:9022::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9022
+], fd r: 203, w: 204
+I [UDPServer.cpp:349] 2023-09-11 23:45:36.569 | SM REQ to connect 172.19.0.122:9023
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-11 23:45:36.574 | Chosen threads for new conn: 24, tx-thread 0, next_thread_ 24
+I [transport.cpp:124] 2023-09-11 23:45:36.574 | Added [172.19.0.122:9023::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9023
+], fd r: 205, w: 206
+I [reporter.cpp:133] 2023-09-11 23:45:37.164 | Total RPCs: 163567, Throughput 65426.800000/s
+I [reporter.cpp:133] 2023-09-11 23:45:39.664 | Total RPCs: 702351, Throughput 280940.400000/s
+I [reporter.cpp:133] 2023-09-11 23:45:42.165 | Total RPCs: 702329, Throughput 280931.600000/s
+I [reporter.cpp:133] 2023-09-11 23:45:44.665 | Total RPCs: 700623, Throughput 280249.200000/s
+I [reporter.cpp:133] 2023-09-11 23:45:47.165 | Total RPCs: 700781, Throughput 280312.400000/s
+I [reporter.cpp:133] 2023-09-11 23:45:49.665 | Total RPCs: 698228, Throughput 279291.200000/s
+I [reporter.cpp:133] 2023-09-11 23:45:52.165 | Total RPCs: 699235, Throughput 279694.000000/s
+I [reporter.cpp:133] 2023-09-11 23:45:54.665 | Total RPCs: 701148, Throughput 280459.200000/s
+I [reporter.cpp:133] 2023-09-11 23:45:57.165 | Total RPCs: 697450, Throughput 278980.000000/s
+I [reporter.cpp:133] 2023-09-11 23:45:59.666 | Total RPCs: 158148, Throughput 63259.200000/s
+I [reporter.cpp:133] 2023-09-11 23:46:02.166 | Total RPCs: 0, Throughput 0.000000/s
+I [reporter.cpp:133] 2023-09-11 23:46:04.666 | Total RPCs: 0, Throughput 0.000000/s
+I [reporter.cpp:133] 2023-09-11 23:46:07.166 | Total RPCs: 0, Throughput 0.000000/s
