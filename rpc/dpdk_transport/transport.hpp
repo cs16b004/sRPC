@@ -97,6 +97,9 @@ namespace rrr{
         friend class UDPServer;
         friend class UDPClient;
         friend class UDPConnection;
+        #ifdef RPC_MICRO_STATISTICS
+        friend class Reporter;
+        #endif
         #ifdef RPC_STATISTICS
         friend class Reporter;
         #endif
@@ -131,11 +134,13 @@ namespace rrr{
         SpinLock sm_queue_l;
         std::queue<Marshal*> sm_queue;
         #ifdef RPC_MICRO_STATISTICS
-        std::unordered_map<uint64_t,uint64_t> pkt_rx_ts;
-        std::unordered_map<uint64_t,uint64_t> pkt_process_ts;
-        std::unordered_map<uint64_t,uint64_t> pkt_complete_ts;
-        
+        std::unordered_map<uint64_t,std::timespec> pkt_rx_ts;
+        std::unordered_map<uint64_t,std::timespec> pkt_process_ts;
+        std::unordered_map<uint64_t,std::timespec> pkt_complete_ts;
+        rrr::SpinLock r_ts_lock;
+        rrr::SpinLock t_ts_lock;
         uint64_t pkt_counter=0;
+        
         #endif
         
 

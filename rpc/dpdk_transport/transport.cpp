@@ -322,32 +322,38 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         uint8_t pkt_type;
         #ifdef RPC_MICRO_STATISTICS
         //read pkt id last 8 bytes are reserved for pkt id
-        uint64_t pkt_id;
-        rte_memcpy((uint8_t*) &pkt_id, pkt_ptr + rx_info->buf[i]->data_len - sizeof(uint64_t), sizeof(uint64_t));
+        if(config_->host_name_ == "catskill"){
+            uint64_t pkt_id;
+            rte_memcpy((uint8_t*) &pkt_id, pkt_ptr + rx_info->buf[i]->data_len - sizeof(uint64_t), sizeof(uint64_t));
    
         
-        uint64_t ts = rrr::rdtsc();
-        pkt_rx_ts[pkt_id] = ts;
-        Log_debug("Received packet with id %lld. total size %d, id offset: %d, data offset %d, ts: %lld",
-            pkt_id, rx_info->buf[i]->data_len, rx_info->buf[i]->data_len - sizeof(uint64_t), data_offset+1,  ts);
+            struct timespec ts;
+            timespec_get(&ts, TIME_UTC);
+            r_ts_lock.lock();
+            pkt_rx_ts[pkt_id] = ts;
+            r_ts_lock.unlock();
+            Log_debug("Received packet with id %lld. total size %d, id offset: %d, data offset %d",
+            pkt_id, rx_info->buf[i]->data_len, rx_info->buf[i]->data_len - sizeof(uint64_t), data_offset+1);
+        }    
         #endif
+        
         Log_debug("Processing incoming packet from %s",src_addr.c_str());
         mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
         data_ptr += sizeof(uint8_t); 
         if(pkt_type == rrr::RR ){
          
             if(addr_lookup_table.find(lookup_addr)!= addr_lookup_table.end()){
-                int n = write(out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size);
-                #ifdef TRANSPORT_STATS
-                rx_info->stat.pkt_count++;
-                gettimeofday(&current, NULL);
-                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
-
-                if (elapsed_sec >= 10) {
-                    gettimeofday(&start_clock,NULL);
-                    rx_info->stat.show_statistics();
+                #ifdef RPC_MICRO_STATISTICS
+                int n;
+                if(config_->host_name_ == "catskill"){
+                    n = write(out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size+8); // sizeof(pkt id)
+                }else{
+                    n = write(out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size);
                 }
+                #else 
+                int n = write(out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size);
                 #endif
+                
                  if (n>0){
                 Log_debug("%d bytes written to fd %d, read end %d",
                             n,out_connections[addr_lookup_table[lookup_addr]]->wfd,
@@ -358,16 +364,7 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
             }
             }else{
                 Log_debug("Packet Dropped as connection not found");
-                #ifdef TRANSPORT_STATS
-                rx_info->stat.pkt_error++;
-                gettimeofday(&current, NULL);
-                int elapsed_sec = current.tv_sec - start_clock.tv_sec;
-
-                if (elapsed_sec >= 100) {
-                    gettimeofday(&start_clock,NULL);
-                    rx_info->stat.show_statistics();
-                }
-                #endif
+               
             }
         //Log_info("Byres Written %d",n);
             
@@ -451,10 +448,13 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
 
 
      #ifdef RPC_MICRO_STATISTICS // add a pkt id to each packet sent , to see where it spends the most time.
+     if(config_->host_name_ == "greenport"){
         pkt_counter++;
         Log_debug("Setting ID offset: %d,", data_offset);
         rte_memcpy(pkt_buf + data_offset, (uint8_t*)&pkt_counter, sizeof(uint64_t));
         data_offset+= sizeof(uint64_t);
+    }
+        
     #endif
 
     int data_size = data_offset; 

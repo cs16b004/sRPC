@@ -31,8 +31,8 @@ double compute_avg(std::unordered_map<uint64_t,std::timespec>& start_book,
                         freq++;
                     }
                 }
-                double_t avg_lat= nano_diff_sum;
-                //Log_info("Sample Size : %d Average Latency in nano sec: %lf",freq,avg_lat);
+                double_t avg_lat= nano_diff_sum/1000.0;
+                Log_info("Sample Size : %d Average time in micro sec: %lf",freq,avg_lat);
                 return avg_lat;
 
 
@@ -89,12 +89,25 @@ void* Reporter::run(void* arg){
         usleep(reporter->period_ * 1000);
         i+=reporter->period_ * 1000;
         Log_debug("Time since launched %fs, stop flag %d",i*1.0/(1000*1000),reporter->stop);
-        #ifdef RPC_MICRO_STATISTICS
-            for(auto entry: reporter->tl->pkt_process_ts){
-                Log_debug("diff for id %d -> %d cycles",entry.first, entry.second - reporter->tl->pkt_rx_ts[entry.first] );
-            }
-
-        #endif
+        if(!reporter->is_client){
+            #ifdef RPC_MICRO_STATISTICS
+                        reporter->tl->r_ts_lock.lock();
+                        reporter->tl->t_ts_lock.lock();
+                        for (const auto& pair : reporter->tl->pkt_rx_ts) {
+                            start_book_copy[pair.first] = deepCopyTimespec(pair.second);
+                        }
+                        for(const auto& pair: reporter->tl->pkt_process_ts){
+                            end_book_copy[pair.first] = deepCopyTimespec(pair.second);
+                        }
+                        reporter->tl->pkt_rx_ts.clear();
+                        reporter->tl->pkt_process_ts.clear();    
+                        reporter->tl->r_ts_lock.unlock();
+                        reporter->tl->t_ts_lock.unlock();
+                        rrr::compute_avg(start_book_copy,end_book_copy);
+                        start_book_copy.clear();
+                        end_book_copy.clear();
+            #endif
+        }
         double  lat_avg=0;
         double poll_count=0;
         for(int i=0;i<reporter->pm_->n_threads_;i++){
@@ -122,8 +135,9 @@ void* Reporter::run(void* arg){
                     end_book_copy.clear();
                     
                 }
-                else
+                else{
                      job_count+= poll_job->read_and_set_counter(0);
+                }
             }
 
         }

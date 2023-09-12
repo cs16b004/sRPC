@@ -1,0 +1,96 @@
+I [config.cpp:55] 2023-09-12 05:54:52.716 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:100] 2023-09-12 05:54:52.718 | Loading CPU Config
+I [config.cpp:55] 2023-09-12 05:54:52.719 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:55] 2023-09-12 05:54:52.720 | Loading configuration from : config_files/host_catskill.yml
+I [config.cpp:55] 2023-09-12 05:54:52.721 | Loading configuration from : config_files/network_catskill.yml
+I [config.cpp:55] 2023-09-12 05:54:52.723 | Loading configuration from : config_files/benchmarks.yml
+I [transport.cpp:694] 2023-09-12 05:54:52.725 | Setting up network info....
+I [transport.cpp:710] 2023-09-12 05:54:52.726 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-12 05:54:52.726 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:710] 2023-09-12 05:54:52.726 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-12 05:54:52.726 | Adding a host with name ampere03 : info :
+ [ Name: ampere03
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:699] 2023-09-12 05:54:52.726 | Configuring local address 4, 172.19.0.121
+I [transport.cpp:710] 2023-09-12 05:54:52.726 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:710] 2023-09-12 05:54:52.726 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:534] 2023-09-12 05:54:52.726 | Thread counter 0, num_rx_threads 1, tx_threads 1
+I [transport.cpp:1035] 2023-09-12 05:54:53.471 | Flow isolation enabled for port 0
+
+I [transport.cpp:1105] 2023-09-12 05:54:53.507 | IP Address to be queued 172.19.0.121
+I [transport.cpp:1133] 2023-09-12 05:54:53.531 | Flow Rule Added for IP Address : 172.19.0.121
+I [transport.cpp:655] 2023-09-12 05:54:53.531 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:661] 2023-09-12 05:54:53.531 | Total Cores available: 33
+I [transport.cpp:670] 2023-09-12 05:54:53.531 | rx_core limit: 2 tx_core limit: 3, my core_id 0 
+I [transport.cpp:273] 2023-09-12 05:54:53.531 | Enter receive thread 0 on core 1 on port_id 0 on queue 0
+I [transport.cpp:216] 2023-09-12 05:54:53.532 | Entering TX thread 0 at lcore 2
+I [UDPServer.cpp:335] 2023-09-12 05:54:53.532 | Starting Server Loop
+I 2023-09-12 05:54:53.533 | Reporter Thread Launched, Observing 1 poll threads
+I [reporter.cpp:147] 2023-09-12 05:54:56.034 | Total RPCs: 0, Throughput 0.000000/s
+I [UDPServer.cpp:350] 2023-09-12 05:54:56.982 | SM REQ to connect 172.19.0.122:9000
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:103] 2023-09-12 05:54:56.982 | Chosen threads for new conn: 1, tx-thread 0, next_thread_ 1
+I [transport.cpp:124] 2023-09-12 05:54:56.982 | Added [172.19.0.122:9000::8501] 
+[ IP: 172.19.0.122
+  mac: c:42:a1:8e:e0:e6
+ port: 9000
+], fd r: 156, w: 157
+I [reporter.cpp:35] 2023-09-12 05:54:58.557 | Sample Size : 11758 Average time in micro sec: 94.165575
+I [reporter.cpp:147] 2023-09-12 05:54:58.558 | Total RPCs: 11800, Throughput 4720.000000/s
+I [reporter.cpp:35] 2023-09-12 05:55:01.108 | Sample Size : 53484 Average time in micro sec: 13.754574
+I [reporter.cpp:147] 2023-09-12 05:55:01.112 | Total RPCs: 53640, Throughput 21456.000000/s
+I [reporter.cpp:35] 2023-09-12 05:55:03.662 | Sample Size : 53336 Average time in micro sec: 13.839884
+I [reporter.cpp:147] 2023-09-12 05:55:03.667 | Total RPCs: 53352, Throughput 21340.800000/s
+I [reporter.cpp:35] 2023-09-12 05:55:06.218 | Sample Size : 53733 Average time in micro sec: 13.847265
+I [reporter.cpp:147] 2023-09-12 05:55:06.223 | Total RPCs: 53739, Throughput 21495.600000/s
+I [reporter.cpp:35] 2023-09-12 05:55:08.774 | Sample Size : 54077 Average time in micro sec: 13.815682
+I [reporter.cpp:147] 2023-09-12 05:55:08.779 | Total RPCs: 54091, Throughput 21636.400000/s
+I [reporter.cpp:35] 2023-09-12 05:55:11.355 | Sample Size : 54425 Average time in micro sec: 13.729716
+I [reporter.cpp:147] 2023-09-12 05:55:11.362 | Total RPCs: 54590, Throughput 21836.000000/s
+I [reporter.cpp:35] 2023-09-12 05:55:13.934 | Sample Size : 54874 Average time in micro sec: 14.037649
+I [reporter.cpp:147] 2023-09-12 05:55:13.942 | Total RPCs: 54729, Throughput 21891.600000/s
+I [reporter.cpp:35] 2023-09-12 05:55:16.513 | Sample Size : 54717 Average time in micro sec: 14.048959
+I [reporter.cpp:147] 2023-09-12 05:55:16.521 | Total RPCs: 54870, Throughput 21948.000000/s
+I [reporter.cpp:35] 2023-09-12 05:55:19.078 | Sample Size : 36616 Average time in micro sec: 14.646431
+I [reporter.cpp:147] 2023-09-12 05:55:19.084 | Total RPCs: 36212, Throughput 14484.800000/s
+I [reporter.cpp:147] 2023-09-12 05:55:21.584 | Total RPCs: 0, Throughput 0.000000/s

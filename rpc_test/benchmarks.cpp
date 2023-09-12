@@ -85,7 +85,7 @@ void* Benchmarks::launch_client_thread(void *arg){
         fg.wait_all();
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG
-        //break;
+        break;
         #endif
         #endif
     }

@@ -106,10 +106,9 @@ void UDPConnection::handle_read() {
             complete_requests.push_back(req);
             #ifdef RPC_MICRO_STATISTICS
             // Read packet ID
-            Marshal id;
+           
             uint64_t pkt_id;
-            id.read_from_marshal(in_,sizeof(uint64_t));
-            id >> pkt_id;
+            verify(in_.read(&pkt_id,sizeof(uint64_t)) == sizeof(uint64_t));
             Log_debug("Packet Id processed by app thread %d", pkt_id);
             rx_pkt_ids[v_xid.get()] = pkt_id;
             #endif
@@ -166,10 +165,12 @@ void UDPConnection::handle_read() {
             delete req;
         }
         #ifdef RPC_MICRO_STATISTICS
-        uint64_t ts = rrr::rdtsc();
-
+        struct timespec ts;
+        timespec_get(&ts, TIME_UTC);
+        (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
         (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
-        Log_debug("Putting ts %lld in %lld", ts,rx_pkt_ids[req->xid]);
+        (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
+        //Log_debug("Putting end ts in %ld",rx_pkt_ids[req->xid]);
         #endif
     }
 }
