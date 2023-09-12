@@ -1,0 +1,159 @@
+I [config.cpp:55] 2023-09-11 23:55:50.378 | Loading configuration from : config_files/cpu.yml
+I [config.cpp:100] 2023-09-11 23:55:50.381 | Loading CPU Config
+I [config.cpp:55] 2023-09-11 23:55:50.381 | Loading configuration from : config_files/dpdk.yml
+I [config.cpp:55] 2023-09-11 23:55:50.382 | Loading configuration from : config_files/host_greenport.yml
+I [config.cpp:55] 2023-09-11 23:55:50.384 | Loading configuration from : config_files/network_greenport.yml
+I [config.cpp:55] 2023-09-11 23:55:50.385 | Loading configuration from : config_files/benchmarks.yml
+I [transport.cpp:694] 2023-09-11 23:55:50.387 | Setting up network info....
+I [transport.cpp:710] 2023-09-11 23:55:50.387 | Adding a host with name ampere00 : info :
+ [ Name: ampere00
+  Id : 0
+  MAC: 1c:01:dd:51:b2:ae
+  IP: 192.168.2.115
+  Port : 8000
+
+mac converted 1c:01:dd:51:b2:ae to 1c:1:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:55:50.387 | Adding a host with name ampere01 : info :
+ [ Name: ampere01
+  Id : 1
+  MAC: 1c:01:dd:51:b2:af
+  IP: 192.168.2.116
+  Port : 8100
+
+mac converted 1c:01:dd:51:b2:af to 1c:1:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 23:55:50.387 | Adding a host with name ampere02 : info :
+ [ Name: ampere02
+  Id : 2
+  MAC: 1c:02:dd:51:b2:ae
+  IP: 192.168.2.125
+  Port : 8000
+
+mac converted 1c:02:dd:51:b2:ae to 1c:2:dd:51:b2:ae
+I [transport.cpp:710] 2023-09-11 23:55:50.387 | Adding a host with name ampere03 : info :
+ [ Name: ampere03
+  Id : 3
+  MAC: 1c:02:dd:51:b2:af
+  IP: 192.168.2.126
+  Port : 8100
+
+mac converted 1c:02:dd:51:b2:af to 1c:2:dd:51:b2:af
+I [transport.cpp:710] 2023-09-11 23:55:50.387 | Adding a host with name catskill : info :
+ [ Name: catskill
+  Id : 4
+  MAC: e4:1d:2d:f2:9e:5c
+  IP: 172.19.0.121
+  Port : 8501
+
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:699] 2023-09-11 23:55:50.387 | Configuring local address 5, 172.19.0.122
+I [transport.cpp:710] 2023-09-11 23:55:50.387 | Adding a host with name greenport : info :
+ [ Name: greenport
+  Id : 5
+  MAC: 0c:42:a1:8e:e0:e6
+  IP: 172.19.0.122
+  Port : 8501
+
+mac converted 0c:42:a1:8e:e0:e6 to c:42:a1:8e:e0:e6
+I [transport.cpp:534] 2023-09-11 23:55:50.387 | Thread counter 0, num_rx_threads 1, tx_threads 1
+I [transport.cpp:1035] 2023-09-11 23:55:52.122 | Flow isolation enabled for port 0
+
+I [transport.cpp:1105] 2023-09-11 23:55:52.163 | IP Address to be queued 172.19.0.122
+I [transport.cpp:1133] 2023-09-11 23:55:52.181 | Flow Rule Added for IP Address : 172.19.0.122
+I [transport.cpp:655] 2023-09-11 23:55:52.181 | DPDK tx threads 1, rx threads 1
+I [transport.cpp:661] 2023-09-11 23:55:52.181 | Total Cores available: 33
+I [transport.cpp:670] 2023-09-11 23:55:52.181 | rx_core limit: 2 tx_core limit: 3, my core_id 0 
+I [transport.cpp:273] 2023-09-11 23:55:52.181 | Enter receive thread 0 on core 1 on port_id 0 on queue 0
+I [transport.cpp:216] 2023-09-11 23:55:52.181 | Entering TX thread 0 at lcore 2
+mac converted e4:1d:2d:f2:9e:5c to e4:1d:2d:f2:9e:5c
+I [transport.cpp:173] 2023-09-11 23:55:52.182 | Chosen threads for new conn: 1 is tx-thread 0, counter 1
+I [transport.cpp:194] 2023-09-11 23:55:52.232 | Connected to 172.19.0.121:8501::9000, fd r: 156, w: 157
+I [benchmarks.cpp:107] 2023-09-11 23:55:52.232 | New client thread created 0, with client 0
+I 2023-09-11 23:55:52.233 | Reporter Thread Launched, Observing 1 poll threads
+I [benchmarks.cpp:79] 2023-09-11 23:55:52.233 | Benchmark thread: 0 launched
+I [reporter.cpp:131] 2023-09-11 23:55:52.733 | Across all poll, Average Latency 0.000000 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:53.234 | Sample size 171, Median Latency: 156231.000000 99.99th: 1228726.000000
+I [reporter.cpp:131] 2023-09-11 23:55:53.234 | Across all poll, Average Latency 156914.395349 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:53.751 | Sample size 3841, Median Latency: 38750.000000 99.99th: 308410.000000
+I [reporter.cpp:131] 2023-09-11 23:55:53.751 | Across all poll, Average Latency 80064.187663 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:54.283 | Sample size 11425, Median Latency: 34803.000000 99.99th: 1160697.000000
+I [reporter.cpp:131] 2023-09-11 23:55:54.285 | Across all poll, Average Latency 35574.406704 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:54.815 | Sample size 11949, Median Latency: 33977.000000 99.99th: 538780.000000
+I [reporter.cpp:131] 2023-09-11 23:55:54.817 | Across all poll, Average Latency 34634.821423 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:55.346 | Sample size 11869, Median Latency: 33975.000000 99.99th: 354624.000000
+I [reporter.cpp:131] 2023-09-11 23:55:55.348 | Across all poll, Average Latency 34694.085510 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:55.872 | Sample size 11902, Median Latency: 33979.000000 99.99th: 370174.000000
+I [reporter.cpp:131] 2023-09-11 23:55:55.874 | Across all poll, Average Latency 34806.068386 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:56.397 | Sample size 12027, Median Latency: 33982.000000 99.99th: 371213.000000
+I [reporter.cpp:131] 2023-09-11 23:55:56.399 | Across all poll, Average Latency 34395.900233 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:56.923 | Sample size 11965, Median Latency: 34039.000000 99.99th: 382052.000000
+I [reporter.cpp:131] 2023-09-11 23:55:56.924 | Across all poll, Average Latency 34484.530420 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:57.455 | Sample size 11913, Median Latency: 34092.000000 99.99th: 624608.000000
+I [reporter.cpp:131] 2023-09-11 23:55:57.456 | Across all poll, Average Latency 34659.243599 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:57.980 | Sample size 11818, Median Latency: 34057.500000 99.99th: 373959.000000
+I [reporter.cpp:131] 2023-09-11 23:55:57.981 | Across all poll, Average Latency 34866.483036 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:58.506 | Sample size 11892, Median Latency: 34014.000000 99.99th: 421081.000000
+I [reporter.cpp:131] 2023-09-11 23:55:58.507 | Across all poll, Average Latency 34777.579164 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:59.031 | Sample size 11866, Median Latency: 34019.000000 99.99th: 471277.000000
+I [reporter.cpp:131] 2023-09-11 23:55:59.032 | Across all poll, Average Latency 34928.875453 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:55:59.563 | Sample size 11937, Median Latency: 33995.000000 99.99th: 533604.000000
+I [reporter.cpp:131] 2023-09-11 23:55:59.565 | Across all poll, Average Latency 34687.826520 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:00.088 | Sample size 11762, Median Latency: 34122.000000 99.99th: 550176.000000
+I [reporter.cpp:131] 2023-09-11 23:56:00.090 | Across all poll, Average Latency 35203.157613 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:00.613 | Sample size 11948, Median Latency: 34068.000000 99.99th: 409489.000000
+I [reporter.cpp:131] 2023-09-11 23:56:00.615 | Across all poll, Average Latency 34645.304628 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:01.138 | Sample size 11801, Median Latency: 34140.000000 99.99th: 545010.000000
+I [reporter.cpp:131] 2023-09-11 23:56:01.140 | Across all poll, Average Latency 34890.898153 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:01.664 | Sample size 11939, Median Latency: 34133.000000 99.99th: 448000.000000
+I [reporter.cpp:131] 2023-09-11 23:56:01.666 | Across all poll, Average Latency 34741.795896 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:02.199 | Sample size 11802, Median Latency: 34119.000000 99.99th: 547409.000000
+I [reporter.cpp:131] 2023-09-11 23:56:02.201 | Across all poll, Average Latency 35144.284419 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:02.724 | Sample size 11976, Median Latency: 34027.000000 99.99th: 674600.000000
+I [reporter.cpp:131] 2023-09-11 23:56:02.726 | Across all poll, Average Latency 34756.817134 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:03.258 | Sample size 11863, Median Latency: 34077.000000 99.99th: 410388.000000
+I [reporter.cpp:131] 2023-09-11 23:56:03.259 | Across all poll, Average Latency 34833.316193 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:03.782 | Sample size 11771, Median Latency: 34138.000000 99.99th: 407613.000000
+I [reporter.cpp:131] 2023-09-11 23:56:03.784 | Across all poll, Average Latency 35072.408002 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:04.317 | Sample size 11814, Median Latency: 34072.000000 99.99th: 411542.000000
+I [reporter.cpp:131] 2023-09-11 23:56:04.319 | Across all poll, Average Latency 35034.820552 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:04.842 | Sample size 11846, Median Latency: 34046.000000 99.99th: 363073.000000
+I [reporter.cpp:131] 2023-09-11 23:56:04.844 | Across all poll, Average Latency 34955.214822 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:05.367 | Sample size 11995, Median Latency: 34039.000000 99.99th: 370535.000000
+I [reporter.cpp:131] 2023-09-11 23:56:05.369 | Across all poll, Average Latency 34536.673975 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:05.899 | Sample size 11835, Median Latency: 34093.000000 99.99th: 573445.000000
+I [reporter.cpp:131] 2023-09-11 23:56:05.900 | Across all poll, Average Latency 34964.667793 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:06.430 | Sample size 11823, Median Latency: 33998.000000 99.99th: 338856.000000
+I [reporter.cpp:131] 2023-09-11 23:56:06.432 | Across all poll, Average Latency 34915.700922 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:06.955 | Sample size 11709, Median Latency: 34042.000000 99.99th: 618735.000000
+I [reporter.cpp:131] 2023-09-11 23:56:06.957 | Across all poll, Average Latency 35283.282323 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:07.486 | Sample size 11856, Median Latency: 34030.000000 99.99th: 466030.000000
+I [reporter.cpp:131] 2023-09-11 23:56:07.488 | Across all poll, Average Latency 34938.975879 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:08.011 | Sample size 11691, Median Latency: 34092.000000 99.99th: 373330.000000
+I [reporter.cpp:131] 2023-09-11 23:56:08.013 | Across all poll, Average Latency 35506.606312 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:08.536 | Sample size 11698, Median Latency: 34130.000000 99.99th: 566144.000000
+I [reporter.cpp:131] 2023-09-11 23:56:08.537 | Across all poll, Average Latency 35292.702197 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:09.060 | Sample size 11800, Median Latency: 34048.000000 99.99th: 435753.000000
+I [reporter.cpp:131] 2023-09-11 23:56:09.062 | Across all poll, Average Latency 35020.018473 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:09.593 | Sample size 11889, Median Latency: 34083.000000 99.99th: 587694.000000
+I [reporter.cpp:131] 2023-09-11 23:56:09.595 | Across all poll, Average Latency 34828.151724 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:10.119 | Sample size 12024, Median Latency: 34003.000000 99.99th: 382082.000000
+I [reporter.cpp:131] 2023-09-11 23:56:10.120 | Across all poll, Average Latency 34465.651143 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:10.644 | Sample size 11575, Median Latency: 34242.000000 99.99th: 354629.000000
+I [reporter.cpp:131] 2023-09-11 23:56:10.645 | Across all poll, Average Latency 35594.668884 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:11.168 | Sample size 11889, Median Latency: 34009.000000 99.99th: 396412.000000
+I [reporter.cpp:131] 2023-09-11 23:56:11.170 | Across all poll, Average Latency 34755.320017 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:11.699 | Sample size 11928, Median Latency: 34047.000000 99.99th: 554671.000000
+I [reporter.cpp:131] 2023-09-11 23:56:11.701 | Across all poll, Average Latency 34513.731746 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:12.224 | Sample size 11936, Median Latency: 34016.000000 99.99th: 475876.000000
+I [reporter.cpp:131] 2023-09-11 23:56:12.226 | Across all poll, Average Latency 34763.475748 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:12.750 | Sample size 11797, Median Latency: 34113.000000 99.99th: 470550.000000
+I [reporter.cpp:131] 2023-09-11 23:56:12.752 | Across all poll, Average Latency 35016.511358 micro-sec
+I [reporter.cpp:66] 2023-09-11 23:56:13.274 | Sample size 11767, Median Latency: 34068.000000 99.99th: 368985.000000
+I [reporter.cpp:131] 2023-09-11 23:56:13.276 | Across all poll, Average Latency 35084.699354 micro-sec
+I [benchmarks.cpp:92] 2023-09-11 23:56:13.385 | Benchmark thread: 0 stopped
+I [reporter.cpp:131] 2023-09-11 23:56:13.776 | Across all poll, Average Latency -nan micro-sec
+I [reporter.cpp:131] 2023-09-11 23:56:14.276 | Across all poll, Average Latency -nan micro-sec
+I [reporter.cpp:131] 2023-09-11 23:56:14.776 | Across all poll, Average Latency -nan micro-sec
+I [transport.cpp:881] 2023-09-11 23:56:14.810 | Log Rx tid: 0, port id: 0, qid: 0
+I [transport.cpp:887] 2023-09-11 23:56:14.810 | Number of packets: TX: 445100, RX: 0
+I [reporter.cpp:131] 2023-09-11 23:56:15.277 | Across all poll, Average Latency -nan micro-sec
+I 2023-09-11 23:56:15.277 | Reporter Thread Stopped
