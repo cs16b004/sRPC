@@ -17,7 +17,7 @@ using namespace std;
 namespace rrr {
 
 
-UDPConnection::UDPConnection(UDPServer* server, int socket)
+UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
         : ServerConnection((Server*) server,server->transport_->out_connections[socket]->in_fd_),connId(socket) {
     // increase number of open connections
 
@@ -348,7 +348,7 @@ void UDPServer::server_loop(void* arg) {
                 std::string src_addr;
                 *(sm_req)>>src_addr;
                 Log_info("SM REQ to connect %s",src_addr.c_str());
-                uint32_t connId = svr->transport_->accept(src_addr.c_str());
+                uint64_t connId = svr->transport_->accept(src_addr.c_str());
                    
                 if (connId > 0){
                     svr->sconns_l_.lock();

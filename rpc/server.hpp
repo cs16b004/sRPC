@@ -400,7 +400,7 @@ class UDPConnection: public ServerConnection {
     
     
     void close();
-    uint32_t connId;
+    uint64_t connId;
 
 protected:
     NetAddress toAddress;
@@ -411,7 +411,7 @@ protected:
 
 public:
 
-    UDPConnection(UDPServer* server, int socket);
+    UDPConnection(UDPServer* server, uint64_t socket);
     int run_async(const std::function<void()>& f);
     
     unsigned char buf[1000];

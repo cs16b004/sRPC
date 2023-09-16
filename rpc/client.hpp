@@ -192,7 +192,7 @@ class UDPClient: public Client{
         int sock_;
         int wfd;
         Marshal* out_ptr_;
-        uint32_t conn_id;
+        uint64_t conn_id;
         Marshal::bookmark* bmark_;
         DpdkTransport* transport_;
         using RefCounted::release;

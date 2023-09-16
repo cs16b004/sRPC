@@ -5,7 +5,7 @@ INC=-I.. -I. -I../rpc -I../base -I../rpc/dpdk_transport
 LIB_DPDK=$(shell pkg-config --libs libdpdk) -lrte_net_qdma
 CFLAG_DPDK=$(shell pkg-config --cflags libdpdk)
 LIB=-Llib -lrpc -lbase -lpthread -lyaml-cpp $(LIB_DPDK)
-CXXFLAGS=-std=c++17 -g -Wall $(CFLAG_DPDK)
+CXXFLAGS=-std=c++17 -Wall $(CFLAG_DPDK)
 
 .PHONY: all
 all: clean bin/server bin/client
@@ -16,10 +16,10 @@ debug: all
 stat: CXXFLAGS += -g3 -O0 -DRPC_STATISTICS
 stat: all 
 
-dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS -DRPC_MICRO_STATISTICS
+dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS 
 dpdk_debug: all
 
-dpdk_stat: CXXFLAGS += -g3 -O0  -DDPDK -DRPC_STATISTICS -DRPC_MICRO_STATISTICS
+dpdk_stat: CXXFLAGS += -DDPDK -DRPC_STATISTICS 
 dpdk_stat: all
 
 .PHONY: clean

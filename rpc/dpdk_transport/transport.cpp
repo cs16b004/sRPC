@@ -48,7 +48,7 @@ std::string DpdkTransport::getMacFromIp(std::string ip){
     return "02:de:ad:be:ef:60";
 }
 
-uint32_t DpdkTransport::accept(const char* addr_str){
+uint64_t DpdkTransport::accept(const char* addr_str){
     
 
     while(!initiated){
@@ -65,12 +65,10 @@ uint32_t DpdkTransport::accept(const char* addr_str){
     }
     std::string server_ip = addr.substr(0, idx);
     uint16_t port = atoi(addr.substr(idx + 1).c_str());
-     if (addr_lookup_table.find(addr)!= addr_lookup_table.end()){
-        return 0;
-   }
+   
      
     // UDPConnection *conn = new UDPConnection(*s_addr);
-
+   // Log_debug("Accept request %s",addr_str);
     TransportConnection* oconn = new TransportConnection();
     int pipefd[2];
     verify(pipe(pipefd)==0);
@@ -80,7 +78,7 @@ uint32_t DpdkTransport::accept(const char* addr_str){
     oconn->wfd = pipefd[1];
     oconn->udp_port = src_addr_[config_->host_name_].port;
         addr = addr+ "::" + std::to_string(oconn->udp_port);
-    uint32_t conn_id;
+    uint64_t conn_id=0;
     // choose a connection based on round robin principle;
     conn_th_lock.lock();
     
@@ -99,17 +97,25 @@ uint32_t DpdkTransport::accept(const char* addr_str){
     
     //verify(thread_rx_info[chosen_rx_thread].conn_counter == thread_tx_info[chosen_tx_thread].conn_counter);
 
-    conn_id = conn_counter;
+    conn_id = conn_id | oconn->out_addr.ip;
+    conn_id = conn_id<<16;
+    // server port in BE 
+    conn_id = conn_id | rte_cpu_to_be_16(port);
+    //local host port in BE
+    conn_id = conn_id<<16;
+    conn_id  = conn_id | rte_cpu_to_be_16(oconn->udp_port);
+    if(out_connections.find(conn_id) != out_connections.end()){
+        conn_th_lock.unlock();
+         thread_tx_info[chosen_tx_thread]->conn_lock.unlock();
+         return 0;
+    }
      Log_info("Chosen threads for new conn: %d, tx-thread %d, next_thread_ %d",conn_id, chosen_tx_thread,next_thread_);
    
     thread_tx_info[chosen_tx_thread]->out_connections[conn_id] = oconn;
     
-   
-    thread_tx_info[chosen_tx_thread]->addr_lookup_table[addr] = conn_id;
 
     out_connections[conn_id] = oconn;
-    addr_lookup_table[addr] = conn_id;
-
+   
     thread_tx_info[chosen_tx_thread]->conn_lock.unlock();
     conn_th_lock.unlock();
    // this->connections_[conn_id] = conn;
@@ -118,7 +124,16 @@ uint32_t DpdkTransport::accept(const char* addr_str){
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     
-   
+     #ifdef LOG_LEVEL_AS_DEBUG
+        uint64_t conn_c =conn_id;
+        uint16_t local_port = conn_c & (0xffff);
+        conn_c = conn_c>>16;
+        uint16_t server_port = conn_c & (0xffff);
+        conn_c = conn_c>>16;
+        uint32_t ser_ip = conn_c & (0xffffffff);
+
+        Log_debug("Conn Id dissassemble : IP: %s, port: %d, local port: %d",ipv4_to_string(ser_ip).c_str(), ntohs(server_port), ntohs(local_port));
+    #endif
     send(con_ack_req, 30*sizeof(uint8_t), conn_id, 
             thread_tx_info[chosen_tx_thread],rrr::SM);
      Log_info("Added [%s] %s, fd r: %d, w: %d",
@@ -128,7 +143,7 @@ uint32_t DpdkTransport::accept(const char* addr_str){
     sleep(1);
     return conn_id;
 }
-uint32_t DpdkTransport::connect(const char* addr_str){
+uint64_t DpdkTransport::connect(const char* addr_str){
     while(!initiated){
         Log_debug("Waiting for initialization");
         sleep(1);
@@ -157,7 +172,7 @@ uint32_t DpdkTransport::connect(const char* addr_str){
     oconn->wfd = pipefd[1];
     
     
-    uint32_t conn_id;
+    uint64_t conn_id=0;
     conn_th_lock.lock();
     next_thread_++;
     uint64_t chosen_tx_thread = next_thread_%tx_threads_;
@@ -168,17 +183,21 @@ uint32_t DpdkTransport::connect(const char* addr_str){
     addr = addr + "::" + std::to_string(oconn->udp_port);
     
     conn_counter++;
-    
-    conn_id = conn_counter;
-     Log_info("Chosen threads for new conn: %d is tx-thread %d, counter %d",conn_id, chosen_tx_thread,next_thread_);
+    // server ip in BE
+    conn_id = conn_id | oconn->out_addr.ip;
+    //Log_debug("conn_id ip %s", ipv4_to_string(conn_id).c_str());
+    conn_id = conn_id<<16;
+    // server port in BE 
+    conn_id = conn_id | rte_cpu_to_be_16(port);
+    //local host port in BE
+    conn_id = conn_id<<16;
+    conn_id  = conn_id | rte_cpu_to_be_16(oconn->udp_port);
+    Log_info("Chosen threads for new conn: %d is tx-thread %d, counter %d",conn_id, chosen_tx_thread,next_thread_);
     
     thread_tx_info[chosen_tx_thread]->out_connections[conn_id] = oconn;
-    thread_tx_info[chosen_tx_thread]->addr_lookup_table[addr] = conn_id;
-
-    out_connections[conn_id] = oconn;
-    addr_lookup_table[addr] = conn_id;
-
     
+    out_connections[conn_id] = oconn;
+   
     thread_tx_info[chosen_tx_thread]->conn_lock.unlock();
     conn_th_lock.unlock();
    // this->connections_[conn_id] = conn;
@@ -189,6 +208,16 @@ uint32_t DpdkTransport::connect(const char* addr_str){
     
     send(con_req, 30*sizeof(uint8_t), conn_id, 
             thread_tx_info[chosen_tx_thread],rrr::SM);
+    #ifdef LOG_LEVEL_AS_DEBUG
+        uint64_t conn_c =conn_id;
+        uint16_t local_port = conn_c & (0xffff);
+        conn_c = conn_c>>16;
+        uint16_t server_port = conn_c & (0xffff);
+        conn_c = conn_c>>16;
+        uint32_t ser_ip = conn_c & (0xffffffff);
+
+        Log_debug("Conn Id dissassemble : IP: %s, port: %d, local port: %d",ipv4_to_string(ser_ip).c_str(), ntohs(server_port), ntohs(local_port));
+    #endif
     while(!oconn->connected_)
         usleep(50*1000);
     Log_info("Connected to %s, fd r: %d, w: %d",addr.c_str(),oconn->in_fd_,oconn->wfd);
@@ -302,15 +331,32 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         
         struct rte_ipv4_hdr* ip_hdr = reinterpret_cast<struct rte_ipv4_hdr*>(pkt_ptr + ip_hdr_offset);
         uint32_t src_ip = ip_hdr->src_addr;
-
+        
         struct rte_udp_hdr* udp_hdr = reinterpret_cast<struct rte_udp_hdr*> (pkt_ptr + udp_hdr_offset);
         
-        uint16_t src_port = ntohs(udp_hdr->src_port);
-        uint16_t dest_port = ntohs(udp_hdr->dst_port);
+         //uint16_t src_port = ntohs(udp_hdr->src_port);
+        // uint16_t dest_port = ntohs(udp_hdr->dst_port);
         uint16_t pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
         //Log_debug("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
-        std::string src_addr = ipv4_to_string(src_ip) + ":" + std::to_string(src_port);
-        std::string lookup_addr = src_addr + ("::" + std::to_string(dest_port));
+        uint64_t conn_id = 0;
+        conn_id = src_ip;
+        conn_id = conn_id<<16;
+        // server port in BE 
+        conn_id = conn_id | (uint64_t)(udp_hdr->src_port);
+        //local host port in BE
+        conn_id = conn_id<<16;
+        conn_id  = conn_id | (uint64_t)(udp_hdr->dst_port);
+        #ifdef LOG_LEVEL_AS_DEBUG
+        
+         uint64_t conn_c =conn_id;
+        uint16_t local_port = conn_c & (0xffff);
+        conn_c = conn_c>>16;
+        uint16_t server_port = conn_c & (0xffff);
+        conn_c = conn_c>>16;
+        uint32_t ser_ip = conn_c & (0xffffffff);
+
+        Log_debug("Conn Id dissassemble : IP: %s, port: %d, local port: %d",ipv4_to_string(ser_ip).c_str(), ntohs(server_port), ntohs(local_port));
+        #endif
         uint8_t* data_ptr = pkt_ptr + data_offset;
         //   for (int i=0; i < pkt_size; ++i) {
         //         if (! (i % 16) && i)
@@ -337,27 +383,27 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
         }    
         #endif
         
-        Log_debug("Processing incoming packet from %s",src_addr.c_str());
+       
         mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
         data_ptr += sizeof(uint8_t); 
         if(pkt_type == rrr::RR ){
          
-            if(addr_lookup_table.find(lookup_addr)!= addr_lookup_table.end()){
+            if(out_connections.find(conn_id)!= out_connections.end()){
                 #ifdef RPC_MICRO_STATISTICS
                 int n;
                 if(config_->host_name_ == "catskill"){
-                    n = write(out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size+8); // sizeof(pkt id)
+                    n = write(out_connections[conn_id]->wfd,data_ptr,pkt_size+8); // sizeof(pkt id)
                 }else{
-                    n = write(out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size);
+                    n = write(out_connections[conn_id]->wfd,data_ptr,pkt_size);
                 }
                 #else 
-                int n = write(out_connections[addr_lookup_table[lookup_addr]]->wfd,data_ptr,pkt_size);
+                int n = write(out_connections[conn_id]->wfd,data_ptr,pkt_size);
                 #endif
                 
                  if (n>0){
                 Log_debug("%d bytes written to fd %d, read end %d",
-                            n,out_connections[addr_lookup_table[lookup_addr]]->wfd,
-                            out_connections[addr_lookup_table[lookup_addr]]->in_fd_);
+                            n,out_connections[conn_id]->wfd,
+                            out_connections[conn_id]->in_fd_);
                 }
                 if(n < 0 ){
                 perror("Message: ");
@@ -374,17 +420,19 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
             uint8_t req_type;
             
             mempcpy(&req_type,data_ptr,sizeof(uint8_t));
-            Log_debug("Req Type 0x%2x, src_addr : %s",req_type, src_addr.c_str());
+           // Log_debug("Req Type 0x%2x, src_addr : %s",req_type, src_addr.c_str());
             if(req_type == rrr::CON_ACK){
-                if(out_connections.find(addr_lookup_table[lookup_addr]) != 
+                if(out_connections.find(conn_id) != 
                         out_connections.end()){
-                    out_connections[addr_lookup_table[lookup_addr]]->connected_ = true;
-                    Log_debug("Connection to %s accepted, by thread %d",src_addr.c_str(),rx_info->thread_id);
+                    out_connections[conn_id]->connected_ = true;
+                    
                         }
                         else{
-                            Log_error("Connection not found connid: %d , thread_id %d, addr %s",rx_info->addr_lookup_table[lookup_addr],rx_info->thread_id, lookup_addr.c_str());
+                            Log_error("Connection not found connid: %d , thread_id %d",conn_id,rx_info->thread_id);
                         }
             }else{
+              //  Log_debug("Connection request from %s", ipv4_to_string(src_ip).c_str());
+                std::string src_addr = ipv4_to_string(src_ip) + ":" + std::to_string(ntohs(udp_hdr->src_port));
                 *(sm_req)<<req_type;
                 *(sm_req)<<src_addr;
                 rx_info->dpdk_th->sm_queue_l.lock();
@@ -405,7 +453,7 @@ void DpdkTransport::process_incoming_packets(dpdk_thread_info* rx_info) {
             
         }else{
             Log_debug("Packet Type Not found");
-            Log_debug("Src addr: %s",src_addr.c_str());
+           
         }
         int prefetch_idx = i + DPDK_PREFETCH_NUM;
         if (prefetch_idx < rx_info->count)
@@ -424,10 +472,10 @@ uint16_t DpdkTransport::get_open_port(){
     return temp;
 }
 void DpdkTransport::send(uint8_t* payload, unsigned length,
-                      uint16_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type) {
+                      uint64_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type) {
     sendl.lock();
     if (tx_info->count == 0) {
-        int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id%tx_threads_]);
+        int ret = tx_info->buf_alloc(tx_mbuf_pool[tx_info->thread_id]);
         if (ret < 0)
             rte_panic("couldn't allocate mbufs");
     }
@@ -496,7 +544,7 @@ void DpdkTransport::send(uint8_t* payload, unsigned length,
     sendl.unlock();
 }
 
-int dpdk_thread_info::make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id) {
+int dpdk_thread_info::make_pkt_header(uint8_t *pkt, int payload_len, uint64_t conn_id) {
     NetAddress& src_addr = out_connections[conn_id]->src_addr;
     if(out_connections.find(conn_id) == out_connections.end())
         return -1; 

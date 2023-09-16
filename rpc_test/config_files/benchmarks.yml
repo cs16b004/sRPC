@@ -1,11 +1,11 @@
 benchmarks:
   input_size: 64 #input size in bytes
-  output_size: 128
+  output_size: 64
   client_poll_threads: 1
   server_poll_threads: 1
   client_connections: 1
   client_threads: 1
   server_duration: 120 #server_duration in seconds
   client_duration: 80
-  client_batch_size: 1
+  client_batch_size: 3
   server_address: "172.19.0.121:8501"

@@ -106,7 +106,7 @@ namespace rrr{
     private:
         static DpdkTransport* transport_l;
         std::map<std::string,uint32_t> addr_lookup_table;
-        std::map<uint32_t, TransportConnection*> out_connections;
+        std::map<uint64_t, TransportConnection*> out_connections;
         uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
         uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
@@ -174,7 +174,7 @@ namespace rrr{
         int isolate(uint8_t phy_port);
         void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
         void send(uint8_t* payload, unsigned length,
-                      uint16_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type);
+                      uint64_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type);
         SpinLock sendl;
 
 public:
@@ -184,8 +184,8 @@ public:
     static void create_transport(Config* config);
     static DpdkTransport* get_transport();
    // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
-    uint32_t connect (const char* addr);
-      uint32_t accept(const char* addr);
+    uint64_t connect (const char* addr);
+    uint64_t accept(const char* addr);
     int connect(std::string addr);
     uint16_t get_open_port();
     void shutdown();
@@ -217,7 +217,7 @@ public:
         int max_size=100;
         uint16_t conn_counter=0;
         SpinLock conn_lock;
-        std::map<uint32_t, TransportConnection*> out_connections;
+        std::map<uint64_t, TransportConnection*> out_connections;
         std::map<std::string,uint32_t> addr_lookup_table;
         packet_stats stat;
         int udp_port_id = 0;
@@ -228,7 +228,7 @@ public:
         void init(DpdkTransport* th, int th_id, int p_id,
                   int q_id, int burst_size);
         int buf_alloc(struct rte_mempool* mbuf_pool);
-        int make_pkt_header(uint8_t *pkt, int payload_len, uint32_t conn_id);
+        int make_pkt_header(uint8_t *pkt, int payload_len, uint64_t conn_id);
 
         ~dpdk_thread_info() {
             if (buf)
