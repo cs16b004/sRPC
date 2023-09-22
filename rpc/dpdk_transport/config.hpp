@@ -63,6 +63,7 @@ public:
 
     uint16_t num_tx_threads_;
     uint16_t num_rx_threads_;
+    uint16_t burst_size=32;
     //benchmarks yml
     uint16_t num_client_threads_;
     uint16_t client_poll_threads_ = 1;
@@ -73,13 +74,15 @@ public:
     uint16_t client_duration_ = 20;
     uint16_t server_duration_ = 60;
     std::string server_address_;
-
+    uint16_t rte_ring_size = 32768;
     uint16_t client_batch_size_=5;
     //
 
     int transport_ = 0;
     int workload_ = 0;
     int ratio_ = 0;
+    uint16_t buffer_len=1024;
+
  
 
 private:

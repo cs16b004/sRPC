@@ -49,8 +49,8 @@ benchmarks.o: benchmarks.cpp benchmarks.hpp lib/librpc.a lib/libbase.a
 	${CXX} ${CXXFLAGS} ${INC} -c benchmarks.cpp ${LIB} -o benchmarks.o
 
 
-lib/librpc.a: client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o
-	ar rcs lib/librpc.a client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o
+lib/librpc.a: client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o
+	ar rcs lib/librpc.a client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o
 	rm -f client.o marshal.o polling.o server.o utils.o udpserver.o
 
 lib/libbase.a: basetypes.o logging.o misc.o strop.o threading.o unittest.o reporter.o
@@ -66,14 +66,14 @@ marshal.o: ../misc/marshal.cpp ../misc/marshal.hpp
 polling.o: ../rpc/polling.cpp ../rpc/polling.hpp
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/polling.cpp -o polling.o
 
-transport.o: ../rpc/dpdk_transport/transport.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/utils.hpp config.o marshal.o polling.o 
-			${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport.cpp config.o polling.o -o transport.o
+transport.o: ../rpc/dpdk_transport/transport.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/utils.hpp config.o marshal.o polling.o transport_connection.o 
+			${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport.cpp config.o transport_connection.o polling.o -o transport.o
 
 config.o: ../rpc/dpdk_transport/config.cpp ../rpc/dpdk_transport/config.hpp
 		  ${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/config.cpp -o config.o
 
 udpserver.o: ../rpc/UDPServer.cpp ../rpc/server.hpp transport.o config.o
-	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/UDPServer.cpp config.o transport.o -o udpserver.o
+	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/UDPServer.cpp transport_connection.o config.o transport.o -o udpserver.o
 	echo "Compiling UDPServer"
 
 server.o: ../rpc/server.cpp ../rpc/server.hpp
@@ -105,3 +105,5 @@ unittest.o: ../base/unittest.cpp ../base/unittest.hpp
 reporter.o: ../rpc/reporter.cpp ../rpc/reporter.hpp ../rpc/polling.hpp polling.o
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/reporter.cpp -o reporter.o
 
+transport_connection.o: ../rpc/dpdk_transport/transport_connection.cpp ../rpc/dpdk_transport/transport_connection.hpp config.o
+	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport_connection.cpp -o transport_connection.o

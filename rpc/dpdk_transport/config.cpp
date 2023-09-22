@@ -94,6 +94,7 @@ void Config::load_dpdk_yml(YAML::Node config) {
     dpdk_options_ = config["option"].as<std::string>();
     num_rx_threads_ = config["rx_threads"].as<uint16_t>();
     num_tx_threads_ = config["tx_threads"].as<uint16_t>();
+    burst_size = config["pkt_burst_size"].as<uint16_t>();
 }
 
 void Config::load_cpu_yml(YAML::Node config) {

@@ -165,9 +165,9 @@ void Benchmarks::stop_client(){
          thread_info[i]->stop = true;
          
        }
-       for(int i=0; i< conf->num_client_threads_; i++){
-        pthread_join(*client_threads[i],nullptr);
-       }
+    //    for(int i=0; i< conf->num_client_threads_; i++){
+    //     pthread_join(*client_threads[i],nullptr);
+    //    }
        for(int i=0; i< conf->client_connections_; i++){
             service_proxies[i]->close();
        }

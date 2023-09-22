@@ -344,7 +344,7 @@ void UDPServer::server_loop(void* arg) {
             svr->transport_->sm_queue_l.unlock();
             uint8_t req_type;
             verify(sm_req->read(&req_type, sizeof(uint8_t)) == sizeof(uint8_t));
-            if(req_type == rrr::CON){
+            if(req_type == CON){
                 std::string src_addr;
                 *(sm_req)>>src_addr;
                 Log_info("SM REQ to connect %s",src_addr.c_str());

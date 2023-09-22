@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     Benchmarks bm(conf);
 
     bm.create_proxies();
-    bm.create_client_threads();
+    //bm.create_client_threads();
     bm.observe_client();
     bm.stop_client();
     

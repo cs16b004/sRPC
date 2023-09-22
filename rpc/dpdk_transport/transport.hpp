@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include "../../misc/marshal.hpp"
 #include "config.hpp"
-
+#include "transport_connection.hpp"
 #include "../polling.hpp"
 #include <rte_ethdev.h>
 #include <rte_eth_ctrl.h>
@@ -25,7 +25,11 @@
 #define DEV_TX_OFFLOAD_TCP_CKSUM  RTE_ETH_TX_OFFLOAD_TCP_CKSUM
 #define DEV_TX_OFFLOAD_SCTP_CKSUM RTE_ETH_TX_OFFLOAD_SCTP_CKSUM
 #define DEV_TX_OFFLOAD_TCP_TSO DEV_TX_OFFLOAD_TCP_CKSUM
-
+#define SM       0x07
+#define RR       0x09
+#define DIS      0x01
+#define CON      0x02
+#define CON_ACK  0x3
 namespace rrr{
     
     struct Request;
@@ -33,66 +37,8 @@ namespace rrr{
     class UDPClient;
     class Reporter;
     // Pakcet Type    
-    const uint8_t SM = 0x07;
-    const uint8_t RR = 0x09;
-    const uint8_t DIS = 0x01;
-    const uint8_t CON = 0x02;
-    const uint8_t CON_ACK = 0x3;
+ 
     
-    struct packet_stats {
-        uint64_t pkt_count = 0;
-
-        std::map<int, uint64_t> pkt_port_dest;
-
-        uint64_t pkt_error = 0;
-        uint64_t pkt_eth_type_err = 0;
-        uint64_t pkt_ip_prot_err = 0;
-        uint64_t pkt_port_num_err = 0;
-        uint64_t pkt_app_err = 0;
-
-        void merge(packet_stats& other);
-        void show_statistics();
-    };
-   
-     
-      struct NetAddress {
-        uint8_t id;
-
-        uint8_t mac[6];
-        uint32_t ip;
-        uint16_t port;
-
-        NetAddress() {};
-
-        NetAddress(const char* mac_i, const char* ip_i, const int port);
-        NetAddress(const uint8_t* mac_i, const uint32_t ip, const int port);
-        void init(const char* mac_i, const char* ip_i, const int port);
-        bool operator==(const NetAddress& other);
-        NetAddress& operator=(const NetAddress& other);
-        std::string getAddr();
-        std::string to_string();
-    };
-    struct TransportMarshal{
-        uint8_t *payload;
-        uint32_t n_bytes;
-        TransportMarshal(uint32_t size){
-            payload = new uint8_t[size];
-            n_bytes = size;
-
-        }
-    };
-    struct TransportConnection{
-        int in_fd_;
-        int wfd;
-        SpinLock outl;
-        std::queue<TransportMarshal*> out_messages;
-        NetAddress out_addr;
-        NetAddress src_addr;
-        //My port nbumber ;
-        uint16_t udp_port;
-        bool connected_ = false;
-    };
-       
     class DpdkTransport {
         friend class UDPServer;
         friend class UDPClient;
@@ -103,6 +49,26 @@ namespace rrr{
         #ifdef RPC_STATISTICS
         friend class Reporter;
         #endif
+
+        const uint8_t con_req[64] = {SM, CON, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+        const uint8_t con_ack[64] = {SM, CON_ACK, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+
+
+
     private:
         static DpdkTransport* transport_l;
         std::map<std::string,uint32_t> addr_lookup_table;
@@ -118,6 +84,13 @@ namespace rrr{
         uint16_t rx_queue_ = 1, tx_queue_ = 1;
         struct rte_mempool **tx_mbuf_pool;
         struct rte_mempool **rx_mbuf_pool;
+
+        // Session Management rings for each thread; 
+        //    (Single consumer multiple producer)
+        struct rte_ring** tx_sm_rings;
+        struct rte_ring** rx_sm_rings;
+        
+
         uint16_t u_port_counter = 9000;
         uint16_t conn_counter=0;
         rrr::SpinLock pc_l;
@@ -184,7 +157,19 @@ public:
     static void create_transport(Config* config);
     static DpdkTransport* get_transport();
    // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
+
+    // Send a connec request to server at addr_str
+    // Called from Application thread 
+    // Assigns a dedicated dpdk thread 
+    // returns the conn_id to use in future
     uint64_t connect (const char* addr);
+
+
+
+    // Accept a Connection
+    // Called from application thread to (server loop)
+    // creates a transport_connection, assigns a dedicated tx_thread;
+    // returns a connection  id to be used by application thread
     uint64_t accept(const char* addr);
     int connect(std::string addr);
     uint16_t get_open_port();
@@ -209,6 +194,7 @@ public:
 
         private:
     };
+        // Structure to provide informaion to the thread; launched;
       struct dpdk_thread_info {
         int thread_id;
         int port_id;
@@ -216,25 +202,36 @@ public:
         int count = 0;
         int max_size=100;
         uint16_t conn_counter=0;
+        bool shutdown=false;
         SpinLock conn_lock;
+        // Dedicated Connections 
         std::map<uint64_t, TransportConnection*> out_connections;
+        // Application thread put connection_ptr in this ring , 
+        //thread will organize mbuf and other structs
+        struct rte_ring* sm_ring;  
         std::map<std::string,uint32_t> addr_lookup_table;
-        packet_stats stat;
-        int udp_port_id = 0;
+        struct rte_mempool* mem_pool;
+
         struct rte_mbuf **buf{nullptr};
-        rrr::DpdkTransport* dpdk_th;
+        
+        rrr::DpdkTransport* t_layer;
 
         dpdk_thread_info() { }
         void init(DpdkTransport* th, int th_id, int p_id,
                   int q_id, int burst_size);
+        
         int buf_alloc(struct rte_mempool* mbuf_pool);
-        int make_pkt_header(uint8_t *pkt, int payload_len, uint64_t conn_id);
 
+        
         ~dpdk_thread_info() {
-            if (buf)
-                delete [] buf;
         }
     };
-     
-       
+     /**
+      * Helper function to process Session Management (SM) requests from other threads;
+      * \param sm_ring, 
+      * the ring to deque and process
+      * \param mempool, 
+      * the  mempool to use allocate buffers etc.
+     */
+     uint16_t process_sm_requests(rte_ring* sm_ring, rte_mempool* mempool);  
 }
