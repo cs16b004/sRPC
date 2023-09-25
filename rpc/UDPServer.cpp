@@ -19,6 +19,7 @@ namespace rrr {
 
 UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
         : ServerConnection((Server*) server,server->transport_->out_connections[socket]->in_fd_),connId(socket) {
+            conn = server->transport_->out_connections[socket];
     // increase number of open connections
 
     server_->sconns_ctr_.next(1);
@@ -33,40 +34,22 @@ int UDPConnection::run_async(const std::function<void()>& f) {
     return server_->threadpool_->run_async(f);
 }
 
-void UDPConnection::begin_reply(Request* req, i32 error_code /* =... */) {
-    out_l_.lock();
-    v32 v_error_code = error_code;
+void UDPConnection::begin_reply(Request<rrr::Marshal>* req, i32 error_code /* =... */) {
+    curr_reply = new TransportMarshal(conn->get_new_pkt());
+
+     v32 v_error_code = error_code;
     v64 v_reply_xid = req->xid;
 
-    bmark_ = this->out_.set_bookmark(sizeof(i32)); // will write reply size later
+    curr_reply->set_book_mark(sizeof(i32)); // will write reply size later
 
     *this << v_reply_xid;
     *this << v_error_code;
 }
 
 void UDPConnection::end_reply() {
-    // set reply size in packet
-    if (bmark_ != nullptr) {
-        i32 reply_size = out_.get_and_reset_write_cnt();
-        out_.write_bookmark(bmark_, &reply_size);
-        delete bmark_;
-        bmark_ = nullptr;
-    }
-
-    // always enable write events since the code above gauranteed there
-    // will be some data to send
-    server_->pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
-    uint32_t n_bytes = out_.content_size();
-     TransportMarshal *new_reply = new TransportMarshal(n_bytes) ;
-    out_.read(new_reply->payload, n_bytes);
-       ((UDPServer*)server_)->transport_->out_connections[connId]->outl.lock();
- ((UDPServer*)server_)->transport_->out_connections[connId]->out_messages.push(new_reply);
-    ((UDPServer*)server_)->transport_->out_connections[connId]->outl.unlock();
-    //Log_debug("Reply content size : %d, out_ size: %d",new_reply->content_size(),out_.content_size());
-   
-
-    out_l_.unlock();
-
+    i32 reply_size = curr_reply->content_size();
+        curr_reply->write_book_mark(&reply_size, sizeof(i32));
+        rte_ring_enqueue(conn->out_bufring,curr_reply->get_mbuf());
 }
 
 void UDPConnection::handle_read() {
@@ -85,7 +68,7 @@ void UDPConnection::handle_read() {
         return;
     }
    // Log_debug("%d Bytes Read from fd %d",bytes_read,socket_);
-    list<Request*> complete_requests;
+    list<Request<rrr::Marshal>*> complete_requests;
         for(;;){
        // in_.print();
         i32 packet_size;
@@ -97,7 +80,7 @@ void UDPConnection::handle_read() {
             // consume the packet size
             verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
 
-            Request* req = new Request;
+            Request<rrr::Marshal>* req = new Request<rrr::Marshal>;
             verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
             
             v64 v_xid;

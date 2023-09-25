@@ -9,6 +9,7 @@ from simplerpcgen import rpcgen
 def main():
     argparser = argparse.ArgumentParser(prog=sys.argv[0])
     argparser.add_argument("--cpp", action="store_true", help="generate C++ stub files")
+    argparser.add_argument("--dpdk",action="store_true",help = "generate code for dpdk tranport")
     argparser.add_argument("--python", action="store_true", help="generate Python stub files")
     argparser.add_argument("rpc_file")
     opt = argparser.parse_args()
@@ -17,6 +18,8 @@ def main():
         languages.add("cpp")
     if opt.python:
         languages.add("python")
+    if(opt.dpdk):
+        languages.add("dpdk")
     if len(languages) == 0:
         languages.add("cpp")
     rpcgen(opt.rpc_file, languages)

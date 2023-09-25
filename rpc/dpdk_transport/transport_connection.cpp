@@ -1,15 +1,61 @@
 #include "transport_connection.hpp"
 
 namespace rrr{
+inline rte_mbuf* TransportConnection::get_new_pkt(){
+    rte_mbuf** buf =  new rte_mbuf*;
+    int i=0;
+    while(rte_ring_dequeue(available_bufring, (void**)buf) !=0){
+        i++;
+        if(i > 1000*1000){
+            Log_warn("Waiting to get a new pkt from connection %lld",conn_id);
+             i=0;
+        }
+       
+    }
 
+    rte_mbuf* ret = *buf;
+    delete buf;
+    verify(ret != nullptr);
+    return ret;
 
+}
+int TransportConnection::assign_availring(){
+    rrr::Config* conf = Config::get_config();
+     char buf_ring_name[128];
+    sprintf(buf_ring_name, "sRPC_AVAIL_BUFRING_CONN_%lu",conn_id);
+                // bigger size queue;
+         available_bufring = rte_ring_create(buf_ring_name,
+                                                    conf->buffer_len,
+                                                    rte_socket_id(), 
+                                                    RING_F_MC_HTS_DEQ | RING_F_SP_ENQ);
+                                    
+        if(available_bufring)
+            return 0;
+        else
+            return -1;
+}
+int TransportConnection::assign_bufring(){
+    rrr::Config* conf = Config::get_config();
+     char buf_ring_name[128];
+    sprintf(buf_ring_name, "sRPC_BUFRING_CONN_%lu",conn_id);
+                // bigger size queue;
+         out_bufring = rte_ring_create(buf_ring_name,
+                                                    conf->rte_ring_size,
+                                                    rte_socket_id(), 
+                                                    RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
+        if(out_bufring)
+            return 0;
+        else
+            return -1;
+   
+}
 int TransportConnection::buf_alloc(rte_mempool* mempool, uint16_t max_len){
     out_msg_buffers = new struct rte_mbuf*[max_len];
     int retval =  rte_pktmbuf_alloc_bulk(mempool, out_msg_buffers, (unsigned int)max_len);
     verify(retval == 0);
     return retval;
 }
-void TransportConnection::make_headers(){
+void TransportConnection::make_headers_and_produce(){
      for(int i=0;i<Config::get_config()->buffer_len;i++){
         //log_debug("Packet address for pkt %d while making header: %p",i,&buf[i]);
         make_pkt_header(out_msg_buffers[i]);

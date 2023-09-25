@@ -91,6 +91,8 @@ int UDPClient::connect(const char * addr){
     sock_ = transport_->out_connections[conn_id]->in_fd_;
     status_=CONNECTED;
     verify(set_nonblocking(sock_, true) == 0);
+    conn = transport_->get_conn(conn_id);
+
     pollmgr_->add(this);
 
     return 0;
@@ -105,51 +107,20 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
     pending_fu_l_.lock();
     pending_fu_[fu->xid_] = fu;
     pending_fu_l_.unlock();
-
-    // check if the client gets closed in the meantime
-    if (status_ != CONNECTED) {
-        pending_fu_l_.lock();
-        unordered_map<i64, Future*>::iterator it = pending_fu_.find(fu->xid_);
-        if (it != pending_fu_.end()) {
-            it->second->release();
-            pending_fu_.erase(it);
-        }
-        pending_fu_l_.unlock();
-
-        return nullptr;
-    }
-    out_l_.lock();
-    bmark_ = out_.set_bookmark(sizeof(i32)); // will fill packet size later
-
+    current_req = new TransportMarshal(conn->get_new_pkt());
+    current_req->set_book_mark(sizeof(i32));
     *this << v64(fu->xid_);
     *this << rpc_id;
     #ifdef RPC_STATISTICS
         put_start_ts(fu->xid_);
     #endif
-    // one ref is already in pending_fu_
+   
     return (Future *) fu->ref_copy();
 }
 void UDPClient::end_request(){
-     if (bmark_ != nullptr) {
-        i32 request_size = out_.get_and_reset_write_cnt();
-        out_.write_bookmark(bmark_, &request_size);
-        delete bmark_;
-        bmark_ = nullptr;
-    }
-
-    // always enable write events since the code above gauranteed there
-    // will be some data to send
-    uint32_t n_bytes = out_.content_size();
-    TransportMarshal *new_request = new TransportMarshal(n_bytes);
-    out_.read(new_request->payload, n_bytes);
-   // Log_debug("Request content size : %d, out_ size: %d",new_request->content_size(),out_.content_size());
-     transport_->out_connections[conn_id]->outl.lock();
-
-    transport_->out_connections[conn_id]->out_messages.push(new_request);
-    transport_->out_connections[conn_id]->outl.unlock();
-    
-    pollmgr_->update_mode(this, Pollable::READ | Pollable::WRITE);
-    out_l_.unlock();
+     i32 rpc_size = current_req->content_size();
+     current_req->write_book_mark(&rpc_size, sizeof(i32));
+     rte_ring_enqueue(conn->out_bufring,current_req->get_mbuf());
 }
 
 void UDPClient::handle_read(){

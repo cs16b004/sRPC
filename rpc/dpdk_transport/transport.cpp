@@ -113,16 +113,9 @@ uint64_t DpdkTransport::accept(const char* addr_str){
 
 
     out_connections[conn_id] = oconn;
-    char buf_ring_name[128];
-    sprintf(buf_ring_name, "sRPC_BUFRING_CONN_%d",conn_id);
-                // bigger size queue;
-            oconn->out_bufring = rte_ring_create(buf_ring_name,
-                                                    conf->rte_ring_size,
-                                                    rte_socket_id(), 
-                                                    RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
    
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
-       oconn->make_headers();    
+    oconn->make_headers_and_produce();    
     rte_ring_sp_enqueue(tx_sm_rings[chosen_tx_thread], (void*)oconn);
 
     conn_th_lock.unlock();
@@ -132,7 +125,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
    
  
 
-    uint8_t* pkt_ptr = rte_pktmbuf_mtod(oconn->out_msg_buffers[0], uint8_t*);
+    uint8_t* pkt_ptr = rte_pktmbuf_mtod(oconn->get_new_pkt(), uint8_t*);
     memcpy(pkt_ptr + data_offset, con_ack, 64);
     oconn->out_msg_buffers[0]->pkt_len = 64 + data_offset;
     oconn->out_msg_buffers[0]->data_len = 64 + data_offset;
@@ -191,23 +184,17 @@ uint64_t DpdkTransport::connect(const char* addr_str){
     conn_id  = conn_id | rte_cpu_to_be_16(oconn->udp_port); //local host port in BE
     Log_info("Chosen threads for new conn: %d is tx-thread %d, counter %d",conn_id, chosen_tx_thread,next_thread_);
     out_connections[conn_id] = oconn;
-    char buf_ring_name[128];
-    sprintf(buf_ring_name, "sRPC_BUFRING_CONN_%d",conn_id);
-                // bigger size queue;
-            oconn->out_bufring = rte_ring_create(buf_ring_name,
-                                                    conf->rte_ring_size,
-                                                    rte_socket_id(), 
-                                                    RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
+    oconn->assign_bufring();
     
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
-    oconn->make_headers();    
+    oconn->make_headers_and_produce();    
    verify(rte_ring_enqueue(tx_sm_rings[chosen_tx_thread], (void*)oconn) == 0);
  
     conn_th_lock.unlock();
    // this->connections_[conn_id] = conn;
     
     // First packet is SM packet
-    uint8_t* pkt_ptr = rte_pktmbuf_mtod(oconn->out_msg_buffers[0], uint8_t*);
+    uint8_t* pkt_ptr = rte_pktmbuf_mtod(oconn->get_new_pkt(), uint8_t*);
     memcpy(pkt_ptr + data_offset, con_req, 64);
     oconn->out_msg_buffers[0]->pkt_len = 64 + data_offset;
     oconn->out_msg_buffers[0]->data_len = 64 + data_offset;
@@ -281,11 +268,19 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
             ret = rte_eth_tx_burst(port_id, queue_id, my_buffers, nb_pkts);
            // Log_debug("NB pkts %d, sent %d, conn_id %lld", nb_pkts, ret, conn_entry.first);
             if (unlikely(ret < 0)) rte_panic("Can't send burst\n");
-                while (ret != nb_pkts) {
+            while (ret != nb_pkts) {
                 ret += rte_eth_tx_burst(port_id, queue_id, &my_buffers[ret], nb_pkts - ret);
                 retry_count++;
                 if (unlikely(retry_count == 1000000)) {
                     Log_warn("stuck in rte_eth_tx_burst in port %u queue %u", port_id, queue_id);
+                    retry_count = 0;
+                }
+            }
+            retry_count=0;
+            while(rte_ring_sp_enqueue_bulk(current_conn->available_bufring, (void**) my_buffers, nb_pkts, &available) == 0){
+                    retry_count++;
+                if (unlikely(retry_count == 1000000)) {
+                    Log_warn("stuck in rte_avail_buffers enqueue for conn: %lld", current_conn->conn_id);
                     retry_count = 0;
                 }
             }
@@ -295,35 +290,14 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
     Log_info("Exiting TX thread %d",info->thread_id);
     return 0;
 }
-void DpdkTransport::tx_loop_one(dpdk_thread_info *arg){
-    
-    unsigned lcore_id = rte_lcore_id();
-    std::vector<Marshal*> requests;
-    dpdk_thread_info* tx_info = arg;
-    tx_info->conn_lock.lock();
-    for(auto const& entry:tx_info->out_connections){
-       
-        verify(entry.second != nullptr);
-        entry.second->outl.lock();
-            if(!entry.second->out_messages.empty()){
-                 TransportMarshal* req = entry.second->out_messages.front();
-                     
-                entry.second->out_messages.pop();
-            }
-        entry.second->outl.unlock();
-        
-    }
-    tx_info->conn_lock.unlock();
-    
-    return;
-}
+
 int DpdkTransport::dpdk_rx_loop(void* arg) {
     auto rx_info = reinterpret_cast<dpdk_thread_info*>(arg);
     auto dpdk_th = rx_info->t_layer;
     unsigned lcore_id = rte_lcore_id();
     
     uint16_t port_id = rx_info->port_id;
-
+ 
     Log_info("Enter receive thread %d on core %d on port_id %d on queue %d",
              rx_info->thread_id, lcore_id, port_id, rx_info->queue_id);
     

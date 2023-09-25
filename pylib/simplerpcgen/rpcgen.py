@@ -3,7 +3,7 @@ import os
 import random
 import re
 sys.path += os.path.abspath(os.path.join(os.path.split(__file__)[0], "../../pylib")),
-from simplerpcgen.lang_cpp import emit_rpc_source_cpp
+from simplerpcgen.lang_cpp import emit_rpc_source_cpp, emit_rpc_source_cpp_dpdk
 from simplerpcgen.lang_python import emit_rpc_source_python
 
 def error(msg, ctx):
@@ -310,7 +310,10 @@ def rpcgen(rpc_fpath, languages):
     rpc_source = parse("rpc_source", src)
     rpc_table = generate_rpc_table(rpc_source) # service.func = rpc_code
 
-    if "cpp" in languages:
+    if "cpp" in languages and "dpdk" in languages:
+        fpath = os.path.splitext(rpc_fpath)[0] + ".h"
+        emit_rpc_source_cpp_dpdk(rpc_source, rpc_table, fpath, cpp_header, cpp_footer)
+    if "cpp" in languages and "dpdk" not in languages:
         fpath = os.path.splitext(rpc_fpath)[0] + ".h"
         emit_rpc_source_cpp(rpc_source, rpc_table, fpath, cpp_header, cpp_footer)
 

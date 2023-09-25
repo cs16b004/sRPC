@@ -38,7 +38,7 @@ int TCPConnection::run_async(const std::function<void()>& f) {
     return server_->threadpool_->run_async(f);
 }
 
-void TCPConnection::begin_reply(Request* req, i32 error_code /* =... */) {
+void TCPConnection::begin_reply(Request<rrr::Marshal>* req, i32 error_code /* =... */) {
     out_l_.lock();
     v32 v_error_code = error_code;
     v64 v_reply_xid = req->xid;
@@ -75,7 +75,7 @@ void TCPConnection::handle_read() {
         return;
     }
    
-    list<Request*> complete_requests;
+    list<Request<rrr::Marshal>*> complete_requests;
 
     for (;;) {
         i32 packet_size;
@@ -84,7 +84,7 @@ void TCPConnection::handle_read() {
             // consume the packet size
             verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
 
-            Request* req = new Request;
+            Request<rrr::Marshal>* req = new Request;
             verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
 
             v64 v_xid;
@@ -384,7 +384,7 @@ int TCPServer::start(const char* bind_addr) {
     return 0;
 }
 
-int Server::reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*)>& func) {
+int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::Marshal>*, ServerConnection*)>& func) {
     // disallow duplicate rpc_id
     if (handlers_.find(rpc_id) != handlers_.end()) {
         return EEXIST;
@@ -395,8 +395,20 @@ int Server::reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*
     return 0;
 }
 
+int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>& func) {
+    // disallow duplicate rpc_id
+    if (us_handlers_.find(rpc_id) != us_handlers_.end()) {
+        return EEXIST;
+    }
+
+    us_handlers_[rpc_id] = func;
+
+    return 0;
+}
+
 void Server::unreg(i32 rpc_id) {
     handlers_.erase(rpc_id);
+    us_handlers_.erase(rpc_id);
 }
 
 } // namespace rrr

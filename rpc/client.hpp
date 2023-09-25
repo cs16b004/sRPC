@@ -9,7 +9,7 @@
 #include "dpdk_transport/transport.hpp"
 #include <chrono>
 #include <ctime> 
-
+#include "dpdk_transport/transport_marshal.hpp"
 namespace rrr {
 
 #ifdef RPC_STATISTICS
@@ -192,7 +192,9 @@ class UDPClient: public Client{
         int sock_;
         int wfd;
         Marshal* out_ptr_;
+        TransportMarshal* current_req;
         uint64_t conn_id;
+        TransportConnection* conn;
         Marshal::bookmark* bmark_;
         DpdkTransport* transport_;
         using RefCounted::release;
@@ -229,21 +231,23 @@ class UDPClient: public Client{
             close();
             release();
         }
-    //    template<class T>
-    // UDPClient& operator <<(const T& v) {
-    //     if (status_ == CONNECTED) {
-    //         (*out_ptr_)<< v;
-    //     }
-    //     return *this;
-    // }
+        // Change this to do 1 copy
+        template<class T>
+        Client& operator <<(const T& v) {
+            if(status_ == CONNECTED){
+                (*current_req)<<v;
+            }
+            return *this;
+        }
+        
+    // NOTE: this function is used *internally* by Python extension
+    Client& operator <<(Marshal& m) {
+        if (status_ == CONNECTED) {
+           // (*req_marshal).read_from_marshal(m, m.content_size());
 
-    // // NOTE: this function is used *internally* by Python extension
-    // UDPClient& operator <<(Marshal& m) {
-    //     if (status_ == CONNECTED) {
-    //         (*out_ptr_).read_from_marshal(m, m.content_size());
-    //     }
-    //     return *this;
-    // }
+        }
+        return *this;
+    }
 
 };
 class TCPClient: public Client {

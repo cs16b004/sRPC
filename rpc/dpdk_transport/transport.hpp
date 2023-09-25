@@ -154,6 +154,12 @@ public:
    // static int createTransport();
    // static DpdkTransport* getTransport();
     void init(Config* config);
+    TransportConnection* get_conn(uint64_t conn_id){
+        conn_th_lock.lock();
+        TransportConnection* conn =  out_connections[conn_id];
+        conn_th_lock.unlock();
+        return conn;
+    }
     static void create_transport(Config* config);
     static DpdkTransport* get_transport();
    // void send(uint8_t* payload, unsigned length, int server_id, int client_id);

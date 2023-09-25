@@ -23,7 +23,9 @@
 namespace rrr{
 
 
-
+    class DPDKTransport;
+    class UDPconnection;
+    class UDPServer;
     struct NetAddress {
         uint8_t id;
 
@@ -41,17 +43,6 @@ namespace rrr{
         std::string getAddr();
         std::string to_string();
     };
-
-    class TransportMarshal{
-        public:
-            uint8_t *payload;
-            uint32_t n_bytes;
-        TransportMarshal(uint32_t size){
-            payload = new uint8_t[size];
-            n_bytes = size;
-
-        }
-    };
 // A connection structure shared by an application thread and a dpdk thread
 // application thread reads and write to buffers while processing RPCs
 // dpdk thread rxtx message buffers
@@ -60,24 +51,33 @@ namespace rrr{
 // Pipe fd will remove totally
 // UDP Server client only interacts will with tranport using connect, accept, handle_read and handle_write,
     class TransportConnection{
+        friend class DPDKTransport;
+        friend class UDPConnection;
+        friend class UDPServer;
+        
         public:
+            TransportConnection(){}
             uint64_t conn_id;
             int in_fd_;
             int wfd;
-            SpinLock outl;
-            std::queue<TransportMarshal*> out_messages;
             NetAddress out_addr;
             NetAddress src_addr;
             struct rte_ring* out_bufring; // Should be allocated by assigned dpdk thread
+            struct rte_ring* available_bufring;
             struct rte_mbuf** sm_msg_buffers;
             struct rte_mbuf** out_msg_buffers; //    Can be allocated earlier;
+            Counter out_msg_counter;
             size_t out_max_size;
             //My port nbumber ;
             uint16_t udp_port;
             bool connected_ = false;
+        public:
             int buf_alloc(rte_mempool* mempool,uint16_t max_len);
-            void make_headers();
-        private:
+            void make_headers_and_produce();
             void make_pkt_header(rte_mbuf* pkt);
+            int assign_bufring();
+            int assign_availring();
+            rte_mbuf* get_new_pkt();
+
     };
 }

@@ -10,7 +10,7 @@
 #include "misc/stat.hpp"
 #include "polling.hpp"
 #include "dpdk_transport/transport.hpp"
-
+#include "dpdk_transport/transport_marshal.hpp"
 // for getaddrinfo() used in TCPServer::start()
 
 
@@ -134,8 +134,10 @@ struct start_server_loop_args_type {
  * For the request object, the marshal only contains <arg1>..<argN>,
  * other fields are already consumed.
  */
-struct Request {
-    Marshal m;
+template<class T>
+class Request {
+    public:
+    T m;
     i64 xid;
 };
 
@@ -176,7 +178,9 @@ public:
     ServerConnection(Server* server, int socket): server_(server),socket_(socket) {
         status_ = CONNECTED;
     };
-    virtual void begin_reply(Request* req, i32 error_code = 0) = 0;
+   
+    virtual void begin_reply(Request<rrr::Marshal>* req, i32 error_code = 0) = 0;
+    virtual void begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code = 0) = 0;
     virtual void end_reply() = 0;
     virtual int run_async(const std::function<void()>& f) = 0;
     template<class T>
@@ -243,7 +247,11 @@ public:
     void handle_write();
     void handle_read();
     void handle_error(); 
-    void begin_reply(Request* req, i32 error_code=0);
+    void begin_reply(Request<rrr::Marshal>* req, i32 error_code=0);
+    void begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code=0){
+        // This shouldn't be called
+        verify(1);
+        }
     void end_reply();
 };
 
@@ -253,7 +261,8 @@ class Server: public NoCopy{
     friend class ServerConnection;
     friend class UDPConnection;
     protected:
-     std::unordered_map<i32, std::function<void(Request*, ServerConnection*)>> handlers_;
+     std::unordered_map<i32, std::function<void(Request<rrr::Marshal>*, ServerConnection*)>> handlers_;
+     std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>> us_handlers_;
      std::unordered_set<ServerConnection*> sconns_{};
     PollMgr* pollmgr_;
     ThreadPool* threadpool_;
@@ -290,16 +299,32 @@ public:
     }
    
      virtual void stop()=0;
-    int reg(i32 rpc_id, const std::function<void(Request*, ServerConnection*)>& func);
+    int reg(i32 rpc_id, const std::function<void(Request<rrr::Marshal>*, ServerConnection*)>& func);
     template<class S>
-    int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request*, ServerConnection*)) {
+    int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request<rrr::Marshal>*, ServerConnection*)) {
 
         // disallow duplicate rpc_id
         if (handlers_.find(rpc_id) != handlers_.end()) {
             return EEXIST;
         }
 
-        handlers_[rpc_id] = [svc, svc_func] (Request* req, ServerConnection* sconn) {
+        handlers_[rpc_id] = [svc, svc_func] (Request<rrr::Marshal>* req, ServerConnection* sconn) {
+            (svc->*svc_func)(req, sconn);
+        };
+
+        return 0;
+    }
+
+    int reg(i32 rpc_id, const std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>& func);
+    template<class S>
+    int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request<rrr::TransportMarshal>*, ServerConnection*)) {
+
+        // disallow duplicate rpc_id
+        if (us_handlers_.find(rpc_id) != us_handlers_.end()) {
+            return EEXIST;
+        }
+
+        us_handlers_[rpc_id] = [svc, svc_func] (Request<rrr::TransportMarshal>* req, ServerConnection* sconn) {
             (svc->*svc_func)(req, sconn);
         };
 
@@ -354,14 +379,15 @@ public:
    
 };
 class DeferredReply: public NoCopy {
-    rrr::Request* req_;
+    rrr::Request<rrr::Marshal>* req_;
+    rrr::Request<rrr::TransportMarshal>* us_req_;
     rrr::ServerConnection* sconn_;
     std::function<void()> marshal_reply_;
     std::function<void()> cleanup_;
 
 public:
 
-    DeferredReply(rrr::Request* req, rrr::ServerConnection* sconn,
+    DeferredReply(rrr::Request<rrr::Marshal>* req, rrr::ServerConnection* sconn,
                   const std::function<void()>& marshal_reply, const std::function<void()>& cleanup)
         : req_(req), sconn_(sconn), marshal_reply_(marshal_reply), cleanup_(cleanup) {}
 
@@ -397,7 +423,8 @@ class UDPConnection: public ServerConnection {
   
     friend class DpdkTransport;
 
-    
+    TransportMarshal* curr_reply;
+    TransportConnection* conn;
     
     void close();
     uint64_t connId;
@@ -413,17 +440,26 @@ public:
 
     UDPConnection(UDPServer* server, uint64_t socket);
     int run_async(const std::function<void()>& f);
-    
-    unsigned char buf[1000];
     int fd() {
         return socket_;
     }
-
+    template<class T>
+    ServerConnection& operator <<(const T& v) {
+      (*curr_reply) << v;
+        return *this;
+    }
+    ServerConnection& operator <<(Marshal& m) {
+       // this->out_.read_from_marshal(m, m.content_size());
+        return *this;
+    }
+  
+    
     int poll_mode();
     void handle_write();
     void handle_read();
     void handle_error(); 
-    void begin_reply(Request* req, i32 error_code=0);
+    void begin_reply(Request<rrr::Marshal>* req, i32 error_code=0);
+    void begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code=0){}
     void end_reply();
 };
 class UDPServer : public Server{

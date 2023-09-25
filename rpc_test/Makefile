@@ -36,7 +36,7 @@ clean:
 	mkdir lib
 
 counter.hpp: ../bin/rpcgen counter.rpc
-	../bin/rpcgen counter.rpc
+	../bin/rpcgen --dpdk --cpp counter.rpc
 
 bin/server: s.cpp counter.hpp lib/librpc.a lib/libbase.a benchmarks.o
 	${CXX} ${CXXFLAGS} ${INC} s.cpp benchmarks.o ${LIB} -o bin/server

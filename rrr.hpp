@@ -11,6 +11,7 @@
 #include "misc/alock.hpp"
 #include "misc/rand.hpp"
 #include "misc/marshal.hpp"
+
 #include "misc/recorder.hpp"
 #include "misc/cpuinfo.hpp"
 
@@ -20,6 +21,7 @@
 #include "rpc/client.hpp"
 #include "rpc/server.hpp"
 #include "rpc/reporter.hpp"
+#include "rpc/dpdk_transport/transport_marshal.hpp"
 
 #include "coroutine/scheduler.h"
 #include "coroutine/coroutine.h"
