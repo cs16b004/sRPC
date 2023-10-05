@@ -66,7 +66,7 @@ marshal.o: ../misc/marshal.cpp ../misc/marshal.hpp
 polling.o: ../rpc/polling.cpp ../rpc/polling.hpp
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/polling.cpp -o polling.o
 
-transport.o: ../rpc/dpdk_transport/transport.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/utils.hpp config.o marshal.o polling.o transport_connection.o 
+transport.o: ../rpc/dpdk_transport/transport.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/utils.hpp ../rpc/dpdk_transport/transport_marshal.hpp config.o marshal.o polling.o transport_connection.o 
 			${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport.cpp config.o transport_connection.o polling.o -o transport.o
 
 config.o: ../rpc/dpdk_transport/config.cpp ../rpc/dpdk_transport/config.hpp
@@ -105,5 +105,5 @@ unittest.o: ../base/unittest.cpp ../base/unittest.hpp
 reporter.o: ../rpc/reporter.cpp ../rpc/reporter.hpp ../rpc/polling.hpp polling.o
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/reporter.cpp -o reporter.o
 
-transport_connection.o: ../rpc/dpdk_transport/transport_connection.cpp ../rpc/dpdk_transport/transport_connection.hpp config.o
+transport_connection.o: ../rpc/dpdk_transport/transport_connection.cpp ../rpc/dpdk_transport/transport_connection.hpp ../rpc/dpdk_transport/transport_marshal.hpp config.o
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport_connection.cpp -o transport_connection.o

@@ -30,7 +30,7 @@ class BenchmarkProxy:CounterProxy{
        // add_bench(in,&out);
     }
     rrr::Future* add_bench_async(){
-        //rrr::Log::info(__LINE__,__FILE__, "Input size  = %d * 64",input_size);
+        rrr::Log::info(__LINE__,__FILE__, "Input size  = %d * 64",input_size);
         return async_add_bench(in);
     }
     void close(){

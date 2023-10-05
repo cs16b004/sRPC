@@ -36,9 +36,9 @@ void Benchmarks::create_server(){
     rep->launch();
     
     observe_server();
-
-    server->stop();
     rep->trigger_shutdown();
+    server->stop();
+    
 
     #ifdef DPDK
         rrr::DpdkTransport::get_transport()->trigger_shutdown();
@@ -54,6 +54,7 @@ void Benchmarks::create_server(){
 
 }
 void Benchmarks::create_proxies(){
+      
         pollmgr_ = new rrr::PollMgr(conf->client_poll_threads_);
 
         pollmgr_->set_cpu_affinity(affinity_mask);
@@ -61,7 +62,7 @@ void Benchmarks::create_proxies(){
         service_proxies = new BenchmarkProxy*[conf->client_connections_];
 
         uint16_t input_size;
-        input_size = conf->input_size_/64;
+        input_size = conf->input_size_/sizeof(uint64_t);
         for (int i=0; i < conf->client_connections_; i++) {
             #ifdef DPDK
                 rrr::UDPClient *client = new rrr::UDPClient(pollmgr_);
@@ -75,6 +76,17 @@ void Benchmarks::create_proxies(){
        
 }
 void* Benchmarks::launch_client_thread(void *arg){
+    rrr::Config* conf= rrr::Config::get_config();
+     while(1){
+      //  Log_info("thread cpu %d",sched_getcpu());
+        if(sched_getcpu() >= (conf->cpu_info_.numa)*(conf->cpu_info_.core_per_numa)
+                || sched_getcpu() <= (conf->cpu_info_.numa +1)*(conf->cpu_info_.core_per_numa) ){
+            break;
+        }else{
+            Log_warn("Waiting for scheduled on right node");
+            sleep(1);
+        }
+    }
     benchmark_thread_info* ct = (benchmark_thread_info*)arg;
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
     while(!ct->stop){
@@ -85,7 +97,7 @@ void* Benchmarks::launch_client_thread(void *arg){
         fg.wait_all();
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG
-        //break;
+        break;
         #endif
         #endif
     }
@@ -107,14 +119,16 @@ void Benchmarks::create_client_threads(){
         rrr::Log::info(__LINE__,__FILE__,"New client thread created %d, with client %d",j, j%conf->client_connections_);
 
     }
-    //set_cpu_affinity();
+   // set_cpu_affinity();
 
     for(int j=0;j<conf->num_client_threads_;j++){
-        pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]) == 0;
+       pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]) == 0;
     }
-    set_cpu_affinity();
-     rep = new rrr::Reporter(500,pollmgr_, true);
+   set_cpu_affinity();
+    rep = new rrr::Reporter(500,pollmgr_, true);
     rep->launch();
+    
+     
 
     
     
