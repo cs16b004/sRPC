@@ -23,22 +23,20 @@ network:
       ip: 192.168.2.126
       port: 8100
 
-  # - brooklyn:
-  #     type: server
-  #     id: 2
-  #     mac: 02:de:ad:be:ef:40
-  #     ip: 192.168.2.1
-  #     port: 8500
+  - brooklyn:
+      id: 4
+      mac: e0:07:1b:82:ed:74
+      ip: 172.19.0.123
+      port: 8501
 
-  # - catskill:
-  #     type: server
-  #     id: 1
-  #     mac: 02:de:ad:be:ef:60
-  #     ip: 192.168.2.3
-  #     port: 8501
+  - catskill:
+      id: 5
+      mac: e4:1d:2d:f2:9e:5c
+      ip: 172.19.0.121
+      port: 8501
 
   - greenport:
-      id: 5
-      mac: 02:de:ad:be:ef:40
-      ip: 192.168.2.1
-      port: 8500
+      id: 6
+      mac: 0c:42:a1:8e:e0:e6
+      ip: 172.19.0.122
+      port: 8501

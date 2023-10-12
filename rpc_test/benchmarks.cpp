@@ -62,7 +62,7 @@ void Benchmarks::create_proxies(){
         service_proxies = new BenchmarkProxy*[conf->client_connections_];
 
         uint16_t input_size;
-        input_size = conf->input_size_/sizeof(uint64_t);
+        input_size = conf->input_size_;
         for (int i=0; i < conf->client_connections_; i++) {
             #ifdef DPDK
                 rrr::UDPClient *client = new rrr::UDPClient(pollmgr_);
@@ -90,21 +90,21 @@ void* Benchmarks::launch_client_thread(void *arg){
     benchmark_thread_info* ct = (benchmark_thread_info*)arg;
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
     while(!ct->stop){
-         rrr::FutureGroup fg;
-        for (int i = 0; i < ct->client_batch_size_; i++) {
-            fg.add(ct->my_proxy->add_bench_async());
-        }
-        fg.wait_all();
+         //rrr::FutureGroup fg;
+        //for (int i = 0; i < ct->client_batch_size_; i++) {
+            (ct->my_proxy->add_bench_async());
+        //}
+       // fg.wait_all();
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG
-        break;
+        //break;
         #endif
         #endif
     }
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d stopped", ct->tid);
       
     int *a  = new int;
-    return (void*) a;
+    return  (void*)a;
 }
 void Benchmarks::create_client_threads(){
     thread_info = new benchmark_thread_info* [conf->num_client_threads_];
@@ -120,12 +120,13 @@ void Benchmarks::create_client_threads(){
 
     }
    // set_cpu_affinity();
-
+    
     for(int j=0;j<conf->num_client_threads_;j++){
-       pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]) == 0;
+       pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]);
     }
-   set_cpu_affinity();
-    rep = new rrr::Reporter(500,pollmgr_, true);
+    set_cpu_affinity();
+  
+    rep = new rrr::Reporter(2000,pollmgr_, true);
     rep->launch();
     
      

@@ -9,28 +9,31 @@
 #include <pthread.h>
 #include <vector>
 #include<cstdlib>
-
+#ifdef DPDK
+#include<rte_launch.h>
+#include<rte_lcore.h>
+#endif
 struct benchmark_thread_info;
 class BenchmarkProxy:CounterProxy{
     private:
     uint16_t input_size;
     
-    std::vector<rrr::i64> in;
-     std::vector<rrr::i32> out;
+    std::string in;
+     std::string out;
     public:
     BenchmarkProxy(uint16_t in_size, rrr::Client* cl): CounterProxy(cl), input_size(in_size){
         
         for(int i=0;i<input_size;i++){
-            in.push_back((rrr::i64)rand());
+           in.push_back('a'+ rand()%26);
         }
-
+        //rrr::Log::debug(__LINE__,__FILE__, "Input string %s",in.c_str());
 
     }
     void add_bench(){
        // add_bench(in,&out);
     }
     rrr::Future* add_bench_async(){
-        rrr::Log::info(__LINE__,__FILE__, "Input size  = %d * 64",input_size);
+       // rrr::Log::info(__LINE__,__FILE__, "Input size  = %d bytes",input_size);
         return async_add_bench(in);
     }
     void close(){
@@ -44,11 +47,11 @@ private:
     uint16_t out_size=1;
     rrr::PollMgr* pollmgr_;
     uint64_t count_=0;
-    std::vector<rrr::i32> out_vector;
+    std::string out_string;
 public:
     BenchmarkServiceImpl(uint16_t num_out): out_size(num_out){
         for(int i=0;i<num_out;i++){
-            out_vector.push_back((rrr::i32)1);
+            out_string.push_back('a'+ rand()%26);
         }
     }
 
@@ -65,10 +68,10 @@ public:
         count_++;
         *out = a+1; 
     }
-    void add_bench(const std::vector<rrr::i64>& in, std::vector<rrr::i32>* out ) {
+    void add_bench(const std::string& in, std::string* out ) {
        // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
         count_++;
-        out = &out_vector;
+        out = &out_string;
     }
 };
 class Benchmarks{

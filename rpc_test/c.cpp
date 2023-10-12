@@ -23,6 +23,10 @@ int main(int argc, char **argv) {
      rrr::DpdkTransport::create_transport(conf);
     #endif
     
+
+    while(!(rrr::DpdkTransport::get_transport()->initialized())){
+        ;
+    }
     Benchmarks bm(conf);
 
     bm.create_proxies();

@@ -34,3 +34,8 @@ network:
       mac: 0c:42:a1:8e:e0:e6
       ip: 172.19.0.122
       port: 8501
+  - brooklyn:
+      id: 6
+      mac: e0:07:1b:82:ed:74
+      ip: 172.19.0.123
+      port: 8501
