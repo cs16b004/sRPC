@@ -1,25 +1,76 @@
-
+#pragma once
 #include<string>
 #include<unordered_map>
 #include<map>
 #include<vector>
 #include<set>
 #include<unordered_set>
-#include "../..//base/all.hpp"
+#include "../../base/all.hpp"
+#include "../../misc/marshal.hpp"
 #include <rte_mbuf_core.h>
 #include <rte_mempool.h>
 #include <rte_ip.h>
 #include <rte_ether.h>
 #include <rte_udp.h>
+#include <rte_ether.h>
 namespace rrr{
+    const uint8_t pad[64] = {  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, };
+
     class TransportMarshal{
-        private: 
-            rte_mbuf* req_data;
+        private:
+            
+            rte_mbuf* req_data =nullptr;
+            rte_ipv4_hdr* ipv4_hdr;
+            rte_ether_hdr* eth_hdr;
+            rte_udp_hdr* udp_hdr; 
+
             uint16_t book_mark_offset=0;
             uint16_t book_mark_len=0;
             uint16_t offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
         public:
-            TransportMarshal(rte_mbuf* req): req_data(req){}
+            TransportMarshal(){
+
+            }
+            TransportMarshal(rte_mbuf* req){
+              req_data = (rte_mbuf*)req;     
+              uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+              eth_hdr = reinterpret_cast<rte_ether_hdr*>(dst);
+              
+              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + sizeof(rte_ether_hdr));
+              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + sizeof(rte_ether_hdr) + sizeof(rte_ipv4_hdr));
+             // verify(dst !=nullptr);
+              dst+=offset;
+              
+              uint8_t pkt_type = 0x09;
+              rte_memcpy(dst,&pkt_type,1);
+              
+              offset+=1;
+            }
+            void allot_buffer(rte_mbuf* req){
+              book_mark_offset=0;
+              book_mark_len=0;
+              offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+              req_data = (rte_mbuf*)req;     
+              uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+              eth_hdr = reinterpret_cast<rte_ether_hdr*>(dst);
+              
+              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + sizeof(rte_ether_hdr));
+              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + sizeof(rte_ether_hdr) + sizeof(rte_ipv4_hdr));
+             // verify(dst !=nullptr);
+              dst+=offset;
+              
+              uint8_t pkt_type = 0x09;
+              rte_memcpy(dst,&pkt_type,1);
+              
+              offset+=1;
+            }
             size_t read(void *p, size_t n){
               void* src = rte_pktmbuf_mtod_offset(req_data, void*,offset);
               rte_memcpy(p, src, n);
@@ -33,6 +84,7 @@ namespace rrr{
             }
             size_t write(const void* p, size_t n ){
               void* dst = rte_pktmbuf_mtod_offset(req_data, void*, offset);
+             
               rte_memcpy(dst,p,n);
               offset+=n;
               return n;
@@ -47,10 +99,51 @@ namespace rrr{
               rte_memcpy(dst,p,n);
             }
             size_t content_size(){
-              return offset - sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr) - book_mark_len;
+              return offset - (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr)) - book_mark_len -1;
             }
             rte_mbuf* get_mbuf(){
               return req_data;
+            }
+            void format_header(){
+              if(offset < 64){
+                void* dst = rte_pktmbuf_mtod_offset(req_data, void*, offset);
+                rte_memcpy(dst,pad,64-offset);
+                offset = 64;
+              }
+
+              uint32_t content_size = offset - (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr)) - book_mark_len -1;
+               void* dst = rte_pktmbuf_mtod_offset(req_data, void*, book_mark_offset);
+              rte_memcpy(dst,&content_size,sizeof(uint32_t));
+              req_data->data_len = offset;
+              req_data->pkt_len = offset;
+              ipv4_hdr->total_length = htons(offset -  (sizeof(struct rte_ether_hdr)));
+              udp_hdr->dgram_len = htons(offset -  (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) ));
+            }
+            void set_pkt_type_sm(){
+              uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+              dst+=sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+              uint8_t pkt_type = 0x07;
+              rte_memcpy(dst,&pkt_type,1);
+            }
+            std::string print_request(){
+               char* req = new char[1024];
+               uint8_t* pkt_data = rte_pktmbuf_mtod(req_data, uint8_t*);
+               int j=0;
+               for(int i=  (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr));
+                        i < offset; i++){
+                  
+                    sprintf(req+j,"%02x ", pkt_data[i]);
+                    j+=3;   
+                    if(j%25==0){
+                      req[j] = '\n';
+                      j++;
+                    } 
+                }
+                req[j] = 0;
+                return std::string(req);
+            }
+            void* get_offset(){
+              return rte_pktmbuf_mtod_offset(req_data, void*, offset);
             }
 
     };
@@ -77,16 +170,13 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const rrr::i6
 }
 
 inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const rrr::v32 &v) {
-  char buf[5];
-  size_t bsize = rrr::SparseInt::dump(v.get(), buf);
-  verify(m.write(buf, bsize) == bsize);
+  m << v.get();
   return m;
 }
 
 inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const rrr::v64 &v) {
-  char buf[9];
-  size_t bsize = rrr::SparseInt::dump(v.get(), buf);
-  verify(m.write(buf, bsize) == bsize);
+ 
+  m << v.get();
   return m;
 }
 
@@ -137,6 +227,7 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::ve
   m << v_len;
   for (typename std::vector<T>::const_iterator it = v.begin(); it != v.end();
        ++it) {
+       
     m << *it;
   }
   return m;
@@ -199,6 +290,10 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m,
   return m;
 }
 
+inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal & m, rrr::Marshal m2){
+  m2.read(m.get_offset(),m.content_size());
+}
+
 inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, rrr::i8 &v) {
   verify(m.read(&v, sizeof(v)) == sizeof(v));
   return m;
@@ -220,24 +315,13 @@ inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, rrr::i64 &v) 
 }
 
 inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, rrr::v32 &v) {
-  char byte0;
-  verify(m.peek(&byte0, 1) == 1);
-  size_t bsize = rrr::SparseInt::buf_size(byte0);
-  char buf[5];
-  verify(m.read(buf, bsize) == bsize);
-  i32 val = rrr::SparseInt::load_i32(buf);
-  v.set(val);
+  verify(m.read(&v, sizeof(v)) == sizeof(v));
   return m;
 }
 
 inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, rrr::v64 &v) {
-  char byte0;
-  verify(m.peek(&byte0, 1) == 1);
-  size_t bsize = rrr::SparseInt::buf_size(byte0);
-  char buf[9];
-  verify(m.read(buf, bsize) == bsize);
-  i64 val = rrr::SparseInt::load_i64(buf);
-  v.set(val);
+
+  verify(m.read(&v, sizeof(v)) == sizeof(v));
   return m;
 }
 
@@ -363,6 +447,8 @@ inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, std::unordere
   }
   return m;
 }
+
+
 
 
 

@@ -38,19 +38,6 @@ class Marshal: public NoCopy {
       ptr = new char[size];
       memcpy(ptr, p, n);
     }
-    void printRawBytes(){
-      
-        unsigned char *p = (unsigned char *) ptr;
-
-        for (int i=0; i < size; ++i) {
-                if (! (i % 16) && i)
-                        printf("\n");
-
-                printf("0x%02x ", p[i]);
-        }
-        printf("\n\n");
-
-    }
     raw_bytes(const raw_bytes &) = delete;
     raw_bytes &operator=(const raw_bytes &) = delete;
     ~raw_bytes() { delete[] ptr; }
@@ -118,9 +105,6 @@ class Marshal: public NoCopy {
       assert(write_idx <= data->size);
       assert(read_idx <= write_idx);
       return n_write;
-    }
-    void printChunk(){
-      data->printRawBytes();
     }
     size_t read(void *p, size_t n) {
       assert(write_idx <= data->size);
@@ -261,7 +245,6 @@ class Marshal: public NoCopy {
   size_t read_from_marshal(Marshal &m, size_t n);
 
   size_t write_to_fd(int fd);
-  void print();
   bookmark *set_bookmark(size_t n);
   void write_bookmark(bookmark *bm, const void *p) {
     const char *pc = (const char *) p;

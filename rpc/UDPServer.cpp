@@ -11,6 +11,7 @@
 #include <sys/mman.h>
 #include<linux/memfd.h>
 #include "dpdk_transport/config.hpp"
+#include "dpdk_transport/transport_marshal.hpp"
 
 using namespace std;
 
@@ -35,21 +36,30 @@ int UDPConnection::run_async(const std::function<void()>& f) {
 }
 
 void UDPConnection::begin_reply(Request<rrr::Marshal>* req, i32 error_code /* =... */) {
-    curr_reply = new TransportMarshal(conn->get_new_pkt());
+    current_reply.allot_buffer(conn->get_new_pkt());
 
-     v32 v_error_code = error_code;
-    v64 v_reply_xid = req->xid;
+     i32 v_error_code = error_code;
+    i64 v_reply_xid = req->xid;
 
-    curr_reply->set_book_mark(sizeof(i32)); // will write reply size later
+    current_reply.set_book_mark(sizeof(i32)); // will write reply size later
 
-    *this << v_reply_xid;
-    *this << v_error_code;
+    current_reply << v_reply_xid;
+    current_reply << v_error_code;
 }
 
 void UDPConnection::end_reply() {
-    i32 reply_size = curr_reply->content_size();
-        curr_reply->write_book_mark(&reply_size, sizeof(i32));
-        rte_ring_enqueue(conn->out_bufring,curr_reply->get_mbuf());
+    i32 reply_size = current_reply.content_size();
+        current_reply.write_book_mark(&reply_size, sizeof(i32));
+        current_reply.format_header();
+       int retry=0;
+     while(
+     rte_ring_enqueue(conn->out_bufring,current_reply.get_mbuf())< 0){
+        retry++;
+        if(retry > 100*1000){
+            Log_warn("Stuck in enquueing rpc_request");
+            retry=0;
+        }
+     }
 }
 
 void UDPConnection::handle_read() {
@@ -67,14 +77,14 @@ void UDPConnection::handle_read() {
       
         return;
     }
-   // Log_debug("%d Bytes Read from fd %d",bytes_read,socket_);
+    LOG_DEBUG("%d Bytes Read from fd %d",bytes_read,socket_);
     list<Request<rrr::Marshal>*> complete_requests;
         for(;;){
        // in_.print();
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
-       //  Log_debug("Packet Size %d",packet_size);
-       //     Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
+         LOG_DEBUG("Packet Size %d",packet_size);
+            LOG_DEBUG("n_peek = %d, content_size = %d",n_peek,in_.content_size());
            
         if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
             // consume the packet size
@@ -82,22 +92,22 @@ void UDPConnection::handle_read() {
 
             Request<rrr::Marshal>* req = new Request<rrr::Marshal>;
             verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
+            LOG_DEBUG("Request content %d ", req->m.content_size());
             
-            v64 v_xid;
-            req->m >> v_xid;
-            req->xid = v_xid.get();
+            req->m >> req->xid;
             complete_requests.push_back(req);
+            
             #ifdef RPC_MICRO_STATISTICS
             // Read packet ID
            
             uint64_t pkt_id;
             verify(in_.read(&pkt_id,sizeof(uint64_t)) == sizeof(uint64_t));
-            Log_debug("Packet Id processed by app thread %d", pkt_id);
+            LOG_DEBUG("Packet Id processed by app thread %d", pkt_id);
             rx_pkt_ids[v_xid.get()] = pkt_id;
             #endif
 
         } else {
-            // Log_debug("packet not complete or there's no more packet to process");
+            // LOG_DEBUG("packet not complete or there's no more packet to process");
             break;
         }
         }
@@ -128,7 +138,7 @@ void UDPConnection::handle_read() {
         auto it = server_->handlers_.find(rpc_id);
         if (it != server_->handlers_.end()) {
             // the handler should delete req, and release server_connection refcopy.
-           // Log_debug("RPC Triggered");
+           // LOG_DEBUG("RPC Triggered");
             it->second(req, (UDPConnection *) this->ref_copy());
             
         } else {
@@ -153,7 +163,7 @@ void UDPConnection::handle_read() {
         (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
         (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
         (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
-        //Log_debug("Putting end ts in %ld",rx_pkt_ids[req->xid]);
+        //LOG_DEBUG("Putting end ts in %ld",rx_pkt_ids[req->xid]);
         #endif
     }
 }
@@ -194,7 +204,7 @@ void UDPConnection::close() {
         server_->pollmgr_->remove(this);
         server_->sconns_l_.unlock();
 
-        Log_debug("rrr::UDPConnection: closed on fd=%d", socket_);
+        LOG_DEBUG("rrr::UDPConnection: closed on fd=%d", socket_);
 
         status_ = CLOSED;
        
@@ -275,7 +285,7 @@ void UDPServer::stop(){
             break;
         }
         if (alive_connection_count == -1 || new_alive_connection_count < alive_connection_count) {
-            Log_debug("waiting for %d alive connections to shutdown", new_alive_connection_count);
+            LOG_DEBUG("waiting for %d alive connections to shutdown", new_alive_connection_count);
         }
         alive_connection_count = new_alive_connection_count;
         // sleep 0.05 sec because this is the timeout for PollMgr's epoll()
@@ -294,7 +304,7 @@ void UDPServer::stop(){
    
 }
 UDPServer::~UDPServer() {
-    //Log_debug("rrr::UDPServer: destroyed");
+    //LOG_DEBUG("rrr::UDPServer: destroyed");
     stop();
 }
 

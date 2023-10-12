@@ -111,7 +111,7 @@ void* Reporter::run(void* arg){
         double  lat_avg=0;
         double poll_count=0;
         for(int i=0;i<reporter->pm_->n_threads_;i++){
-            for(auto poll_job: reporter->pm_->poll_threads_[i]->poll_set_){
+            for(rrr::Pollable* poll_job: reporter->pm_->poll_threads_[i]->poll_set_){
                
                 // deep copy the books to avoid locks;
                 if(reporter->is_client){
@@ -133,19 +133,22 @@ void* Reporter::run(void* arg){
 
                     start_book_copy.clear();
                     end_book_copy.clear();
+                    job_count+= poll_job->read_and_set_counter(1);
                     
                 }
                 else{
                      job_count+= poll_job->read_and_set_counter(0);
+
                 }
             }
 
         }
-            if(reporter->is_client)
-                Log_info("Across all poll, Average Latency %f micro-sec",lat_avg/poll_count);
-            else
-                Log_info("Total RPCs: %d, Throughput %f/s",job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
+            if(reporter->is_client){
+               // Log_info("Across all poll, Average Latency %f micro-sec",lat_avg/poll_count);
+            
+            Log_info("Total RPCs: %lu, Throughput %f/s", job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
             last_job_count = job_count;
+            }
             job_count=0;
             diff_count=0; //ith pollable of poll manager;
     }

@@ -14,13 +14,14 @@ class PollThread;
 class Reporter{
     public:
         uint16_t period_; //period in milliseconds
+        rrr::PollMgr* pm_ ;
         bool is_client = false;
         #ifdef DPDK
         DpdkTransport *tl;
 
         #endif
        // rrr::ThreadPool* thp_ ; //threadpool to collect stats from 
-        rrr::PollMgr* pm_ ; //poll manager to collect stats from
+         //poll manager to collect stats from
         
         pthread_t* recorder;
         bool stop=false;

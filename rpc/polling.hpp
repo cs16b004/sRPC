@@ -14,7 +14,10 @@
 
 #include "utils.hpp"
 #include <atomic>
-
+#ifdef DPDK
+#include <rte_launch.h>
+#include<rte_lcore.h>
+#endif
 using rrr::FrequentJob;
 
 namespace rrr {
@@ -33,7 +36,7 @@ protected:
         rrr::SpinLock ts_lock;
     
         uint64_t clamps[200*1000] = {0};
-        uint64_t counters[6] = {0};
+        uint64_t counters[6] = {0,0,0,0,0,0};
         uint64_t batch_record[10000] = {0};
         uint16_t batch_id=0;
         SpinLock c_locks[6];
@@ -108,10 +111,20 @@ public:
         SpinLock pending_remove_l_;
         bool stop_flag_;
 
-        static void* start_poll_loop(void* arg) {
+        static int start_poll_loop_dpdk(void* arg) {
             PollThread* thiz = (PollThread *) arg;
             thiz->poll_loop();
+           
+            //pthread_exit(nullptr);
+            
+            return 0;
+        }
+        static void* start_poll_loop(void*arg){
+            PollThread* thiz = (PollThread *) arg;
+            thiz->poll_loop();
+           
             pthread_exit(nullptr);
+            
             return nullptr;
         }
 
@@ -119,7 +132,11 @@ public:
 
         void start(PollMgr* poll_mgr) {
             poll_mgr_ = poll_mgr;
+            // #ifdef DPDK
+            // rte_eal_remote_launch(PollMgr::PollThread::start_poll_loop_dpdk,this, LCORE_ID_ANY );
+            // #else
             Pthread_create(p_th_, nullptr, PollMgr::PollThread::start_poll_loop, this);
+            //#endif
         }
         public:
          
@@ -132,8 +149,9 @@ public:
         void remove(FrequentJob*);
         ~PollThread() {
             stop_flag_ = true;
-            Pthread_join(*p_th_, nullptr);
-
+           // #ifndef DPDK
+                Pthread_join(*p_th_, nullptr);
+            //#endif
         // when stopping, release anything registered in pollmgr
             for (auto& it: poll_set_) {
                 this->remove(it);

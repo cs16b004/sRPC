@@ -8,6 +8,7 @@
 #include <netinet/tcp.h>
 
 #include "client.hpp"
+#include "dpdk_transport/transport_marshal.hpp"
 
 using namespace std;
 
@@ -71,13 +72,7 @@ void Future::notify_ready() {
 */
 int UDPClient::poll_mode(){
     
-    int mode = Pollable::READ;
-    out_l_.lock();
-    if (!out_.empty()) {
-        mode |= Pollable::WRITE;
-    }
-    out_l_.unlock();
-    return mode;
+    return Pollable::READ | Pollable::WRITE;
         
 }
 int UDPClient::connect(const char * addr){
@@ -103,24 +98,40 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
         return nullptr;
     }
 
-    Future* fu = new Future(xid_counter_.next(), attr);
-    pending_fu_l_.lock();
+     Future* fu = new Future(xid_counter_.next(), attr);
+    //pending_fu_l_.lock();
     pending_fu_[fu->xid_] = fu;
-    pending_fu_l_.unlock();
-    current_req = new TransportMarshal(conn->get_new_pkt());
-    current_req->set_book_mark(sizeof(i32));
-    *this << v64(fu->xid_);
-    *this << rpc_id;
+    //Future* tfu = fu;
+    //pending_fu_l_.unlock();
+    current_req.allot_buffer(conn->get_new_pkt());
+    current_req.set_book_mark(sizeof(i32));
+    current_req << i64(fu->xid_);
+    current_req << rpc_id;
     #ifdef RPC_STATISTICS
-        put_start_ts(fu->xid_);
+    //    put_start_ts(fu->xid_);
     #endif
    
     return (Future *) fu->ref_copy();
 }
 void UDPClient::end_request(){
-     i32 rpc_size = current_req->content_size();
-     current_req->write_book_mark(&rpc_size, sizeof(i32));
-     rte_ring_enqueue(conn->out_bufring,current_req->get_mbuf());
+    // i32 rpc_size = current_req.content_size();
+    // current_req.write_book_mark(&rpc_size, sizeof(i32));
+     current_req.format_header();
+    // LOG_DEBUG("Request Data: \n %s", current_req.print_request().c_str());
+    
+     int retry=0;
+     while(
+     rte_ring_sp_enqueue(conn->out_bufring,current_req.get_mbuf())< 0){
+        retry++;
+        if(retry > 1000*1000){
+            Log_warn("Stuck in enquueing rpc_request");
+            retry=0;
+        }
+     }
+     #ifdef RPC_STATISTICS
+        count(1);
+     #endif
+     
 }
 
 void UDPClient::handle_read(){
@@ -132,7 +143,7 @@ void UDPClient::handle_read(){
     if (bytes_read == 0) {
         return;
     }
-  //  Log_debug("bytes read %d",bytes_read);
+  //  LOG_DEBUG("bytes read %d",bytes_read);
     for (;;) {
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
@@ -140,26 +151,27 @@ void UDPClient::handle_read(){
             // consume the packet size
             verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
 
-            v64 v_reply_xid;
-            v32 v_error_code;
+            i64 v_reply_xid;
+            i32 v_error_code;
 
             in_ >> v_reply_xid >> v_error_code;
 
             pending_fu_l_.lock();
-            unordered_map<i64, Future*>::iterator it = pending_fu_.find(v_reply_xid.get());
+            unordered_map<i64, Future*>::iterator it = pending_fu_.find(v_reply_xid);
             if (it != pending_fu_.end()) {
                 Future* fu = it->second;
-                verify(fu->xid_ == v_reply_xid.get());
+                verify(fu->xid_ == v_reply_xid);
                 pending_fu_.erase(it);
                 pending_fu_l_.unlock();
 
-                fu->error_code_ = v_error_code.get();
-                fu->reply_.read_from_marshal(in_, packet_size - v_reply_xid.val_size() - v_error_code.val_size());
+                fu->error_code_ = v_error_code;
+                fu->reply_.read_from_marshal(in_, packet_size - sizeof(i64) - sizeof(i32));
                 #ifdef RPC_STATISTICS
-                 put_end_ts(fu->xid_);
+               //  put_end_ts(fu->xid_);
                 #endif
+                //LOG_DEBUG("For reply for req: %lu",v_reply_xid);
                 fu->notify_ready();
-               // Log_debug("Running reply future for %d",v_reply_xid);
+               // LOG_DEBUG("Running reply future for %d",v_reply_xid);
                 // since we removed it from pending_fu_
                 fu->release();
             } else {
@@ -263,7 +275,7 @@ int TCPClient::connect(const char* addr) {
     }
 
     verify(set_nonblocking(sock_, true) == 0);
-    Log_debug("rrr::TCPClient: connected to %s", addr);
+    LOG_DEBUG("rrr::TCPClient: connected to %s", addr);
 
     status_ = CONNECTED;
     pollmgr_->add(this);

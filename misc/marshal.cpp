@@ -126,18 +126,6 @@ void stat_marshal_out(int fd, const void* buf, size_t nbytes, ssize_t ret) {
 
 #endif // MARSHAL_STATISTICS
 
-void Marshal::print(){
-    chunk* temp = this->head_;
-
-    while(temp != nullptr){
-        temp->printChunk();
-        printf("\n Chunk Complete,\n");
-        temp= temp->next;
-    }
-    printf("Marsdhal Complete \n");
-}
-
-
 /**
  * 8kb minimum chunk size.
  * NOTE: this value directly affects how many read/write syscall will be issued.

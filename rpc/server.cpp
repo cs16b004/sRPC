@@ -84,7 +84,7 @@ void TCPConnection::handle_read() {
             // consume the packet size
             verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
 
-            Request<rrr::Marshal>* req = new Request;
+            Request<rrr::Marshal>* req = new Request<rrr::Marshal>;
             verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
 
             v64 v_xid;
@@ -181,7 +181,7 @@ void TCPConnection::close() {
         server_->pollmgr_->remove(this);
         server_->sconns_l_.unlock();
 
-        Log_debug("rrr::TCPConnection: closed on fd=%d", socket_);
+        LOG_DEBUG("rrr::TCPConnection: closed on fd=%d", socket_);
 
         status_ = CLOSED;
         ::close(socket_);
@@ -254,7 +254,7 @@ void TCPServer::stop(){
             break;
         }
         if (alive_connection_count == -1 || new_alive_connection_count < alive_connection_count) {
-            Log_debug("waiting for %d alive connections to shutdown", new_alive_connection_count);
+            LOG_DEBUG("waiting for %d alive connections to shutdown", new_alive_connection_count);
         }
         alive_connection_count = new_alive_connection_count;
         // sleep 0.05 sec because this is the timeout for PollMgr's epoll()
@@ -267,7 +267,7 @@ void TCPServer::stop(){
     threadpool_->release();
     pollmgr_->release();
     status_ = STOPPED;
-    //Log_debug("rrr::TCPServer: destroyed");
+    //LOG_DEBUG("rrr::TCPServer: destroyed");
 }
 
 void* TCPServer::start_server_loop(void* arg) {
@@ -304,7 +304,7 @@ void TCPServer::server_loop(struct addrinfo* svr_addr) {
 
         int clnt_socket = accept(server_sock_, svr_addr->ai_addr, &svr_addr->ai_addrlen);
         if (clnt_socket >= 0 && status_ == RUNNING) {
-            Log_debug("rrr::TCPServer: got new client, fd=%d", clnt_socket);
+            LOG_DEBUG("rrr::TCPServer: got new client, fd=%d", clnt_socket);
             verify(set_nonblocking(clnt_socket, true) == 0);
 
             sconns_l_.lock();

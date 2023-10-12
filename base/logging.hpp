@@ -8,6 +8,14 @@
 #define Log_error(msg, ...) ::rrr::Log::error(__LINE__, __FILE__, msg, ## __VA_ARGS__)
 #define Log_fatal(msg, ...) ::rrr::Log::fatal(__LINE__, __FILE__, msg, ## __VA_ARGS__)
 
+#ifdef LOG_LEVEL_AS_DEBUG
+    #define LOG_DEBUG(msg,...) \
+        {    \
+            ::rrr::Log::debug(__LINE__, __FILE__, msg, ## __VA_ARGS__); \
+        }
+#else
+    #define LOG_DEBUG(msg,...) {}
+#endif 
 namespace rrr {
 
 class Log {

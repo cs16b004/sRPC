@@ -14,9 +14,6 @@ int Config::create_config(int argc, char** argv) {
     if (config_s != nullptr) return -1;
 
     config_s = new Config();
-
-    char* end_ptr = nullptr;
-
     int c;
     std::string filename;
     while ((c = getopt(argc, argv, "f:")) != -1) {

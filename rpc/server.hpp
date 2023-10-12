@@ -11,6 +11,7 @@
 #include "polling.hpp"
 #include "dpdk_transport/transport.hpp"
 #include "dpdk_transport/transport_marshal.hpp"
+#include "dpdk_transport/transport_connection.hpp"
 // for getaddrinfo() used in TCPServer::start()
 
 
@@ -155,7 +156,7 @@ class ServerConnection: public Pollable{
 protected:
     Marshal in_, out_;
     SpinLock out_l_,in_l_;
-
+    TransportMarshal current_reply;
     Server* server_;
     int socket_;
 
@@ -185,11 +186,19 @@ public:
     virtual int run_async(const std::function<void()>& f) = 0;
     template<class T>
     ServerConnection& operator <<(const T& v) {
+        #ifdef DPDK
+        current_reply << v;
+        #else
         this->out_ << v;
+        #endif
         return *this;
     }
     ServerConnection& operator <<(Marshal& m) {
+        #ifdef DPDK
+        m.read(current_reply.get_offset(), m.content_size());
+        #else
         this->out_.read_from_marshal(m, m.content_size());
+        #endif
         return *this;
     }
     int fd() {
@@ -300,6 +309,7 @@ public:
    
      virtual void stop()=0;
     int reg(i32 rpc_id, const std::function<void(Request<rrr::Marshal>*, ServerConnection*)>& func);
+    
     template<class S>
     int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request<rrr::Marshal>*, ServerConnection*)) {
 
@@ -316,6 +326,7 @@ public:
     }
 
     int reg(i32 rpc_id, const std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>& func);
+    
     template<class S>
     int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request<rrr::TransportMarshal>*, ServerConnection*)) {
 

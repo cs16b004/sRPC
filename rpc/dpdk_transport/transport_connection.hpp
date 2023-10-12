@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <cstdint>
 #include <map>
@@ -18,6 +19,7 @@
 #include <mutex>
 #include "utils.hpp"
 #include <rte_lcore.h>
+#include <pthread.h>
 #include <rte_ring.h>
 
 namespace rrr{
@@ -62,6 +64,7 @@ namespace rrr{
             int wfd;
             NetAddress out_addr;
             NetAddress src_addr;
+            rte_mempool* pkt_mempool;
             struct rte_ring* out_bufring; // Should be allocated by assigned dpdk thread
             struct rte_ring* available_bufring;
             struct rte_mbuf** sm_msg_buffers;

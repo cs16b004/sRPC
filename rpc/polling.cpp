@@ -30,12 +30,12 @@ void Pollable::record_batch(size_t batch_size){
           
         }
 uint64_t Pollable::read_and_set_counter(uint8_t id){
-            
+           
             return counters[id];
 }
 
 void Pollable::count(uint8_t counter_id){
-            
+           
             counters[counter_id]++;
             
         }

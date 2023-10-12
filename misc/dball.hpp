@@ -17,13 +17,14 @@ namespace rrr {
 class DragonBall {
 
  public:
-
+    bool th_safe_ = false;
+    std::function<void(void)> wish_; // this is your wish!
   int64_t n_wait_ = -1;
   int64_t n_ready_ = 0;
   bool called_ = false;
-  std::function<void(void)> wish_; // this is your wish!
+  
 
-  bool th_safe_ = false;
+
   bool auto_trigger = true;
 
 //    std::mutex mtx_;

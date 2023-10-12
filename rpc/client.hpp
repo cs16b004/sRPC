@@ -10,6 +10,8 @@
 #include <chrono>
 #include <ctime> 
 #include "dpdk_transport/transport_marshal.hpp"
+#include "dpdk_transport/transport_connection.hpp"
+
 namespace rrr {
 
 #ifdef RPC_STATISTICS
@@ -120,12 +122,13 @@ public:
         }
     }
 };
-
+//template<class T>
 class Client: public Pollable {
 
 protected:
     
     Marshal in_, out_;
+    TransportMarshal current_req;
     PollMgr* pollmgr_;
     enum {
         NEW, CONNECTED, CLOSED
@@ -166,11 +169,17 @@ public:
     virtual int fd()=0;
     
 
-    template<class T>
-    Client& operator <<(const T& v) {
+     template<class T>
+     Client& operator <<(const T& v) {
        
         if (status_ == CONNECTED) {
+           
+            #ifdef DPDK
+            this->current_req << v;
+            #else
             this->out_ << v;
+            #endif
+            
         }
        
         return *this;
@@ -181,7 +190,11 @@ public:
     Client& operator <<(Marshal& m) {
       
         if (status_ == CONNECTED) {
+            #ifdef DPDK
+            m.read(this->current_req.get_offset(),m.content_size());
+            #else
             this->out_.read_from_marshal(m, m.content_size());
+            #endif
         }
       
         return *this;
@@ -192,7 +205,7 @@ class UDPClient: public Client{
         int sock_;
         int wfd;
         Marshal* out_ptr_;
-        TransportMarshal* current_req;
+       
         uint64_t conn_id;
         TransportConnection* conn;
         Marshal::bookmark* bmark_;
@@ -218,7 +231,7 @@ class UDPClient: public Client{
                 transport_=  DpdkTransport::get_transport();
             //transport_->init(Config::get_config());
             while(!transport_->initiated){
-                //Log_debug("Waiting for transport to initialize");
+                //LOG_DEBUG("Waiting for transport to initialize");
                 usleep(2000);
             }
         }
@@ -233,17 +246,18 @@ class UDPClient: public Client{
         }
         // Change this to do 1 copy
         template<class T>
-        Client& operator <<(const T& v) {
+        UDPClient& operator <<(const T& v) {
             if(status_ == CONNECTED){
-                (*current_req)<<v;
+               // LOG_DEBUG("Inserting string");
+                (current_req) << v;
             }
             return *this;
         }
         
     // NOTE: this function is used *internally* by Python extension
-    Client& operator <<(Marshal& m) {
+     UDPClient& operator <<(Marshal& m) {
         if (status_ == CONNECTED) {
-           // (*req_marshal).read_from_marshal(m, m.content_size());
+            m.read(current_req.get_offset(),m.content_size());
 
         }
         return *this;
@@ -297,6 +311,7 @@ public:
     void handle_write();
     void handle_error();
     int connect(const char* addr);
+   
 
 };
 

@@ -32,7 +32,6 @@
 #define CON_ACK  0x3
 namespace rrr{
     
-    struct Request;
     class UDPConnection;
     class UDPClient;
     class Reporter;
@@ -50,7 +49,7 @@ namespace rrr{
         friend class Reporter;
         #endif
 
-        const uint8_t con_req[64] = {SM, CON, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+        const uint8_t con_req[64] = {CON, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
@@ -58,7 +57,7 @@ namespace rrr{
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-        const uint8_t con_ack[64] = {SM, CON_ACK, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+        const uint8_t con_ack[64] = {CON_ACK, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
@@ -119,7 +118,6 @@ namespace rrr{
 
         struct dpdk_thread_info **thread_rx_info{nullptr};
         struct dpdk_thread_info **thread_tx_info{nullptr};
-        struct qdma_port_info *port_info_{nullptr};
         struct timeval start_clock, current;
         
         std::thread main_thread;
@@ -154,6 +152,9 @@ public:
    // static int createTransport();
    // static DpdkTransport* getTransport();
     void init(Config* config);
+    bool initialized(){
+        return initiated;
+    }
     TransportConnection* get_conn(uint64_t conn_id){
         conn_th_lock.lock();
         TransportConnection* conn =  out_connections[conn_id];
@@ -190,8 +191,6 @@ public:
             delete[] thread_rx_info;
         if (thread_tx_info)
             delete[] thread_tx_info;
-        if (port_info_)
-            delete [] port_info_;
         if (tx_mbuf_pool)
             delete[] tx_mbuf_pool;
         if (rx_mbuf_pool)
@@ -220,6 +219,7 @@ public:
 
         struct rte_mbuf **buf{nullptr};
         
+        struct rte_mbuf **deque_bufs{nullptr};
         rrr::DpdkTransport* t_layer;
 
         dpdk_thread_info() { }

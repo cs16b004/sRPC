@@ -89,11 +89,12 @@ void* Benchmarks::launch_client_thread(void *arg){
     }
     benchmark_thread_info* ct = (benchmark_thread_info*)arg;
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
+    BenchmarkProxy* pr= ct->my_proxy;
     while(!ct->stop){
-         //rrr::FutureGroup fg;
-        //for (int i = 0; i < ct->client_batch_size_; i++) {
-            (ct->my_proxy->add_bench_async());
-        //}
+         rrr::FutureGroup fg;
+        for (int i = 0; i < ct->client_batch_size_; i++) {
+            (pr->add_bench_async());
+        }
        // fg.wait_all();
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG

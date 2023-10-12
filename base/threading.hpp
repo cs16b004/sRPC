@@ -292,10 +292,11 @@ class ThreadPool: public RefCounted {
         friend class Reporter;
     #endif
     int n_;
+     bool should_stop_;
     Counter round_robin_;
     RPC_Thread** th_;
     Queue<std::function<void()>*>* q_;
-    bool should_stop_;
+   
 
     static void* start_thread_pool(void*);
     void run_thread(int id_in_pool);
@@ -320,11 +321,11 @@ class RunLater: public RefCounted {
     pthread_mutex_t m_;
     pthread_cond_t cv_;
     bool should_stop_;
-
+    std::priority_queue<job_t, std::vector<job_t>, std::greater<job_t>> jobs_;
     SpinLock latest_l_;
     double latest_;
 
-    std::priority_queue<job_t, std::vector<job_t>, std::greater<job_t>> jobs_;
+  
 
     static void* start_run_later(void*);
     void run_later_loop();

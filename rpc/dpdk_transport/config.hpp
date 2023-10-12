@@ -78,10 +78,8 @@ public:
     uint16_t client_batch_size_=5;
     //
 
-    int transport_ = 0;
-    int workload_ = 0;
-    int ratio_ = 0;
-    uint16_t buffer_len=1024;
+    
+    uint16_t buffer_len=8*4096-2;
 
  
 
@@ -111,15 +109,6 @@ public:
     }
     int get_host_threads() const {
         return host_threads_;
-    }
-    int get_transport() const {
-        return transport_;
-    }
-    int get_workload() const {
-        return workload_;
-    }
-    int get_ratio() const {
-        return ratio_;
     }
 };
 }
