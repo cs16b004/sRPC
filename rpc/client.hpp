@@ -208,6 +208,7 @@ class UDPClient: public Client{
        
         uint64_t conn_id;
         TransportConnection* conn;
+        rte_mbuf* pkt_array[32];
         Marshal::bookmark* bmark_;
         DpdkTransport* transport_;
         using RefCounted::release;
@@ -233,6 +234,9 @@ class UDPClient: public Client{
             while(!transport_->initiated){
                 //LOG_DEBUG("Waiting for transport to initialize");
                 usleep(2000);
+            }
+            for(int i=0;i<32;i++){
+                pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);
             }
         }
         void end_request();

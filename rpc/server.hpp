@@ -436,6 +436,7 @@ class UDPConnection: public ServerConnection {
 
     TransportMarshal* curr_reply;
     TransportConnection* conn;
+    rte_mbuf* pkt_array[32];
     
     void close();
     uint64_t connId;
@@ -469,8 +470,10 @@ public:
     void handle_write();
     void handle_read();
     void handle_error(); 
-    void begin_reply(Request<rrr::Marshal>* req, i32 error_code=0);
-    void begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code=0){}
+    void begin_reply(Request<rrr::Marshal>* req, i32 error_code=0) {/*Should not be called*/
+        verify(1);
+    }
+    void begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code=0);
     void end_reply();
 };
 class UDPServer : public Server{

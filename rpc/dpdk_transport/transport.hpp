@@ -210,11 +210,10 @@ public:
         bool shutdown=false;
         SpinLock conn_lock;
         // Dedicated Connections 
-        std::map<uint64_t, TransportConnection*> out_connections;
+        std::unordered_map<uint64_t, TransportConnection*> out_connections;
         // Application thread put connection_ptr in this ring , 
         //thread will organize mbuf and other structs
-        struct rte_ring* sm_ring;  
-        std::map<std::string,uint32_t> addr_lookup_table;
+        struct rte_ring* sm_ring;
         struct rte_mempool* mem_pool;
 
         struct rte_mbuf **buf{nullptr};

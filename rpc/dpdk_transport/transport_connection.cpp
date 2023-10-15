@@ -50,10 +50,15 @@ int TransportConnection::assign_bufring(){
                                                     conf->rte_ring_size,
                                                     rte_socket_id(), 
                                                     RING_F_SC_DEQ | RING_F_SP_ENQ);
-        if(out_bufring)
+         sprintf(buf_ring_name, "IBF_%lu",conn_id);                   
+         in_bufring = rte_ring_create(buf_ring_name,
+                                                    conf->rte_ring_size,
+                                                    rte_socket_id(), 
+                                                    RING_F_SC_DEQ | RING_F_SP_ENQ);
+        if(out_bufring && in_bufring)
             return 0;
         else{
-            Log_error("Not able to assign bufring: %s, Error: %s",buf_ring_name, rte_strerror(rte_errno));
+            Log_error("Not able to assign bufrings: %s, Error: %s",buf_ring_name, rte_strerror(rte_errno));
             return -1;
         }
    

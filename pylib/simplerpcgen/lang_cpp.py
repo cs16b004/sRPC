@@ -270,7 +270,7 @@ def emit_service_and_proxy_dpdk(service, f, rpc_table):
             else:
                 postfix = ""
             if func.attr == "raw":
-                f.writeln("virtual void %s(rrr::Request<rrr::Marshal>* req, rrr::ServerConnection* sconn)%s;" % (func.name, postfix))
+                f.writeln("virtual void %s(rrr::Request<rrr::TransportMarshal>* req, rrr::ServerConnection* sconn)%s;" % (func.name, postfix))
             else:
                 func_args = []
                 for in_arg in func.input:
@@ -291,7 +291,7 @@ def emit_service_and_proxy_dpdk(service, f, rpc_table):
         for func in service.functions:
             if func.attr == "raw":
                 continue
-            f.writeln("void __%s__wrapper__(rrr::Request<rrr::Marshal>* req, rrr::ServerConnection* sconn) {" % func.name)
+            f.writeln("void __%s__wrapper__(rrr::Request<rrr::TransportMarshal>* req, rrr::ServerConnection* sconn) {" % func.name)
             with f.indent():
                 if func.attr == "defer":
                     invoke_with = []

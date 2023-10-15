@@ -66,9 +66,11 @@ namespace rrr{
             NetAddress src_addr;
             rte_mempool* pkt_mempool;
             struct rte_ring* out_bufring; // Should be allocated by assigned dpdk thread
+            struct rte_ring* in_bufring;
             struct rte_ring* available_bufring;
             struct rte_mbuf** sm_msg_buffers;
             struct rte_mbuf** out_msg_buffers; //    Can be allocated earlier;
+            uint16_t burst_size = 1;
             Counter out_msg_counter;
             size_t out_max_size;
             //My port nbumber ;

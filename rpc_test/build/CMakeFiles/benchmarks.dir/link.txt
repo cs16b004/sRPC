@@ -1,0 +1,1 @@
+/usr/bin/c++   -Wall   CMakeFiles/benchmarks.dir/benchmarks.cpp.o  -o benchmarks  librpc.a libbase.a -Wl,--whole-archive -ldpdk -Wl,--no-whole-archive -lpthread -lyaml-cpp 

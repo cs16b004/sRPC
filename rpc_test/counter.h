@@ -8,10 +8,10 @@
 class CounterService: public rrr::Service {
 public:
     enum {
-        ADD = 0x2e7cd5c1,
-        ADD_LONG = 0x6b2b4c11,
-        ADD_BENCH = 0x257f42c9,
-        ADD_SHORT = 0x557b588d,
+        ADD = 0x2e4aa6ad,
+        ADD_LONG = 0x158c462f,
+        ADD_BENCH = 0x6c51d422,
+        ADD_SHORT = 0x31055ffa,
     };
     int __reg_to__(rrr::Server* svr) {
         int ret = 0;
@@ -42,14 +42,14 @@ public:
     virtual void add_bench(const std::string& in, std::string* out) = 0;
     virtual void add_short(const rrr::i64& a, rrr::i32* out) = 0;
 private:
-    void __add__wrapper__(rrr::Request<rrr::Marshal>* req, rrr::ServerConnection* sconn) {
+    void __add__wrapper__(rrr::Request<rrr::TransportMarshal>* req, rrr::ServerConnection* sconn) {
         this->add();
         sconn->begin_reply(req);
         sconn->end_reply();
         delete req;
         sconn->release();
     }
-    void __add_long__wrapper__(rrr::Request<rrr::Marshal>* req, rrr::ServerConnection* sconn) {
+    void __add_long__wrapper__(rrr::Request<rrr::TransportMarshal>* req, rrr::ServerConnection* sconn) {
         rrr::i32 in_0;
         req->m >> in_0;
         rrr::i32 in_1;
@@ -72,7 +72,7 @@ private:
         delete req;
         sconn->release();
     }
-    void __add_bench__wrapper__(rrr::Request<rrr::Marshal>* req, rrr::ServerConnection* sconn) {
+    void __add_bench__wrapper__(rrr::Request<rrr::TransportMarshal>* req, rrr::ServerConnection* sconn) {
         std::string in_0;
         req->m >> in_0;
         std::string out_0;
@@ -83,7 +83,7 @@ private:
         delete req;
         sconn->release();
     }
-    void __add_short__wrapper__(rrr::Request<rrr::Marshal>* req, rrr::ServerConnection* sconn) {
+    void __add_short__wrapper__(rrr::Request<rrr::TransportMarshal>* req, rrr::ServerConnection* sconn) {
         rrr::i64 in_0;
         req->m >> in_0;
         rrr::i32 out_0;

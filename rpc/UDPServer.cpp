@@ -24,6 +24,9 @@ UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
     // increase number of open connections
 
     server_->sconns_ctr_.next(1);
+    for(int i=0;i<32;i++){
+        pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);
+    }
 }
 
 UDPConnection::~UDPConnection() {
@@ -35,12 +38,12 @@ int UDPConnection::run_async(const std::function<void()>& f) {
     return server_->threadpool_->run_async(f);
 }
 
-void UDPConnection::begin_reply(Request<rrr::Marshal>* req, i32 error_code /* =... */) {
+void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code /* =... */) {
     current_reply.allot_buffer(conn->get_new_pkt());
 
      i32 v_error_code = error_code;
     i64 v_reply_xid = req->xid;
-
+    rte_pktmbuf_free(req->m.get_mbuf());
     current_reply.set_book_mark(sizeof(i32)); // will write reply size later
 
     current_reply << v_reply_xid;
@@ -68,78 +71,36 @@ void UDPConnection::handle_read() {
        
         return;
     }
+    unsigned int available;
+    unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
 
-    int bytes_read = in_.read_from_fd(socket_);//::read(socket_, buf , 1);
-    #ifdef RPC_MICRO_STATISTICS
-     std::unordered_map<uint64_t, uint64_t> rx_pkt_ids;
-    #endif
-    if (bytes_read == 0) {
-      
-        return;
-    }
-    LOG_DEBUG("%d Bytes Read from fd %d",bytes_read,socket_);
-    list<Request<rrr::Marshal>*> complete_requests;
-        for(;;){
-       // in_.print();
-        i32 packet_size;
-        int n_peek = in_.peek(&packet_size, sizeof(i32));
-         LOG_DEBUG("Packet Size %d",packet_size);
-            LOG_DEBUG("n_peek = %d, content_size = %d",n_peek,in_.content_size());
-           
-        if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
-            // consume the packet size
-            verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
-
-            Request<rrr::Marshal>* req = new Request<rrr::Marshal>;
-            verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
-            LOG_DEBUG("Request content %d ", req->m.content_size());
-            
-            req->m >> req->xid;
-            complete_requests.push_back(req);
-            
-            #ifdef RPC_MICRO_STATISTICS
-            // Read packet ID
-           
-            uint64_t pkt_id;
-            verify(in_.read(&pkt_id,sizeof(uint64_t)) == sizeof(uint64_t));
-            LOG_DEBUG("Packet Id processed by app thread %d", pkt_id);
-            rx_pkt_ids[v_xid.get()] = pkt_id;
-            #endif
-
-        } else {
-            // LOG_DEBUG("packet not complete or there's no more packet to process");
-            break;
-        }
-        }
+    Request<TransportMarshal>* request_array[32];
     
-      //  Log_info("Request read");
-#ifdef RPC_STATISTICS
-    //stat_server_batching(complete_requests.size());
-     record_batch(complete_requests.size());
-#endif // RPC_STATISTICS
+    for(int i=0;i<nb_pkts;i++){
+        
+        request_array[i] = new Request<TransportMarshal>();
+        request_array[i]->m.allot_buffer(pkt_array[i]);
+        i32 req_size=0;
+        i64 xid;
+        request_array[i]->m >> req_size >> request_array[i]->xid;
+        
 
-    for (auto& req: complete_requests) {
+    }
+    for (int i=0;i<nb_pkts;i++) {
 
-        if (req->m.content_size() < sizeof(i32)) {
-            // rpc id not provided
-            begin_reply(req, EINVAL);
-            end_reply();
-            delete req;
-            continue;
-        }
-        //req->print();
         i32 rpc_id;
-        req->m >> rpc_id;
+        request_array[i]->m >> rpc_id;
 
-#ifdef RPC_STATISTICS
-        count(0);
-#endif // RPC_STATISTICS
+      
 
-        auto it = server_->handlers_.find(rpc_id);
-        if (it != server_->handlers_.end()) {
+        auto it = server_->us_handlers_.find(rpc_id);
+        if (it != server_->us_handlers_.end()) {
             // the handler should delete req, and release server_connection refcopy.
            // LOG_DEBUG("RPC Triggered");
-            it->second(req, (UDPConnection *) this->ref_copy());
+             #ifdef RPC_STATISTICS
+                count(0);
+             #endif // RPC_STATISTICS
+            it->second(request_array[i], (UDPConnection *) this->ref_copy());
             
         } else {
             rpc_id_missing_l_s.lock();
@@ -153,9 +114,8 @@ void UDPConnection::handle_read() {
             if (!surpress_warning) {
                 Log_error("rrr::UDPConnection: no handler for rpc_id=0x%08x", rpc_id);
             }
-            begin_reply(req, ENOENT);
+            begin_reply(request_array[i], ENOENT);
             end_reply();
-            delete req;
         }
         #ifdef RPC_MICRO_STATISTICS
         struct timespec ts;
@@ -337,6 +297,7 @@ void UDPServer::server_loop(void* arg) {
             svr->transport_->sm_queue_l.unlock();
             uint8_t req_type;
             verify(sm_req->read(&req_type, sizeof(uint8_t)) == sizeof(uint8_t));
+            LOG_DEBUG("Request Type %02x",req_type);
             if(req_type == CON){
                 std::string src_addr;
                 *(sm_req)>>src_addr;

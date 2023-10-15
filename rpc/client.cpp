@@ -99,10 +99,10 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
     }
 
      Future* fu = new Future(xid_counter_.next(), attr);
-    //pending_fu_l_.lock();
+    pending_fu_l_.lock();
     pending_fu_[fu->xid_] = fu;
     //Future* tfu = fu;
-    //pending_fu_l_.unlock();
+    pending_fu_l_.unlock();
     current_req.allot_buffer(conn->get_new_pkt());
     current_req.set_book_mark(sizeof(i32));
     current_req << i64(fu->xid_);
@@ -139,50 +139,42 @@ void UDPClient::handle_read(){
         return;
     }
 
-    int bytes_read = in_.read_from_fd(sock_);
-    if (bytes_read == 0) {
-        return;
-    }
-  //  LOG_DEBUG("bytes read %d",bytes_read);
-    for (;;) {
-        i32 packet_size;
-        int n_peek = in_.peek(&packet_size, sizeof(i32));
-        if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
-            // consume the packet size
-            verify(in_.read(&packet_size, sizeof(i32)) == sizeof(i32));
+    unsigned int available;
+    unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
 
-            i64 v_reply_xid;
-            i32 v_error_code;
+    TransportMarshal reply_array[32];
+    
+    for(int i=0;i<nb_pkts;i++){
+        i32 reply_size;
+        i64 v_reply_xid;
+        i32 v_error_code;
 
-            in_ >> v_reply_xid >> v_error_code;
-
-            pending_fu_l_.lock();
-            unordered_map<i64, Future*>::iterator it = pending_fu_.find(v_reply_xid);
-            if (it != pending_fu_.end()) {
+        reply_array[i].allot_buffer(pkt_array[i]);   
+        reply_array[i] >> reply_size >>  v_reply_xid >> v_error_code;    
+        pending_fu_l_.lock();
+        unordered_map<i64, Future*>::iterator it = pending_fu_.find(v_reply_xid);
+        if (it != pending_fu_.end()) {
                 Future* fu = it->second;
                 verify(fu->xid_ == v_reply_xid);
                 pending_fu_.erase(it);
                 pending_fu_l_.unlock();
 
                 fu->error_code_ = v_error_code;
-                fu->reply_.read_from_marshal(in_, packet_size - sizeof(i64) - sizeof(i32));
+                fu->reply_.write(reply_array[i].get_offset(),reply_size-sizeof(i64) -sizeof(i32));
                 #ifdef RPC_STATISTICS
                //  put_end_ts(fu->xid_);
                 #endif
-                //LOG_DEBUG("For reply for req: %lu",v_reply_xid);
+                LOG_DEBUG("For reply for req: %lu",v_reply_xid);
                 fu->notify_ready();
                // LOG_DEBUG("Running reply future for %d",v_reply_xid);
                 // since we removed it from pending_fu_
                 fu->release();
-            } else {
+        } 
+        else {
                 // the future might timed out
                 pending_fu_l_.unlock();
-            }
-
-        } else {
-            // packet incomplete or no more packets to process
-            break;
         }
+        rte_pktmbuf_free(reply_array[i].get_mbuf());
     }
 }
 void UDPClient::close() {

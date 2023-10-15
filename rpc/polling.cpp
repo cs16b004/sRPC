@@ -88,6 +88,14 @@ PollMgr::~PollMgr() {
 
 void PollMgr::PollThread::poll_loop() {
     Log_debug("Poll Thread %d started", thread_id_);
+    #ifdef DPDK
+    while(!stop_flag_){
+        for(auto pollable:poll_set_){
+            pollable->handle_read();
+        }
+    }
+    #endif
+    
     while (!stop_flag_) {
         const int max_nev = 100;
 
