@@ -99,7 +99,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
          thread_tx_info[chosen_tx_thread]->conn_lock.unlock();
          return 0;
     }
-    Log_info("Chosen threads for new conn: %lu, tx-thread %d, next_thread_ %d",conn_id, chosen_tx_thread,next_thread_);
+    Log_info("Chosen threads for new conn: %lu, tx-thread %d, rx-thread %d",conn_id, chosen_tx_thread,chosen_rx_thread);
    
 
 
@@ -183,7 +183,7 @@ uint64_t DpdkTransport::connect(const char* addr_str){
     conn_id = conn_id | rte_cpu_to_be_16(port);  // server port in BE  
     conn_id = conn_id<<16;
     conn_id  = conn_id | rte_cpu_to_be_16(oconn->udp_port); //local host port in BE
-    Log_info("Chosen threads for new conn: %llu is tx-thread %d, counter %d",conn_id, chosen_tx_thread,next_thread_);
+    Log_info("Chosen threads for new conn: %llu is tx-thread %d, rx_thread %d",conn_id, chosen_tx_thread, rx_threads_);
     out_connections[conn_id] = oconn;
     oconn->assign_bufring();
     oconn->pkt_mempool = tx_mbuf_pool[chosen_tx_thread];
@@ -194,7 +194,7 @@ uint64_t DpdkTransport::connect(const char* addr_str){
    while((rte_ring_enqueue(tx_sm_rings[chosen_tx_thread], (void*)oconn))< 0 ){
     ;
    }
-   while((rte_ring_enqueue(tx_sm_rings[chosen_rx_thread], (void*)oconn))< 0 ){
+   while((rte_ring_enqueue(rx_sm_rings[chosen_rx_thread], (void*)oconn))< 0 ){
     ;
    }
  
@@ -351,7 +351,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     TransportConnection* current_conn;
     uint64_t burst_count=0;
     uint16_t d_offset = dpdk_th->data_offset;
-    std::unordered_map<uint64_t,TransportConnection*>& connections = info->out_connections;
+    std::unordered_map<uint64_t,TransportConnection*>& connections = dpdk_th->out_connections;
     
     int i,j;
     uint64_t times=0;
@@ -372,27 +372,29 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
        
        
         // likely the rign is empty
-        if(unlikely(rte_ring_empty(sm_queue_) == 0)){
-            nb_sm_reqs_  = rte_ring_sc_dequeue_burst(sm_queue_, (void**)conn_arr, 8,&available);
-            for(i=0;i<nb_sm_reqs_;i++){
-                connections[conn_arr[i]->conn_id] = conn_arr[i]; // Put the connection in local conn_table
-                LOG_DEBUG("Added Connection %lu to rx_thread %d",conn_arr[i]->conn_id, info->thread_id);
-            }
-        }
+        // if(likely(rte_ring_empty(sm_queue_))){
+        //     nb_sm_reqs_  = rte_ring_sc_dequeue_burst(sm_queue_, (void**)conn_arr, 8,&available);
+        //     for(i=0;i<nb_sm_reqs_;i++){
+        //         connections[conn_arr[i]->conn_id] = conn_arr[i]; // Put the connection in local conn_table
+        //         LOG_DEBUG("Added Connection %lu to rx_thread %d",conn_arr[i]->conn_id, info->thread_id);
+        //     }
+        // }
        
 
-        if(unlikely(rte_pktmbuf_alloc_bulk(mem_pool, rx_buffers, burst_size) < 0))
-            continue;
+        // if(unlikely(rte_pktmbuf_alloc_bulk(mem_pool, rx_buffers, burst_size) < 0))
+        //     continue;
 
         uint16_t nb_rx = rte_eth_rx_burst(port_id, queue_id, 
                                           rx_buffers, burst_size);
-        rte_pktmbuf_free_bulk(&rx_buffers[nb_rx], burst_size-nb_rx);
+
+       // LOG_DEBUG("nb_rx: %d, rx_buffers %p", nb_rx, &rx_buffers[nb_rx]);
+
+       // rte_pktmbuf_free_bulk(&rx_buffers[nb_rx], burst_size-nb_rx);
        
         if (unlikely(nb_rx == 0))
             continue;
         
         for (int i = 0; i < nb_rx; i++) {
-            LOG_DEBUG("RX PKT");
             pkt_ptr = rte_pktmbuf_mtod(rx_buffers[i], uint8_t*);
             ip_hdr = reinterpret_cast<struct rte_ipv4_hdr*>(pkt_ptr + ip_h_offset);
             src_ip = ip_hdr->src_addr;
@@ -439,6 +441,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
                 uint8_t req_type;
             
                 mempcpy(&req_type,data_ptr,sizeof(uint8_t));
+                data_ptr+=sizeof(uint8_t);
            // LOG_DEBUG("Req Type 0x%2x, src_addr : %s",req_type, src_addr.c_str());
                 if(req_type == CON_ACK){
                     if(connections.find(conn_id) != connections.end()){

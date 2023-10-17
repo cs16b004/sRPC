@@ -70,8 +70,8 @@ namespace rrr{
 
     private:
         static DpdkTransport* transport_l;
-        std::map<std::string,uint32_t> addr_lookup_table;
-        std::map<uint64_t, TransportConnection*> out_connections;
+    
+        std::unordered_map<uint64_t, TransportConnection*> out_connections;
         uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
         uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);

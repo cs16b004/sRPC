@@ -8,10 +8,10 @@
 class CounterService: public rrr::Service {
 public:
     enum {
-        ADD = 0x2e4aa6ad,
-        ADD_LONG = 0x158c462f,
-        ADD_BENCH = 0x6c51d422,
-        ADD_SHORT = 0x31055ffa,
+        ADD = 0x44475c18,
+        ADD_LONG = 0x2582efce,
+        ADD_BENCH = 0x1c399c37,
+        ADD_SHORT = 0x2c7c2631,
     };
     int __reg_to__(rrr::Server* svr) {
         int ret = 0;

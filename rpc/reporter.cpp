@@ -146,8 +146,11 @@ void* Reporter::run(void* arg){
             if(reporter->is_client){
                // Log_info("Across all poll, Average Latency %f micro-sec",lat_avg/poll_count);
             
-            Log_info("Total RPCs: %lu, Throughput %f/s", job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
+            Log_info("Total RPCs: %lu, Throughput client %f/s", job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
             last_job_count = job_count;
+            }else{
+                 Log_info("Total RPCs: %lu, Throughput server %f/s", job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
+                last_job_count = job_count;
             }
             job_count=0;
             diff_count=0; //ith pollable of poll manager;
