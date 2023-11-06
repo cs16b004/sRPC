@@ -152,9 +152,10 @@ void UDPClient::handle_read(){
         reply_array[i].allot_buffer(pkt_array[i]);   
         reply_array[i] >> reply_size >>  v_reply_xid >> v_error_code;    
         pending_fu_l_.lock();
+        Future* fu;
         unordered_map<i64, Future*>::iterator it = pending_fu_.find(v_reply_xid);
-        if (it != pending_fu_.end()) {
-                Future* fu = it->second;
+        if (likely(it != pending_fu_.end())) {
+                fu = it->second;
                 verify(fu->xid_ == v_reply_xid);
                 pending_fu_.erase(it);
                 pending_fu_l_.unlock();

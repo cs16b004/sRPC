@@ -43,7 +43,7 @@ void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_c
 
      i32 v_error_code = error_code;
     i64 v_reply_xid = req->xid;
-    rte_pktmbuf_free(req->m.get_mbuf());
+   // rte_pktmbuf_free(req->m.get_mbuf());
     current_reply.set_book_mark(sizeof(i32)); // will write reply size later
 
     current_reply << v_reply_xid;
@@ -94,7 +94,7 @@ void UDPConnection::handle_read() {
       
 
         auto it = server_->us_handlers_.find(rpc_id);
-        if (it != server_->us_handlers_.end()) {
+        if (likely(it != server_->us_handlers_.end())) {
             // the handler should delete req, and release server_connection refcopy.
            // LOG_DEBUG("RPC Triggered");
              #ifdef RPC_STATISTICS
@@ -126,6 +126,7 @@ void UDPConnection::handle_read() {
         //LOG_DEBUG("Putting end ts in %ld",rx_pkt_ids[req->xid]);
         #endif
     }
+    rte_pktmbuf_free_bulk(pkt_array, nb_pkts);
 }
 
 void UDPConnection::handle_write() {
@@ -177,13 +178,8 @@ void UDPConnection::close() {
 }
 
 int UDPConnection::poll_mode() {
-    int mode = Pollable::READ;
-    out_l_.lock();
-    if (!out_.empty()) {
-        mode |= Pollable::WRITE;
-    }
-    out_l_.unlock();
-    return mode;
+
+    return Pollable::READ| Pollable::WRITE;
 }
 
 UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, DpdkTransport* transport)
@@ -285,8 +281,8 @@ void UDPServer::server_loop(void* arg) {
                     svr->sconns_l_.lock();
                     verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
                     UDPConnection* sconn = new UDPConnection(svr, connId);
-                    svr->sconns_.insert(sconn);
-                    svr->pollmgr_->add(sconn);
+                    svr->sconns_.insert((UDPConnection*) sconn->ref_copy());
+                    svr->pollmgr_->add((UDPConnection*)sconn->ref_copy());
                     svr->sconns_l_.unlock();
                 }
             }

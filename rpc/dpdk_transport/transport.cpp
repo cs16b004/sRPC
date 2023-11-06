@@ -84,7 +84,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     uint16_t chosen_rx_thread = (next_thread_%(config_->num_rx_threads_));
 
     conn_counter++;
-    
+    Log_info("Accept Called");
     //verify(thread_rx_info[chosen_rx_thread].conn_counter == thread_tx_info[chosen_tx_thread].conn_counter);
 
     conn_id = conn_id | oconn->out_addr.ip;
@@ -104,7 +104,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
 
 
     out_connections[conn_id] = oconn;
-    rte_hash_add_key_data(conn_table, &conn_id, oconn);
+   // rte_hash_add_key_data(conn_table, &conn_id, oconn);
     oconn->assign_bufring();
     oconn->pkt_mempool = tx_mbuf_pool[chosen_tx_thread];
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
@@ -186,13 +186,13 @@ uint64_t DpdkTransport::connect(const char* addr_str){
     conn_id  = conn_id | rte_cpu_to_be_16(oconn->udp_port); //local host port in BE
     Log_info("Chosen threads for new conn: %llu is tx-thread %d, rx_thread %d",conn_id, chosen_tx_thread, rx_threads_);
     out_connections[conn_id] = oconn;
-    int ret;
-    ret = rte_hash_add_key_data(conn_table, &conn_id, oconn);
-    if(ret < 0){
-        Log_error("Error in connecting to %s, entry cannot be created in conn table", addr_str);
-        return 0;
-    }
-    ret = rte_hash_lookup(conn_table,&conn_id);
+    //int ret;
+    //ret = rte_hash_add_key_data(conn_table, &conn_id, oconn);
+    //if(ret < 0){
+      //  Log_error("Error in connecting to %s, entry cannot be created in conn table", addr_str);
+      //  return 0;
+    //}
+    //ret = rte_hash_lookup(conn_table,&conn_id);
 
     oconn->assign_bufring();
     oconn->pkt_mempool = tx_mbuf_pool[chosen_tx_thread];
@@ -404,7 +404,9 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
        
         if (unlikely(nb_rx == 0))
             continue;
-        
+        for(int i=0;i<nb_rx;i++){
+            rte_prefetch2(rx_buffers[i]);
+        }
         for (int i = 0; i < nb_rx; i++) {
             pkt_ptr = rte_pktmbuf_mtod(rx_buffers[i], uint8_t*);
             ip_hdr = reinterpret_cast<struct rte_ipv4_hdr*>(pkt_ptr + ip_h_offset);
@@ -433,20 +435,22 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
             // #endif
             connId_arr[i] = conn_id;
             data_ptr = pkt_ptr + d_offset;
-            mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
+            rte_memcpy(&pkt_type,data_ptr,sizeof(uint8_t));
+           // mempcpy
+            //pkt_type = *((uint8_t*)data_ptr);
             data_ptr += sizeof(uint8_t);
             
             if(likely(pkt_type == RR) ){
                 struct data *result;
-                ret = rte_hash_lookup_data(conn_tab, &conn_id, (void**)&current_conn );
+               // ret = rte_hash_lookup_data(conn_tab, &conn_id, (void**)&current_conn );
                 //ret = rte_hash_lookup(conn_tab, &conn_id);
-                if(unlikely(ret < 0))
-                    continue;
+               // if(unlikely(ret < 0))
+                //    continue;
                 //rte_hash_lookup_bulk
                 
                // ret = rte_table_hash_lookup_data(conn_tab, &conn_id, (void**)&current_conn);
                 while(retry < 2000){
-                    if(rte_ring_sp_enqueue(current_conn->in_bufring, rx_buffers[i]) >= 0){
+                    if(rte_ring_sp_enqueue(connections[conn_id]->in_bufring, rx_buffers[i]) >= 0){
                         break;
                     }
                     retry++;

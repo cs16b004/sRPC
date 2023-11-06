@@ -1,3 +1,7 @@
 .vscode
 rpc_test/perf.data
 rpc_test/perf.data.old
+rpc_test/bin/
+rpc_test/*.o
+rpc_test/lib/
+

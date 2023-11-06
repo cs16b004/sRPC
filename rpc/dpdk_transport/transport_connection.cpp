@@ -95,7 +95,7 @@ void TransportConnection::make_pkt_header(rte_mbuf* pkt){
     uint16_t pkt_offset=0;
    
     pkt->next = NULL;
-    pkt->ol_flags = RTE_MBUF_F_TX_IPV4 | RTE_MBUF_F_TX_IP_CKSUM | RTE_MBUF_F_TX_UDP_CKSUM;
+    pkt->ol_flags = RTE_MBUF_F_TX_IPV4| RTE_MBUF_F_TX_IP_CKSUM | RTE_MBUF_F_TX_UDP_CKSUM;
     /* Initialize Ethernet header. */
     uint8_t* pkt_buf = rte_pktmbuf_mtod(pkt, uint8_t*);
 
