@@ -166,7 +166,7 @@ public:
     virtual void end_request() = 0;
     virtual int connect(const char* addr) = 0;
     virtual void close_and_release() = 0;
-    virtual int fd()=0;
+    virtual uint64_t fd()=0;
     
 
      template<class T>
@@ -202,7 +202,7 @@ public:
 };
 class UDPClient: public Client{
     protected:
-        int sock_;
+        uint64_t sock_;
         int wfd;
         Marshal* out_ptr_;
        
@@ -241,7 +241,7 @@ class UDPClient: public Client{
         }
         void end_request();
         int connect(const char* addr);
-        int fd(){
+        uint64_t fd(){
             return sock_;
         }
         void close_and_release() {
@@ -270,7 +270,7 @@ class UDPClient: public Client{
 };
 class TCPClient: public Client {
    
-    int sock_;
+    uint64_t sock_;
    
     Marshal::bookmark* bmark_;
 
@@ -306,7 +306,7 @@ public:
 
     void end_request();
 
-    int fd() {
+    uint64_t fd() {
         return sock_;
     }
 

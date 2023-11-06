@@ -201,7 +201,7 @@ public:
         #endif
         return *this;
     }
-    int fd() {
+    uint64_t fd() {
         return socket_;
     }
 };
@@ -248,7 +248,7 @@ public:
     // helper function, do some work in background
     int run_async(const std::function<void()>& f);
 
-    int fd() {
+    uint64_t fd() {
         return socket_;
     }
 
@@ -452,8 +452,8 @@ public:
 
     UDPConnection(UDPServer* server, uint64_t socket);
     int run_async(const std::function<void()>& f);
-    int fd() {
-        return socket_;
+    uint64_t fd() {
+        return connId;
     }
     template<class T>
     ServerConnection& operator <<(const T& v) {

@@ -1,0 +1,4112 @@
+events: Hits
+
+fl=(1) /build/glibc-SzIz7B/glibc-2.31/nptl/pthread_create.c
+fn=(1) start_thread
+cfl=(2) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../rpc/UDPServer.cpp
+cfn=(2) rrr::UDPServer::start_server_loop
+calls=2552 253
+477 2552
+
+fl=(1)
+fn=(1)
+cfl=(3) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../rpc/polling.hpp
+cfn=(3) rrr::PollMgr::PollThread::start_poll_loop
+calls=1136 125
+477 1136
+
+fl=(1)
+fn=(1)
+cfl=(4) eal_common_thread.c
+cfn=(4) eal_thread_loop.cold
+calls=15066 0
+477 15066
+
+fl=(5) /usr/include/c++/9/bits/functional_hash.h
+fn=(5) std::hash::operator
+168 3
+
+fl=(6) /usr/include/c++/9/bits/hashtable.h
+fn=(6) std::_Hashtable::_M_begin
+383 47
+
+fl=(6)
+fn=(6)
+384 87
+
+fl=(6)
+fn=(7) std::_Hashtable::begin
+536 60
+
+fl=(6)
+fn=(7)
+537 111
+
+fl=(6)
+fn=(7)
+cfl=(6)
+cfn=(6)
+calls=87 384
+537 87
+
+fl=(6)
+fn=(7)
+cfl=(7) /usr/include/c++/9/bits/hashtable_policy.h
+cfn=(8) std::__detail::_Node_iterator::_Node_iterator
+calls=162 341
+537 162
+
+fl=(6)
+fn=(7)
+cfl=(6)
+cfn=(6)
+calls=47 383
+537 47
+
+fl=(6)
+fn=(7)
+cfl=(7)
+cfn=(8)
+calls=32 340
+537 32
+
+fl=(6)
+fn=(9) std::_Hashtable::end
+544 39
+
+fl=(6)
+fn=(9)
+cfl=(7)
+cfn=(8)
+calls=90 341
+545 90
+
+fl=(6)
+fn=(9)
+cfl=(7)
+cfn=(8)
+calls=16 340
+545 16
+
+fl=(6)
+fn=(9)
+545 61
+
+fl=(6)
+fn=(10) std::_Hashtable::_M_bucket_index
+675 11
+
+fl=(6)
+fn=(10)
+676 6
+
+fl=(6)
+fn=(10)
+cfl=(7)
+cfn=(11) std::__detail::_Hash_code_base::_M_bucket_index
+calls=2 1296
+676 2
+
+fl=(6)
+fn=(10)
+cfl=(7)
+cfn=(11)
+calls=41 1297
+676 41
+
+fl=(6)
+fn=(12) std::_Hashtable::_M_find_node
+684 4
+
+fl=(6)
+fn=(12)
+cfl=(6)
+cfn=(13) std::_Hashtable::_M_find_before_node
+calls=6 1567
+687 6
+
+fl=(6)
+fn=(12)
+cfl=(6)
+cfn=(13)
+calls=4 1574
+687 4
+
+fl=(6)
+fn=(12)
+cfl=(6)
+cfn=(13)
+calls=15 1577
+687 15
+
+fl=(6)
+fn=(12)
+687 5
+
+fl=(6)
+fn=(12)
+cfl=(6)
+cfn=(13)
+calls=13 1573
+687 13
+
+fl=(6)
+fn=(12)
+cfl=(6)
+cfn=(13)
+calls=130 1580
+687 130
+
+fl=(6)
+fn=(12)
+688 8
+
+fl=(6)
+fn=(12)
+689 6
+
+fl=(6)
+fn=(12)
+691 2
+
+fl=(6)
+fn=(14) std::_Hashtable::find
+cfl=(7)
+cfn=(15) std::__detail::_Hash_code_base::_M_hash_code
+calls=2 1292
+1452 2
+
+fl=(6)
+fn=(14)
+cfl=(6)
+cfn=(10)
+calls=3 676
+1453 3
+
+fl=(6)
+fn=(14)
+cfl=(6)
+cfn=(12)
+calls=5 687
+1454 5
+
+fl=(6)
+fn=(14)
+1454 1
+
+fl=(6)
+fn=(14)
+cfl=(6)
+cfn=(12)
+calls=1 689
+1454 1
+
+fl=(6)
+fn=(13)
+1567 6
+
+fl=(6)
+fn=(13)
+1573 13
+
+fl=(6)
+fn=(13)
+1574 4
+
+fl=(6)
+fn=(13)
+1577 15
+
+fl=(6)
+fn=(13)
+1580 9
+
+fl=(6)
+fn=(13)
+cfl=(7)
+cfn=(16) std::__detail::_Hashtable_base::_M_equals
+calls=117 1834
+1580 117
+
+fl=(6)
+fn=(13)
+cfl=(7)
+cfn=(16)
+calls=4 1829
+1580 4
+
+fl=(7)
+fn=(17) std::__detail::_Select1st::operator
+92 3
+
+fl=(7)
+fn=(17)
+94 2
+
+fl=(7)
+fn=(17)
+cfl=(8) /usr/include/c++/9/bits/move.h
+cfn=(18) std::forward
+calls=2 74
+94 2
+
+fl=(7)
+fn=(17)
+cfl=(9) /usr/include/c++/9/utility
+cfn=(19) std::get
+calls=4 219
+94 4
+
+fl=(7)
+fn=(17)
+cfl=(9)
+cfn=(19)
+calls=16 220
+94 16
+
+fl=(7)
+fn=(17)
+cfl=(8)
+cfn=(18)
+calls=3 75
+94 3
+
+fl=(7)
+fn=(20) std::__detail::_Hash_node_value_base::_M_valptr
+236 34
+
+fl=(7)
+fn=(20)
+cfl=(10) /usr/include/c++/9/ext/aligned_buffer.h
+cfn=(21) __gnu_cxx::__aligned_buffer::_M_ptr
+calls=27 114
+237 27
+
+fl=(7)
+fn=(20)
+cfl=(10)
+cfn=(21)
+calls=113 115
+237 113
+
+fl=(7)
+fn=(20)
+237 64
+
+fl=(7)
+fn=(22) std::__detail::_Hash_node_value_base::_M_v
+244 23
+
+fl=(7)
+fn=(22)
+cfl=(7)
+cfn=(20)
+calls=202 237
+245 202
+
+fl=(7)
+fn=(22)
+cfl=(7)
+cfn=(20)
+calls=34 236
+245 34
+
+fl=(7)
+fn=(22)
+245 22
+
+fl=(7)
+fn=(23) std::__detail::_Hash_node::_M_next
+282 9
+
+fl=(7)
+fn=(23)
+283 12
+
+fl=(7)
+fn=(24) std::__detail::_Node_iterator_base::_Node_iterator_base
+294 73
+
+fl=(7)
+fn=(24)
+295 99
+
+fl=(7)
+fn=(25) std::__detail::_Node_iterator_base::_M_incr
+298 9
+
+fl=(7)
+fn=(25)
+cfl=(7)
+cfn=(23)
+calls=12 283
+299 12
+
+fl=(7)
+fn=(25)
+299 12
+
+fl=(7)
+fn=(25)
+cfl=(7)
+cfn=(23)
+calls=9 282
+299 9
+
+fl=(7)
+fn=(26) std::__detail::operator!=
+311 42
+
+fl=(7)
+fn=(26)
+314 149
+
+fl=(7)
+fn=(8)
+340 48
+
+fl=(7)
+fn=(8)
+cfl=(7)
+cfn=(24)
+calls=99 295
+341 99
+
+fl=(7)
+fn=(8)
+341 80
+
+fl=(7)
+fn=(8)
+cfl=(7)
+cfn=(24)
+calls=73 294
+341 73
+
+fl=(7)
+fn=(27) std::__detail::_Node_iterator::operator*
+344 9
+
+fl=(7)
+fn=(27)
+cfl=(7)
+cfn=(22)
+calls=20 244
+345 20
+
+fl=(7)
+fn=(27)
+cfl=(7)
+cfn=(22)
+calls=200 245
+345 200
+
+fl=(7)
+fn=(27)
+345 45
+
+fl=(7)
+fn=(28) std::__detail::_Node_iterator::operator->
+cfl=(7)
+cfn=(20)
+calls=2 237
+349 2
+
+fl=(7)
+fn=(29) std::__detail::_Node_iterator::operator++
+352 14
+
+fl=(7)
+fn=(29)
+cfl=(7)
+cfn=(25)
+calls=9 298
+354 9
+
+fl=(7)
+fn=(29)
+cfl=(7)
+cfn=(25)
+calls=33 299
+354 33
+
+fl=(7)
+fn=(29)
+354 12
+
+fl=(7)
+fn=(29)
+355 12
+
+fl=(7)
+fn=(29)
+356 1
+
+fl=(7)
+fn=(30) std::__detail::_Mod_range_hashing::operator
+431 3
+
+fl=(7)
+fn=(30)
+433 25
+
+fl=(7)
+fn=(31) std::__detail::_Map_base::operator[]
+689 8
+
+fl=(7)
+fn=(31)
+694 1
+
+fl=(7)
+fn=(31)
+695 1
+
+fl=(7)
+fn=(31)
+cfl=(7)
+cfn=(15)
+calls=8 1292
+695 8
+
+fl=(7)
+fn=(31)
+cfl=(6)
+cfn=(10)
+calls=46 676
+696 46
+
+fl=(7)
+fn=(31)
+cfl=(6)
+cfn=(10)
+calls=11 675
+696 11
+
+fl=(7)
+fn=(31)
+696 1
+
+fl=(7)
+fn=(31)
+cfl=(6)
+cfn=(12)
+calls=4 684
+697 4
+
+fl=(7)
+fn=(31)
+cfl=(6)
+cfn=(12)
+calls=8 688
+697 8
+
+fl=(7)
+fn=(31)
+cfl=(6)
+cfn=(12)
+calls=2 691
+697 2
+
+fl=(7)
+fn=(31)
+cfl=(6)
+cfn=(12)
+calls=5 689
+697 5
+
+fl=(7)
+fn=(31)
+697 6
+
+fl=(7)
+fn=(31)
+cfl=(6)
+cfn=(12)
+calls=168 687
+697 168
+
+fl=(7)
+fn=(31)
+699 12
+
+fl=(7)
+fn=(31)
+cfl=(7)
+cfn=(22)
+calls=2 244
+707 2
+
+fl=(7)
+fn=(31)
+cfl=(7)
+cfn=(22)
+calls=24 245
+707 24
+
+fl=(7)
+fn=(32) std::__detail::_Hashtable_ebo_helper::_S_cget
+1104 5
+
+fl=(7)
+fn=(32)
+1105 7
+
+fl=(7)
+fn=(15)
+cfl=(7)
+cfn=(33) std::__detail::_Hash_code_base::_M_h1
+calls=5 1329
+1292 5
+
+fl=(7)
+fn=(15)
+1292 2
+
+fl=(7)
+fn=(15)
+cfl=(5)
+cfn=(5)
+calls=3 168
+1292 3
+
+fl=(7)
+fn=(11)
+1296 2
+
+fl=(7)
+fn=(11)
+1297 2
+
+fl=(7)
+fn=(11)
+cfl=(7)
+cfn=(30)
+calls=3 431
+1297 3
+
+fl=(7)
+fn=(11)
+cfl=(7)
+cfn=(30)
+calls=25 433
+1297 25
+
+fl=(7)
+fn=(11)
+cfl=(7)
+cfn=(34) std::__detail::_Hash_code_base::_M_h2
+calls=11 1335
+1297 11
+
+fl=(7)
+fn=(35) std::__detail::_Hash_code_base::_M_extract
+cfl=(7)
+cfn=(32)
+calls=1 1105
+1323 1
+
+fl=(7)
+fn=(35)
+cfl=(7)
+cfn=(32)
+calls=1 1104
+1323 1
+
+fl=(7)
+fn=(35)
+1323 6
+
+fl=(7)
+fn=(33)
+1329 5
+
+fl=(7)
+fn=(34)
+cfl=(7)
+cfn=(32)
+calls=3 1104
+1335 3
+
+fl=(7)
+fn=(34)
+cfl=(7)
+cfn=(32)
+calls=3 1105
+1335 3
+
+fl=(7)
+fn=(34)
+1335 5
+
+fl=(7)
+fn=(36) std::__detail::_Equal_helper::_S_equals
+1459 7
+
+fl=(7)
+fn=(36)
+cfl=(7)
+cfn=(17)
+calls=27 94
+1461 27
+
+fl=(7)
+fn=(36)
+1461 6
+
+fl=(7)
+fn=(36)
+cfl=(11) /usr/include/c++/9/bits/stl_function.h
+cfn=(37) std::equal_to::operator
+calls=3 355
+1461 3
+
+fl=(7)
+fn=(36)
+cfl=(7)
+cfn=(22)
+calls=1 244
+1461 1
+
+fl=(7)
+fn=(36)
+cfl=(7)
+cfn=(17)
+calls=3 92
+1461 3
+
+fl=(7)
+fn=(36)
+cfl=(7)
+cfn=(22)
+calls=34 245
+1461 34
+
+fl=(7)
+fn=(36)
+cfl=(11)
+cfn=(37)
+calls=16 356
+1461 16
+
+fl=(7)
+fn=(16)
+1829 4
+
+fl=(7)
+fn=(16)
+cfl=(7)
+cfn=(36)
+calls=90 1461
+1834 90
+
+fl=(7)
+fn=(16)
+cfl=(7)
+cfn=(36)
+calls=7 1459
+1834 7
+
+fl=(7)
+fn=(16)
+cfl=(7)
+cfn=(38) std::__detail::_Hashtable_base::_M_eq
+calls=8 1846
+1834 8
+
+fl=(7)
+fn=(16)
+1834 4
+
+fl=(7)
+fn=(16)
+cfl=(7)
+cfn=(35)
+calls=8 1323
+1834 8
+
+fl=(7)
+fn=(38)
+cfl=(7)
+cfn=(32)
+calls=1 1104
+1846 1
+
+fl=(7)
+fn=(38)
+cfl=(7)
+cfn=(32)
+calls=3 1105
+1846 3
+
+fl=(7)
+fn=(38)
+1846 4
+
+fl=(8)
+fn=(18)
+74 2
+
+fl=(8)
+fn=(18)
+75 3
+
+fl=(12) /usr/include/c++/9/bits/std_function.h
+fn=(39) std::_Function_base::_Base_manager::_M_get_pointer
+159 1
+
+fl=(12)
+fn=(40) std::_Function_handler::_M_invoke
+cfl=(12)
+cfn=(39)
+calls=1 159
+300 1
+
+fl=(12)
+fn=(40)
+cfl=(13) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../rpc/server.hpp
+cfn=(41) rrr::Server::reg::{lambda#1}::operator
+calls=175 339
+300 175
+
+fl=(12)
+fn=(42) std::function::operator
+cfl=(12)
+cfn=(40)
+calls=176 300
+688 176
+
+fl=(12)
+fn=(42)
+689 1
+
+fl=(14) /usr/include/c++/9/bits/stl_deque.h
+fn=(43) std::operator==
+286 205
+
+fl=(14)
+fn=(43)
+288 1166
+
+fl=(14)
+fn=(44) std::deque::empty
+1384 195
+
+fl=(14)
+fn=(44)
+cfl=(14)
+cfn=(43)
+calls=1166 288
+1385 1166
+
+fl=(14)
+fn=(44)
+1385 330
+
+fl=(14)
+fn=(44)
+cfl=(14)
+cfn=(43)
+calls=205 286
+1385 205
+
+fl=(11)
+fn=(37)
+355 3
+
+fl=(11)
+fn=(37)
+356 16
+
+fl=(15) /usr/include/c++/9/bits/stl_queue.h
+fn=(45) std::queue::empty
+197 244
+
+fl=(15)
+fn=(45)
+cfl=(14)
+cfn=(44)
+calls=195 1384
+198 195
+
+fl=(15)
+fn=(45)
+cfl=(14)
+cfn=(44)
+calls=1701 1385
+198 1701
+
+fl=(15)
+fn=(45)
+198 253
+
+fl=(16) /usr/include/c++/9/bits/unordered_map.h
+fn=(46) std::unordered_map::begin
+325 11
+
+fl=(16)
+fn=(46)
+326 21
+
+fl=(16)
+fn=(46)
+cfl=(6)
+cfn=(7)
+calls=28 536
+326 28
+
+fl=(16)
+fn=(46)
+cfl=(6)
+cfn=(7)
+calls=226 537
+326 226
+
+fl=(16)
+fn=(47) std::unordered_map::end
+347 11
+
+fl=(16)
+fn=(47)
+cfl=(6)
+cfn=(9)
+calls=93 545
+348 93
+
+fl=(16)
+fn=(47)
+cfl=(6)
+cfn=(9)
+calls=17 544
+348 17
+
+fl=(16)
+fn=(47)
+348 19
+
+fl=(16)
+fn=(48) std::unordered_map::find
+cfl=(6)
+cfn=(14)
+calls=3 1453
+922 3
+
+fl=(16)
+fn=(48)
+cfl=(6)
+cfn=(14)
+calls=7 1454
+922 7
+
+fl=(16)
+fn=(48)
+cfl=(6)
+cfn=(14)
+calls=2 1452
+922 2
+
+fl=(16)
+fn=(49) std::unordered_map::operator[]
+985 1
+
+fl=(16)
+fn=(49)
+cfl=(7)
+cfn=(31)
+calls=9 695
+986 9
+
+fl=(16)
+fn=(49)
+cfl=(7)
+cfn=(31)
+calls=58 696
+986 58
+
+fl=(16)
+fn=(49)
+cfl=(7)
+cfn=(31)
+calls=193 697
+986 193
+
+fl=(16)
+fn=(49)
+cfl=(7)
+cfn=(31)
+calls=8 689
+986 8
+
+fl=(16)
+fn=(49)
+cfl=(7)
+cfn=(31)
+calls=1 694
+986 1
+
+fl=(16)
+fn=(49)
+986 6
+
+fl=(16)
+fn=(49)
+cfl=(7)
+cfn=(31)
+calls=26 707
+986 26
+
+fl=(16)
+fn=(49)
+cfl=(7)
+cfn=(31)
+calls=12 699
+986 12
+
+fl=(17) /usr/include/c++/9/bits/unordered_set.h
+fn=(50) std::unordered_set::begin
+320 19
+
+fl=(17)
+fn=(50)
+321 30
+
+fl=(17)
+fn=(50)
+cfl=(6)
+cfn=(7)
+calls=213 537
+321 213
+
+fl=(17)
+fn=(50)
+cfl=(6)
+cfn=(7)
+calls=32 536
+321 32
+
+fl=(17)
+fn=(51) std::unordered_set::end
+334 13
+
+fl=(17)
+fn=(51)
+cfl=(6)
+cfn=(9)
+calls=74 545
+335 74
+
+fl=(17)
+fn=(51)
+cfl=(6)
+cfn=(9)
+calls=22 544
+335 22
+
+fl=(17)
+fn=(51)
+335 27
+
+fl=(10)
+fn=(52) __gnu_cxx::__aligned_buffer::_M_addr
+102 30
+
+fl=(10)
+fn=(52)
+105 33
+
+fl=(10)
+fn=(21)
+114 27
+
+fl=(10)
+fn=(21)
+cfl=(10)
+cfn=(52)
+calls=30 102
+115 30
+
+fl=(10)
+fn=(21)
+cfl=(10)
+cfn=(52)
+calls=33 105
+115 33
+
+fl=(10)
+fn=(21)
+115 50
+
+fl=(9)
+fn=(53) std::__pair_get::__get
+174 2
+
+fl=(9)
+fn=(53)
+175 9
+
+fl=(9)
+fn=(19)
+219 4
+
+fl=(9)
+fn=(19)
+220 5
+
+fl=(9)
+fn=(19)
+cfl=(9)
+cfn=(53)
+calls=2 174
+220 2
+
+fl=(9)
+fn=(19)
+cfl=(9)
+cfn=(53)
+calls=9 175
+220 9
+
+fl=(18) /usr/lib/gcc/x86_64-linux-gnu/9/include/avxintrin.h
+fn=(54) rrr::TransportMarshal::read[inline]
+922 1
+
+fl=(18)
+fn=(54)
+928 1
+
+fl=(19) /usr/local/include/rte_ethdev.h
+fn=(55) rte_eth_rx_burst
+5862 143
+
+fl=(19)
+fn=(55)
+5878 72
+
+fl=(19)
+fn=(55)
+5879 771
+
+fl=(19)
+fn=(55)
+5891 363
+
+fl=(19)
+fn=(55)
+cfl=??
+cfn=(56) mlx5_rx_burst_vec
+calls=11096 0
+5891 11096
+
+fl=(19)
+fn=(55)
+5903 72
+
+fl=(19)
+fn=(55)
+5904 37
+
+fl=(19)
+fn=(55)
+5905 191
+
+fl=(19)
+fn=(55)
+cfl=(20) /usr/local/include/rte_ethdev_trace_fp.h
+cfn=(57) rte_eth_rx_burst[inline]
+calls=48 20
+5911 48
+
+fl=(19)
+fn=(55)
+5911 69
+
+fl=(19)
+fn=(55)
+5913 22
+
+fl=(19)
+fn=(58) rte_eth_tx_burst
+cfl=??
+cfn=(59) mlx5_tx_burst_sciv
+calls=18 0
+6248 18
+
+fl=(19)
+fn=(58)
+6250 1
+
+fl=(20)
+fn=(57)
+20 48
+
+fl=(21) /usr/local/include/rte_mbuf.h
+fn=(60) rte_pktmbuf_free[inline]
+626 1
+
+fl=(21)
+fn=(61) rte_mbuf_raw_free[inline]
+cfl=(22) /usr/local/include/rte_mempool.h
+cfn=(62) rte_mempool_put[inline]
+calls=35 1473
+626 35
+
+fl=(21)
+fn=(60)
+1397 1
+
+fl=(21)
+fn=(63) rte_pktmbuf_free_seg[inline]
+1397 2
+
+fl=(21)
+fn=(63)
+cfl=(21)
+cfn=(60)
+calls=1 626
+1398 1
+
+fl=(21)
+fn=(63)
+cfl=(21)
+cfn=(61)
+calls=35 626
+1398 35
+
+fl=(21)
+fn=(64) rte_pktmbuf_free
+cfl=(21)
+cfn=(60)
+calls=1 1397
+1419 1
+
+fl=(21)
+fn=(64)
+cfl=(21)
+cfn=(63)
+calls=2 1397
+1419 2
+
+fl=(21)
+fn=(64)
+cfl=(21)
+cfn=(63)
+calls=36 1398
+1419 36
+
+fl=(23) /usr/local/include/rte_memcpy.h
+fn=(65) rrr::TransportMarshal::write_book_mark[inline]
+70 1
+
+fl=(23)
+fn=(66) rrr::TransportMarshal::allot_buffer[inline]
+71 1
+
+fl=(23)
+fn=(67) rte_mov15_or_less[inline]
+71 1
+
+fl=(23)
+fn=(54)
+72 3
+
+fl=(23)
+fn=(67)
+74 1
+
+fl=(23)
+fn=(68) rrr::TransportMarshal::write[inline]
+74 1
+
+fl=(23)
+fn=(67)
+78 2
+
+fl=(23)
+fn=(67)
+83 1
+
+fl=(23)
+fn=(69) rte_mov32[inline]
+cfl=(18)
+cfn=(54)
+calls=1 922
+346 1
+
+fl=(23)
+fn=(54)
+346 5
+
+fl=(23)
+fn=(69)
+cfl=(18)
+cfn=(54)
+calls=1 928
+347 1
+
+fl=(23)
+fn=(68)
+426 2
+
+fl=(23)
+fn=(70) rte_memcpy_generic[inline]
+433 1
+
+fl=(23)
+fn=(71) rrr::TransportMarshal::format_header[inline]
+433 1
+
+fl=(23)
+fn=(54)
+433 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(66)
+calls=1 71
+434 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(65)
+calls=1 70
+434 1
+
+fl=(23)
+fn=(70)
+434 2
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(67)
+calls=1 71
+434 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(67)
+calls=2 78
+434 2
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(67)
+calls=1 74
+434 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(54)
+calls=3 72
+434 3
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(67)
+calls=1 83
+434 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(68)
+calls=1 74
+434 1
+
+fl=(23)
+fn=(70)
+453 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(69)
+calls=1 346
+455 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(69)
+calls=1 347
+455 1
+
+fl=(23)
+fn=(70)
+cfl=(23)
+cfn=(54)
+calls=5 346
+455 5
+
+fl=(23)
+fn=(66)
+865 1
+
+fl=(23)
+fn=(65)
+865 1
+
+fl=(23)
+fn=(54)
+865 1
+
+fl=(23)
+fn=(68)
+865 1
+
+fl=(23)
+fn=(72) rte_memcpy[inline]
+865 3
+
+fl=(23)
+fn=(71)
+865 1
+
+fl=(23)
+fn=(72)
+866 2
+
+fl=(23)
+fn=(72)
+cfl=(23)
+cfn=(68)
+calls=2 426
+868 2
+
+fl=(23)
+fn=(72)
+cfl=(23)
+cfn=(70)
+calls=7 455
+868 7
+
+fl=(23)
+fn=(72)
+cfl=(23)
+cfn=(70)
+calls=1 433
+868 1
+
+fl=(23)
+fn=(72)
+cfl=(23)
+cfn=(54)
+calls=1 433
+868 1
+
+fl=(23)
+fn=(72)
+cfl=(23)
+cfn=(70)
+calls=1 453
+868 1
+
+fl=(23)
+fn=(72)
+cfl=(23)
+cfn=(71)
+calls=1 433
+868 1
+
+fl=(23)
+fn=(72)
+cfl=(23)
+cfn=(70)
+calls=13 434
+868 13
+
+fl=(22)
+fn=(73) rte_mempool_get_ops
+738 1
+
+fl=(22)
+fn=(74) rte_mempool_ops_enqueue_bulk
+826 1
+
+fl=(22)
+fn=(74)
+833 1
+
+fl=(22)
+fn=(74)
+cfl=(22)
+cfn=(73)
+calls=1 738
+833 1
+
+fl=(22)
+fn=(74)
+834 1
+
+fl=(22)
+fn=(74)
+cfl=(24) rte_mempool_ring.c
+cfn=(75) common_ring_mp_enqueue
+calls=30 0
+834 30
+
+fl=(22)
+fn=(60)
+cfl=(22)
+cfn=(74)
+calls=1 826
+1409 1
+
+fl=(22)
+fn=(60)
+cfl=(22)
+cfn=(74)
+calls=2 833
+1409 2
+
+fl=(22)
+fn=(60)
+cfl=(22)
+cfn=(74)
+calls=31 834
+1409 31
+
+fl=(22)
+fn=(76) rte_mempool_generic_put[inline]
+cfl=(22)
+cfn=(60)
+calls=34 1409
+1431 34
+
+fl=(22)
+fn=(60)
+1453 1
+
+fl=(22)
+fn=(77) rte_mempool_put_bulk[inline]
+cfl=(22)
+cfn=(76)
+calls=34 1431
+1455 34
+
+fl=(22)
+fn=(62)
+cfl=(22)
+cfn=(60)
+calls=1 1453
+1473 1
+
+fl=(22)
+fn=(62)
+cfl=(22)
+cfn=(77)
+calls=34 1455
+1473 34
+
+fl=(25) /usr/local/include/rte_ring.h
+fn=(78) rte_ring_enqueue[inline]
+cfl=(26) /usr/local/include/rte_ring_elem.h
+cfn=(79) rte_ring_enqueue_elem[inline]
+calls=17 290
+339 17
+
+fl=(25)
+fn=(80) rte_ring_dequeue[inline]
+cfl=(26)
+cfn=(81) rte_ring_dequeue_elem[inline]
+calls=11 475
+477 11
+
+fl=(25)
+fn=(82) rte_ring_count
+504 12
+
+fl=(25)
+fn=(82)
+505 81
+
+fl=(25)
+fn=(82)
+506 36
+
+fl=(25)
+fn=(82)
+507 54
+
+fl=(25)
+fn=(82)
+508 36
+
+fl=(25)
+fn=(82)
+509 7
+
+fl=(25)
+fn=(83) rte_ring_empty
+551 20
+
+fl=(25)
+fn=(83)
+552 7
+
+fl=(25)
+fn=(83)
+553 20
+
+fl=(25)
+fn=(83)
+554 34
+
+fl=(25)
+fn=(83)
+555 3
+
+fl=(25)
+fn=(84) rte_ring_sc_dequeue_burst[inline]
+cfl=(26)
+cfn=(85) rte_ring_sc_dequeue_burst_elem[inline]
+calls=129 644
+788 129
+
+fl=(26)
+fn=(86) rte_ring_sp_enqueue_bulk_elem[inline]
+cfl=(27) /usr/local/include/rte_ring_elem_pvt.h
+cfn=(87) rrr::DpdkTransport::dpdk_rx_loop[inline]
+calls=2 334
+163 2
+
+fl=(26)
+fn=(86)
+cfl=(27)
+cfn=(88) __rte_ring_do_enqueue_elem[inline]
+calls=63 329
+163 63
+
+fl=(26)
+fn=(86)
+cfl=(27)
+cfn=(88)
+calls=2 336
+163 2
+
+fl=(26)
+fn=(89) rte_ring_enqueue_bulk_elem[inline]
+197 1
+
+fl=(26)
+fn=(90) rrr::UDPConnection::end_reply[inline]
+197 15
+
+fl=(26)
+fn=(89)
+cfl=(26)
+cfn=(86)
+calls=1 163
+202 1
+
+fl=(26)
+fn=(91) rte_ring_sp_enqueue_elem[inline]
+cfl=(26)
+cfn=(86)
+calls=3 163
+264 3
+
+fl=(26)
+fn=(79)
+cfl=(26)
+cfn=(90)
+calls=15 197
+290 15
+
+fl=(26)
+fn=(79)
+cfl=(26)
+cfn=(89)
+calls=1 197
+290 1
+
+fl=(26)
+fn=(79)
+cfl=(26)
+cfn=(89)
+calls=1 202
+290 1
+
+fl=(26)
+fn=(92) rte_ring_sc_dequeue_bulk_elem[inline]
+cfl=(27)
+cfn=(93) __rte_ring_do_dequeue_elem[inline]
+calls=3 376
+348 3
+
+fl=(26)
+fn=(92)
+cfl=(27)
+cfn=(93)
+calls=4 381
+348 4
+
+fl=(26)
+fn=(94) rrr::TransportConnection::get_new_pkt[inline]
+379 4
+
+fl=(26)
+fn=(95) rte_ring_dequeue_bulk_elem[inline]
+cfl=(26)
+cfn=(92)
+calls=7 348
+384 7
+
+fl=(26)
+fn=(81)
+cfl=(26)
+cfn=(95)
+calls=7 384
+475 7
+
+fl=(26)
+fn=(81)
+cfl=(26)
+cfn=(94)
+calls=4 379
+475 4
+
+fl=(26)
+fn=(85)
+cfl=(27)
+cfn=(93)
+calls=130 376
+644 130
+
+fl=(26)
+fn=(85)
+cfl=(27)
+cfn=(96) rrr::UDPConnection::handle_read[inline]
+calls=1 387
+644 1
+
+fl=(26)
+fn=(85)
+cfl=(27)
+cfn=(93)
+calls=2 381
+644 2
+
+fl=(27)
+fn=(87)
+68 2
+
+fl=(27)
+fn=(97) __rte_ring_enqueue_elems_64[inline]
+71 7
+
+fl=(27)
+fn=(97)
+72 1
+
+fl=(27)
+fn=(97)
+84 2
+
+fl=(27)
+fn=(98) __rte_ring_enqueue_elems[inline]
+cfl=(27)
+cfn=(97)
+calls=2 84
+136 2
+
+fl=(27)
+fn=(98)
+cfl=(27)
+cfn=(87)
+calls=2 68
+136 2
+
+fl=(27)
+fn=(98)
+cfl=(27)
+cfn=(97)
+calls=1 72
+136 1
+
+fl=(27)
+fn=(98)
+cfl=(27)
+cfn=(97)
+calls=7 71
+136 7
+
+fl=(27)
+fn=(99) rrr::DpdkTransport::dpdk_tx_loop[inline]
+205 1
+
+fl=(27)
+fn=(94)
+205 1
+
+fl=(27)
+fn=(96)
+209 1
+
+fl=(27)
+fn=(100) __rte_ring_dequeue_elems_64[inline]
+210 1
+
+fl=(27)
+fn=(100)
+214 6
+
+fl=(27)
+fn=(100)
+218 2
+
+fl=(27)
+fn=(100)
+227 1
+
+fl=(27)
+fn=(101) __rte_ring_dequeue_elems[inline]
+cfl=(27)
+cfn=(100)
+calls=6 214
+266 6
+
+fl=(27)
+fn=(101)
+cfl=(27)
+cfn=(99)
+calls=1 205
+266 1
+
+fl=(27)
+fn=(101)
+cfl=(27)
+cfn=(100)
+calls=1 227
+266 1
+
+fl=(27)
+fn=(101)
+cfl=(27)
+cfn=(94)
+calls=1 205
+266 1
+
+fl=(27)
+fn=(101)
+cfl=(27)
+cfn=(100)
+calls=1 210
+266 1
+
+fl=(27)
+fn=(101)
+cfl=(27)
+cfn=(100)
+calls=2 218
+266 2
+
+fl=(27)
+fn=(101)
+cfl=(27)
+cfn=(96)
+calls=1 209
+266 1
+
+fl=(27)
+fn=(88)
+cfl=(28) /usr/local/include/rte_ring_generic_pvt.h
+cfn=(102) __rte_ring_move_prod_head[inline]
+calls=2 88
+329 2
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=8 68
+329 8
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(90)
+calls=1 97
+329 1
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(99)
+calls=7 68
+329 7
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=17 60
+329 17
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=1 92
+329 1
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=1 97
+329 1
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=1 93
+329 1
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(87)
+calls=1 60
+329 1
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=7 61
+329 7
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=10 81
+329 10
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(102)
+calls=7 84
+329 7
+
+fl=(27)
+fn=(87)
+334 2
+
+fl=(27)
+fn=(88)
+cfl=(27)
+cfn=(98)
+calls=12 136
+334 12
+
+fl=(27)
+fn=(88)
+cfl=(28)
+cfn=(87)
+calls=1 18
+336 1
+
+fl=(27)
+fn=(88)
+336 1
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(99)
+calls=1 130
+376 1
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(94)
+calls=1 138
+376 1
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(103) __rte_ring_move_cons_head[inline]
+calls=36 150
+376 36
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(103)
+calls=5 157
+376 5
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(103)
+calls=13 153
+376 13
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(103)
+calls=31 138
+376 31
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(96)
+calls=7 138
+376 7
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(103)
+calls=26 156
+376 26
+
+fl=(27)
+fn=(93)
+cfl=(28)
+cfn=(103)
+calls=13 154
+376 13
+
+fl=(27)
+fn=(93)
+cfl=(27)
+cfn=(101)
+calls=13 266
+381 13
+
+fl=(27)
+fn=(96)
+387 1
+
+fl=(28)
+fn=(87)
+18 1
+
+fl=(28)
+fn=(87)
+60 1
+
+fl=(28)
+fn=(102)
+60 17
+
+fl=(28)
+fn=(102)
+61 7
+
+fl=(28)
+fn=(99)
+68 7
+
+fl=(28)
+fn=(102)
+68 8
+
+fl=(28)
+fn=(102)
+81 10
+
+fl=(28)
+fn=(102)
+84 7
+
+fl=(28)
+fn=(102)
+88 2
+
+fl=(28)
+fn=(102)
+92 1
+
+fl=(28)
+fn=(102)
+93 1
+
+fl=(28)
+fn=(102)
+97 1
+
+fl=(28)
+fn=(90)
+97 1
+
+fl=(28)
+fn=(99)
+130 1
+
+fl=(28)
+fn=(96)
+138 7
+
+fl=(28)
+fn=(103)
+138 31
+
+fl=(28)
+fn=(94)
+138 1
+
+fl=(28)
+fn=(103)
+150 36
+
+fl=(28)
+fn=(103)
+153 13
+
+fl=(28)
+fn=(103)
+154 13
+
+fl=(28)
+fn=(103)
+156 26
+
+fl=(28)
+fn=(103)
+157 5
+
+fl=(29) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../base/basetypes.hpp
+fn=(104) rrr::v64::get
+53 1
+
+fl=(29)
+fn=(105) rrr::RefCounted::release
+88 3
+
+fl=(29)
+fn=(105)
+89 1
+
+fl=(30) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../base/logging.cpp
+fn=(106) rrr::Log::log_v
+cfl=??
+cfn=(107) fputc
+calls=1 0
+59 1
+
+fl=(30)
+fn=(108) rrr::Log::debug
+cfl=(30)
+cfn=(106)
+calls=1 59
+104 1
+
+fl=(2)
+fn=(109) rrr::UDPConnection::begin_reply
+cfl=(31) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../rpc/dpdk_transport/transport_marshal.hpp
+cfn=(110) rrr::TransportMarshal::allot_buffer
+calls=1 70
+42 1
+
+fl=(2)
+fn=(109)
+cfl=(32) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../rpc/dpdk_transport/transport_connection.cpp
+cfn=(111) rrr::TransportConnection::get_new_pkt
+calls=12 6
+42 12
+
+fl=(2)
+fn=(109)
+cfl=(31)
+cfn=(110)
+calls=1 58
+42 1
+
+fl=(2)
+fn=(109)
+cfl=(32)
+cfn=(111)
+calls=11 8
+42 11
+
+fl=(2)
+fn=(109)
+cfl=(32)
+cfn=(111)
+calls=37 7
+42 37
+
+fl=(2)
+fn=(109)
+cfl=(31)
+cfn=(110)
+calls=1 62
+42 1
+
+fl=(2)
+fn=(109)
+cfl=(31)
+cfn=(110)
+calls=2 61
+42 2
+
+fl=(2)
+fn=(109)
+cfl=(32)
+cfn=(111)
+calls=2 24
+42 2
+
+fl=(2)
+fn=(109)
+cfl=(31)
+cfn=(112) rrr::TransportMarshal::get_mbuf
+calls=1 104
+46 1
+
+fl=(2)
+fn=(109)
+cfl=(21)
+cfn=(64)
+calls=39 1419
+46 39
+
+fl=(2)
+fn=(109)
+47 1
+
+fl=(2)
+fn=(109)
+cfl=(31)
+cfn=(113) rrr::operator<<
+calls=1 167
+49 1
+
+fl=(2)
+fn=(109)
+cfl=(31)
+cfn=(113)
+calls=3 168
+49 3
+
+fl=(2)
+fn=(109)
+cfl=(31)
+cfn=(113)
+calls=5 163
+50 5
+
+fl=(2)
+fn=(109)
+51 1
+
+fl=(2)
+fn=(114) rrr::UDPConnection::end_reply
+cfl=(31)
+cfn=(115) rrr::TransportMarshal::content_size
+calls=1 102
+54 1
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(116) rrr::TransportMarshal::write_book_mark
+calls=3 99
+55 3
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(116)
+calls=4 98
+55 4
+
+fl=(2)
+fn=(114)
+55 1
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(117) rrr::TransportMarshal::format_header
+calls=1 119
+56 1
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(117)
+calls=3 115
+56 3
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(117)
+calls=2 116
+56 2
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(117)
+calls=1 120
+56 1
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(117)
+calls=1 114
+56 1
+
+fl=(2)
+fn=(114)
+59 9
+
+fl=(2)
+fn=(114)
+cfl=(31)
+cfn=(112)
+calls=1 104
+59 1
+
+fl=(2)
+fn=(114)
+cfl=(25)
+cfn=(78)
+calls=17 339
+59 17
+
+fl=(2)
+fn=(114)
+66 1
+
+fl=(2)
+fn=(118) rrr::UDPConnection::handle_read
+68 6
+
+fl=(2)
+fn=(118)
+75 71
+
+fl=(2)
+fn=(118)
+cfl=(25)
+cfn=(84)
+calls=1 788
+75 1
+
+fl=(2)
+fn=(118)
+cfl=??
+cfn=(119) operator new
+calls=19 0
+81 19
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(110)
+calls=5 70
+82 5
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(110)
+calls=3 61
+82 3
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(110)
+calls=1 56
+82 1
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(110)
+calls=2 58
+82 2
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(110)
+calls=1 67
+82 1
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(120) rrr::operator>>
+calls=4 308
+85 4
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(120)
+calls=1 315
+85 1
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(120)
+calls=4 313
+85 4
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(120)
+calls=3 308
+92 3
+
+fl=(2)
+fn=(118)
+cfl=(31)
+cfn=(120)
+calls=1 307
+92 1
+
+fl=(2)
+fn=(118)
+92 1
+
+fl=(2)
+fn=(118)
+cfl=(16)
+cfn=(48)
+calls=12 922
+96 12
+
+fl=(2)
+fn=(118)
+cfl=(7)
+cfn=(26)
+calls=1 311
+97 1
+
+fl=(2)
+fn=(118)
+cfl=(16)
+cfn=(47)
+calls=4 348
+97 4
+
+fl=(2)
+fn=(118)
+cfl=(7)
+cfn=(28)
+calls=2 349
+103 2
+
+fl=(2)
+fn=(118)
+cfl=(12)
+cfn=(42)
+calls=173 688
+103 173
+
+fl=(2)
+fn=(118)
+cfl=(12)
+cfn=(42)
+calls=1 689
+103 1
+
+fl=(2)
+fn=(118)
+129 6
+
+fl=(2)
+fn=(2)
+cfl=(2)
+cfn=(121) rrr::UDPServer::server_loop
+calls=1 289
+253 1
+
+fl=(2)
+fn=(2)
+cfl=(2)
+cfn=(121)
+calls=2439 268
+253 2439
+
+fl=(2)
+fn=(2)
+cfl=(2)
+cfn=(121)
+calls=111 267
+253 111
+
+fl=(2)
+fn=(2)
+cfl=(2)
+cfn=(121)
+calls=1 282
+253 1
+
+fl=(2)
+fn=(121)
+267 111
+
+fl=(2)
+fn=(121)
+cfl=(15)
+cfn=(45)
+calls=244 197
+268 244
+
+fl=(2)
+fn=(121)
+268 46
+
+fl=(2)
+fn=(121)
+cfl=(15)
+cfn=(45)
+calls=2149 198
+268 2149
+
+fl=(2)
+fn=(121)
+cfl=(33) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../rpc/dpdk_transport/transport.cpp
+cfn=(122) rrr::DpdkTransport::accept
+calls=1 111
+282 1
+
+fl=(2)
+fn=(121)
+cfl=(34) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/../rpc/polling.cpp
+cfn=(123) rrr::PollMgr::add
+calls=1 422
+289 1
+
+fl=(33)
+fn=(122)
+cfl=(32)
+cfn=(124) rrr::TransportConnection::make_headers_and_produce
+calls=1 77
+111 1
+
+fl=(33)
+fn=(125) rrr::DpdkTransport::dpdk_tx_loop
+270 10
+
+fl=(33)
+fn=(125)
+271 5
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(83)
+calls=3 555
+273 3
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(83)
+calls=7 552
+273 7
+
+fl=(33)
+fn=(125)
+273 47
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(83)
+calls=20 553
+273 20
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(83)
+calls=34 554
+273 34
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(83)
+calls=20 551
+273 20
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(29)
+calls=9 355
+285 9
+
+fl=(33)
+fn=(125)
+cfl=(16)
+cfn=(47)
+calls=11 347
+285 11
+
+fl=(33)
+fn=(125)
+cfl=(16)
+cfn=(46)
+calls=275 326
+285 275
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(29)
+calls=8 352
+285 8
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(27)
+calls=164 345
+285 164
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(29)
+calls=1 356
+285 1
+
+fl=(33)
+fn=(125)
+cfl=(16)
+cfn=(46)
+calls=11 325
+285 11
+
+fl=(33)
+fn=(125)
+cfl=(16)
+cfn=(47)
+calls=125 348
+285 125
+
+fl=(33)
+fn=(125)
+285 129
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(26)
+calls=72 314
+285 72
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(29)
+calls=34 354
+285 34
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(27)
+calls=7 344
+285 7
+
+fl=(33)
+fn=(125)
+cfl=(7)
+cfn=(26)
+calls=25 311
+285 25
+
+fl=(33)
+fn=(125)
+286 51
+
+fl=(33)
+fn=(125)
+287 56
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(82)
+calls=81 505
+288 81
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(82)
+calls=36 506
+288 36
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(82)
+calls=36 508
+288 36
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(82)
+calls=12 504
+288 12
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(82)
+calls=54 507
+288 54
+
+fl=(33)
+fn=(125)
+cfl=(25)
+cfn=(82)
+calls=7 509
+288 7
+
+fl=(33)
+fn=(125)
+288 48
+
+fl=(33)
+fn=(125)
+291 1
+
+fl=(33)
+fn=(125)
+cfl=(19)
+cfn=(58)
+calls=1 6250
+296 1
+
+fl=(33)
+fn=(125)
+cfl=(19)
+cfn=(58)
+calls=18 6248
+296 18
+
+fl=(33)
+fn=(125)
+310 5
+
+fl=(33)
+fn=(125)
+317 5
+
+fl=(33)
+fn=(126) rrr::DpdkTransport::dpdk_rx_loop
+371 103
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=72 5903
+387 72
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=72 5878
+387 72
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=771 5879
+387 771
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=117 5911
+387 117
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=37 5904
+387 37
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=22 5913
+387 22
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=191 5905
+387 191
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=143 5862
+387 143
+
+fl=(33)
+fn=(126)
+387 120
+
+fl=(33)
+fn=(126)
+cfl=(19)
+cfn=(55)
+calls=11420 5891
+387 11420
+
+fl=(33)
+fn=(126)
+394 50
+
+fl=(33)
+fn=(126)
+395 7
+
+fl=(33)
+fn=(126)
+397 1
+
+fl=(33)
+fn=(126)
+398 13
+
+fl=(33)
+fn=(126)
+399 5
+
+fl=(33)
+fn=(126)
+400 68
+
+fl=(33)
+fn=(126)
+401 3
+
+fl=(33)
+fn=(126)
+cfl=??
+cfn=(127) _init
+calls=1 0
+404 1
+
+fl=(33)
+fn=(126)
+404 6
+
+fl=(33)
+fn=(126)
+408 5
+
+fl=(33)
+fn=(126)
+410 8
+
+fl=(33)
+fn=(126)
+412 5
+
+fl=(33)
+fn=(126)
+413 10
+
+fl=(33)
+fn=(126)
+423 5
+
+fl=(33)
+fn=(126)
+cfl=??
+cfn=(128) __nss_database_lookup
+calls=6 0
+424 6
+
+fl=(33)
+fn=(126)
+424 1
+
+fl=(33)
+fn=(126)
+cfl=??
+cfn=(127)
+calls=3 0
+424 3
+
+fl=(33)
+fn=(126)
+425 1
+
+fl=(33)
+fn=(126)
+429 1
+
+fl=(33)
+fn=(126)
+430 66
+
+fl=(33)
+fn=(126)
+cfl=(16)
+cfn=(49)
+calls=1 985
+430 1
+
+fl=(33)
+fn=(126)
+cfl=(16)
+cfn=(49)
+calls=313 986
+430 313
+
+fl=(32)
+fn=(111)
+cfl=??
+cfn=(119)
+calls=12 0
+6 12
+
+fl=(32)
+fn=(111)
+cfl=??
+cfn=(127)
+calls=1 0
+7 1
+
+fl=(32)
+fn=(111)
+cfl=??
+cfn=(119)
+calls=36 0
+7 36
+
+fl=(32)
+fn=(111)
+cfl=(25)
+cfn=(80)
+calls=11 477
+8 11
+
+fl=(32)
+fn=(111)
+24 2
+
+fl=(32)
+fn=(124)
+cfl=(32)
+cfn=(129) rrr::TransportConnection::make_pkt_header
+calls=1 120
+77 1
+
+fl=(32)
+fn=(129)
+120 1
+
+fl=(31)
+fn=(110)
+56 1
+
+fl=(31)
+fn=(110)
+58 3
+
+fl=(31)
+fn=(110)
+61 5
+
+fl=(31)
+fn=(110)
+62 1
+
+fl=(31)
+fn=(110)
+67 1
+
+fl=(31)
+fn=(110)
+cfl=(23)
+cfn=(72)
+calls=2 866
+70 2
+
+fl=(31)
+fn=(110)
+cfl=(23)
+cfn=(72)
+calls=1 865
+70 1
+
+fl=(31)
+fn=(110)
+cfl=(23)
+cfn=(72)
+calls=2 868
+70 2
+
+fl=(31)
+fn=(110)
+cfl=(23)
+cfn=(66)
+calls=1 865
+70 1
+
+fl=(31)
+fn=(130) rrr::TransportMarshal::read
+74 1
+
+fl=(31)
+fn=(130)
+75 8
+
+fl=(31)
+fn=(130)
+cfl=(23)
+cfn=(54)
+calls=1 865
+76 1
+
+fl=(31)
+fn=(130)
+cfl=(23)
+cfn=(72)
+calls=17 868
+76 17
+
+fl=(31)
+fn=(130)
+cfl=(23)
+cfn=(72)
+calls=1 865
+76 1
+
+fl=(31)
+fn=(130)
+77 2
+
+fl=(31)
+fn=(131) rrr::TransportMarshal::write
+85 2
+
+fl=(31)
+fn=(131)
+86 1
+
+fl=(31)
+fn=(131)
+cfl=(23)
+cfn=(72)
+calls=4 868
+88 4
+
+fl=(31)
+fn=(131)
+cfl=(23)
+cfn=(68)
+calls=1 865
+88 1
+
+fl=(31)
+fn=(131)
+cfl=(23)
+cfn=(72)
+calls=1 865
+88 1
+
+fl=(31)
+fn=(131)
+90 2
+
+fl=(31)
+fn=(131)
+91 1
+
+fl=(31)
+fn=(116)
+98 4
+
+fl=(31)
+fn=(116)
+cfl=(23)
+cfn=(65)
+calls=1 865
+99 1
+
+fl=(31)
+fn=(116)
+cfl=(23)
+cfn=(72)
+calls=2 868
+99 2
+
+fl=(31)
+fn=(115)
+102 1
+
+fl=(31)
+fn=(112)
+104 2
+
+fl=(31)
+fn=(117)
+114 1
+
+fl=(31)
+fn=(117)
+115 3
+
+fl=(31)
+fn=(117)
+cfl=(23)
+cfn=(72)
+calls=1 868
+116 1
+
+fl=(31)
+fn=(117)
+cfl=(23)
+cfn=(71)
+calls=1 865
+116 1
+
+fl=(31)
+fn=(117)
+119 1
+
+fl=(31)
+fn=(117)
+cfl=??
+cfn=(127)
+calls=1 0
+120 1
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(131)
+calls=2 90
+163 2
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(131)
+calls=2 88
+163 2
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(131)
+calls=1 85
+163 1
+
+fl=(31)
+fn=(113)
+167 1
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(131)
+calls=1 91
+168 1
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(131)
+calls=1 85
+168 1
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(131)
+calls=4 88
+168 4
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(131)
+calls=1 86
+168 1
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(113)
+calls=4 168
+179 4
+
+fl=(31)
+fn=(113)
+cfl=??
+cfn=(127)
+calls=1 0
+209 1
+
+fl=(31)
+fn=(113)
+cfl=(31)
+cfn=(113)
+calls=4 179
+210 4
+
+fl=(31)
+fn=(113)
+cfl=(29)
+cfn=(104)
+calls=1 53
+211 1
+
+fl=(31)
+fn=(120)
+307 1
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=1 74
+308 1
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=3 75
+308 3
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=3 76
+308 3
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=2 77
+313 2
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=1 75
+313 1
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=1 76
+313 1
+
+fl=(31)
+fn=(120)
+315 1
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=1 75
+324 1
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=6 76
+324 6
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(120)
+calls=7 324
+355 7
+
+fl=(31)
+fn=(120)
+cfl=??
+cfn=(132) std::__cxx11::basic_string::_M_replace_aux
+calls=2 0
+356 2
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=3 75
+358 3
+
+fl=(31)
+fn=(120)
+cfl=??
+cfn=(127)
+calls=1 0
+358 1
+
+fl=(31)
+fn=(120)
+cfl=(31)
+cfn=(130)
+calls=9 76
+358 9
+
+fl=(34)
+fn=(133) rrr::PollMgr::PollThread::poll_loop
+116 22
+
+fl=(34)
+fn=(133)
+cfl=(7)
+cfn=(26)
+calls=16 311
+117 16
+
+fl=(34)
+fn=(133)
+cfl=(7)
+cfn=(29)
+calls=3 355
+117 3
+
+fl=(34)
+fn=(133)
+cfl=(7)
+cfn=(29)
+calls=20 354
+117 20
+
+fl=(34)
+fn=(133)
+cfl=(17)
+cfn=(51)
+calls=13 334
+117 13
+
+fl=(34)
+fn=(133)
+cfl=(7)
+cfn=(27)
+calls=2 344
+117 2
+
+fl=(34)
+fn=(133)
+117 89
+
+fl=(34)
+fn=(133)
+cfl=(7)
+cfn=(26)
+calls=77 314
+117 77
+
+fl=(34)
+fn=(133)
+cfl=(7)
+cfn=(27)
+calls=101 345
+117 101
+
+fl=(34)
+fn=(133)
+cfl=(7)
+cfn=(29)
+calls=6 352
+117 6
+
+fl=(34)
+fn=(133)
+cfl=(17)
+cfn=(50)
+calls=275 321
+117 275
+
+fl=(34)
+fn=(133)
+cfl=(17)
+cfn=(50)
+calls=19 320
+117 19
+
+fl=(34)
+fn=(133)
+cfl=(17)
+cfn=(51)
+calls=123 335
+117 123
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=7 85
+118 7
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=12 96
+118 12
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=71 75
+118 71
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=4 92
+118 4
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=145 103
+118 145
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=19 81
+118 19
+
+fl=(34)
+fn=(133)
+118 107
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=6 129
+118 6
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=10 82
+118 10
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=6 68
+118 6
+
+fl=(34)
+fn=(133)
+cfl=(2)
+cfn=(118)
+calls=5 97
+118 5
+
+fl=(34)
+fn=(123)
+cfl=(30)
+cfn=(108)
+calls=1 104
+422 1
+
+fl=(3)
+fn=(3)
+cfl=(34)
+cfn=(133)
+calls=383 118
+125 383
+
+fl=(3)
+fn=(3)
+cfl=(34)
+cfn=(133)
+calls=22 116
+125 22
+
+fl=(3)
+fn=(3)
+cfl=(34)
+cfn=(133)
+calls=744 117
+125 744
+
+fl=(13)
+fn=(134) rrr::ServerConnection::operator<<
+190 4
+
+fl=(13)
+fn=(134)
+190 1
+
+fl=(13)
+fn=(134)
+190 1
+
+fl=(13)
+fn=(134)
+190 1
+
+fl=(13)
+fn=(41)
+cfl=(35) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/./counter.h
+cfn=(135) CounterService::__add_bench__wrapper__
+calls=4 84
+339 4
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=22 77
+339 22
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=14 83
+339 14
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=7 81
+339 7
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=115 80
+339 115
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=3 76
+339 3
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=1 79
+339 1
+
+fl=(13)
+fn=(41)
+339 1
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=45 82
+339 45
+
+fl=(13)
+fn=(41)
+cfl=(35)
+cfn=(135)
+calls=1 75
+339 1
+
+fl=(35)
+fn=(135)
+75 1
+
+fl=(35)
+fn=(135)
+cfl=??
+cfn=(136) pthread_attr_setschedparam
+calls=3 0
+76 3
+
+fl=(35)
+fn=(135)
+cfl=(31)
+cfn=(120)
+calls=7 355
+77 7
+
+fl=(35)
+fn=(135)
+cfl=(31)
+cfn=(120)
+calls=2 356
+77 2
+
+fl=(35)
+fn=(135)
+cfl=(31)
+cfn=(120)
+calls=13 358
+77 13
+
+fl=(35)
+fn=(135)
+cfl=(36) /var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/rpc_test/benchmarks.hpp
+cfn=(137) BenchmarkServiceImpl::add_bench
+calls=1 73
+79 1
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(109)
+calls=4 49
+80 4
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(109)
+calls=1 47
+80 1
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(109)
+calls=5 50
+80 5
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(109)
+calls=40 46
+80 40
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(109)
+calls=1 51
+80 1
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(109)
+calls=67 42
+80 67
+
+fl=(35)
+fn=(135)
+80 1
+
+fl=(35)
+fn=(135)
+cfl=(13)
+cfn=(138) rrr::ServerConnection::operator<< 
+calls=7 190
+81 7
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(114)
+calls=27 59
+82 27
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(114)
+calls=1 66
+82 1
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(114)
+calls=1 54
+82 1
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(114)
+calls=8 56
+82 8
+
+fl=(35)
+fn=(135)
+cfl=(2)
+cfn=(114)
+calls=8 55
+82 8
+
+fl=(35)
+fn=(135)
+cfl=??
+cfn=(136)
+calls=14 0
+83 14
+
+fl=(35)
+fn=(135)
+cfl=(29)
+cfn=(105)
+calls=1 89
+84 1
+
+fl=(35)
+fn=(135)
+cfl=(29)
+cfn=(105)
+calls=3 88
+84 3
+
+fl=(36)
+fn=(137)
+73 1
+
+fl=??
+fn=(139) _IO_do_write
+cfl=??
+cfn=(140) _IO_file_write
+calls=1 0
+0 1
+
+fl=??
+fn=(56)
+cfl=(37) mlx5_rxtx_vec.c
+cfn=(141) rxq_cq_process_v
+calls=7867 0
+0 7867
+
+fl=??
+fn=(142) __libc_malloc
+0 9
+
+fl=??
+fn=(143) mlx5_tx_handle_completion
+0 3
+
+fl=??
+fn=(140)
+cfl=??
+cfn=(144) __write
+calls=1 0
+0 1
+
+fl=??
+fn=(145) __libc_memalign
+0 5
+
+fl=??
+fn=(146) mprotect
+0 3
+
+fl=??
+fn=(136)
+cfl=??
+cfn=(146)
+calls=3 0
+0 3
+
+fl=??
+fn=(145)
+cfl=??
+cfn=(136)
+calls=29 0
+0 29
+
+fl=??
+fn=(147) operator
+0 1
+
+fl=??
+fn=(59)
+cfl=??
+cfn=(143)
+calls=3 0
+0 3
+
+fl=??
+fn=(147)
+0 32
+
+fl=??
+fn=(147)
+0 34
+
+fl=??
+fn=(147)
+0 2
+
+fl=??
+fn=(56)
+cfl=??
+cfn=(127)
+calls=20 0
+0 20
+
+fl=??
+fn=(142)
+cfl=??
+cfn=(136)
+calls=23 0
+0 23
+
+fl=??
+fn=(107)
+cfl=??
+cfn=(148) _IO_file_overflow
+calls=1 0
+0 1
+
+fl=??
+fn=(149) __tls_get_addr
+0 20
+
+fl=??
+fn=(132)
+cfl=??
+cfn=(150) std::__cxx11::basic_string::_M_mutate
+calls=2 0
+0 2
+
+fl=??
+fn=(148)
+cfl=??
+cfn=(139)
+calls=1 0
+0 1
+
+fl=??
+fn=(136)
+cfl=??
+cfn=(136)
+calls=63 0
+0 63
+
+fl=??
+fn=(150)
+cfl=??
+cfn=(119)
+calls=2 0
+0 2
+
+fl=??
+fn=(59)
+0 15
+
+fl=??
+fn=(151) std::__once_callable
+0 2
+
+fl=??
+fn=(56)
+cfl=(24)
+cfn=(152) common_ring_mc_dequeue
+calls=372 0
+0 372
+
+fl=??
+fn=(128)
+0 6
+
+fl=??
+fn=(127)
+0 28
+
+fl=??
+fn=(56)
+0 2817
+
+fl=??
+fn=(144)
+0 1
+
+fl=??
+fn=(56)
+cfl=??
+cfn=(149)
+calls=20 0
+0 20
+
+fl=??
+fn=(136)
+0 66
+
+fl=(4)
+fn=(4)
+cfl=(19)
+cfn=(55)
+calls=39 5891
+0 39
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=1 291
+0 1
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=5 271
+0 5
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=5 310
+0 5
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=7 395
+0 7
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=51 286
+0 51
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=50 394
+0 50
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=5 408
+0 5
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=10 413
+0 10
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=10 424
+0 10
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=5 399
+0 5
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=19 296
+0 19
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=7 404
+0 7
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=1 425
+0 1
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=8 410
+0 8
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=13 398
+0 13
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=131 273
+0 131
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=3 401
+0 3
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=56 287
+0 56
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=380 430
+0 380
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=68 400
+0 68
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=1 429
+0 1
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=12965 387
+0 12965
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=5 423
+0 5
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=274 288
+0 274
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=871 285
+0 871
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=10 270
+0 10
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=103 371
+0 103
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(125)
+calls=5 317
+0 5
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=1 397
+0 1
+
+fl=(4)
+fn=(4)
+cfl=(33)
+cfn=(126)
+calls=5 412
+0 5
+
+fl=(37)
+fn=(141)
+0 7867
+
+fl=(24)
+fn=(152)
+0 372
+
+fl=(24)
+fn=(75)
+0 30
+

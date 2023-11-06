@@ -55,7 +55,7 @@ public:
         READ = 0x1, WRITE = 0x2
     };
 
-    virtual int fd() = 0;
+    virtual uint64_t fd() = 0;
     virtual int poll_mode() = 0;
     virtual void handle_read() = 0;
     virtual void handle_write() = 0;
@@ -91,6 +91,7 @@ public:
     void add(FrequentJob*);
     void remove(FrequentJob*);
     int set_cpu_affinity(std::bitset<128> &core_mask);
+    void stop_threads();
     
     class PollThread : RPC_Thread {
         friend class PollMgr;
@@ -101,7 +102,7 @@ public:
 
         // guard mode_ and poll_set_
         rrr::SpinLock l_;
-        std::unordered_map<int, int> mode_;
+        std::unordered_map<uint64_t, int> mode_;
         std::unordered_set<Pollable*> poll_set_;
         int poll_fd_;
 
@@ -148,9 +149,11 @@ public:
         void add(FrequentJob*);
         void remove(FrequentJob*);
         ~PollThread() {
+            if (!stop_flag_){
             stop_flag_ = true;
            // #ifndef DPDK
                 Pthread_join(*p_th_, nullptr);
+            }
             //#endif
         // when stopping, release anything registered in pollmgr
             for (auto& it: poll_set_) {

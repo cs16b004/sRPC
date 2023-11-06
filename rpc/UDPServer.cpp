@@ -118,11 +118,11 @@ void UDPConnection::handle_read() {
             end_reply();
         }
         #ifdef RPC_MICRO_STATISTICS
-        struct timespec ts;
-        timespec_get(&ts, TIME_UTC);
-        (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
-        (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
-        (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
+        // struct timespec ts;
+        // timespec_get(&ts, TIME_UTC);
+        // (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
+        // (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
+        // (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
         //LOG_DEBUG("Putting end ts in %ld",rx_pkt_ids[req->xid]);
         #endif
     }
@@ -172,7 +172,7 @@ void UDPConnection::close() {
 
     // this call might actually DELETE this object, so we put it at the end of function
     if (should_release) {
-        this->release();
+      //  this->release();
     }
 }
 
@@ -219,7 +219,7 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
 }
 void UDPServer::stop(){
      if (status_ == RUNNING) {
-        status_ = STOPPING;
+        status_ = STOPPED;
         // wait till accepting thread done
         Pthread_join(loop_th_, nullptr);
 
@@ -236,31 +236,8 @@ void UDPServer::stop(){
     for (auto& it: sconns) {
         ((UDPConnection*)it)->close();
     }
-
+    pollmgr_->release();
     // make sure all open connections are closed
-    int alive_connection_count = -1;
-    for (;;) {
-        int new_alive_connection_count = sconns_ctr_.peek_next();
-        if (new_alive_connection_count <= 0) {
-            break;
-        }
-        if (alive_connection_count == -1 || new_alive_connection_count < alive_connection_count) {
-            LOG_DEBUG("waiting for %d alive connections to shutdown", new_alive_connection_count);
-        }
-        alive_connection_count = new_alive_connection_count;
-        // sleep 0.05 sec because this is the timeout for PollMgr's epoll()
-        usleep(50 * 1000);
-    }
-    verify(sconns_ctr_.peek_next() == 0);
-    #ifdef RPC_STATISTICS
-        
-      //  pollmgr_->remove(rJob);
-    #endif
-    // transport_->trigger_shutdown();
-    // transport_->shutdown();
-   // threadpool_->release();
-   // pollmgr_->release();
-
    
 }
 UDPServer::~UDPServer() {

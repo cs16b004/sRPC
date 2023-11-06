@@ -17,7 +17,8 @@
 #include <rte_ip.h>
 #include <sys/time.h>
 #include <mutex>
-
+#include <rte_hash.h>
+#include <rte_jhash.h>
 
 #define DEV_TX_OFFLOAD_VLAN_INSERT RTE_ETH_TX_OFFLOAD_VLAN_INSERT
 #define DEV_TX_OFFLOAD_IPV4_CKSUM RTE_ETH_TX_OFFLOAD_IPV4_CKSUM
@@ -72,6 +73,7 @@ namespace rrr{
         static DpdkTransport* transport_l;
     
         std::unordered_map<uint64_t, TransportConnection*> out_connections;
+        struct rte_hash *conn_table;
         uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
         uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
@@ -120,7 +122,7 @@ namespace rrr{
         struct dpdk_thread_info **thread_tx_info{nullptr};
         struct timeval start_clock, current;
         
-        std::thread main_thread;
+        
         bool force_quit{false};
         std::string getMacFromIp(std::string ip);
         void addr_config(std::string host_name,

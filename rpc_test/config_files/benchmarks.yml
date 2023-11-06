@@ -5,7 +5,7 @@ benchmarks:
   server_poll_threads: 1
   client_connections: 1
   client_threads: 1
-  server_duration: 120 #server_duration in seconds
-  client_duration: 80
+  server_duration: 40 #server_duration in seconds
+  client_duration: 30
   client_batch_size: 3
   server_address: "172.19.0.121:8501"

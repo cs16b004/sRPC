@@ -67,12 +67,12 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     // UDPConnection *conn = new UDPConnection(*s_addr);
    // LOG_DEBUG("Accept request %s",addr_str);
     TransportConnection* oconn = new TransportConnection();
-    int pipefd[2];
-    verify(pipe(pipefd)==0);
+    //int pipefd[2];
+    //verify(pipe(pipefd)==0);
     oconn->src_addr = src_addr_[config_->host_name_];
     oconn->out_addr = NetAddress(getMacFromIp(server_ip).c_str(),server_ip.c_str(),port);
-    oconn->in_fd_  = pipefd[0];
-    oconn->wfd = pipefd[1];
+    //oconn->in_fd_  = pipefd[0];
+    //oconn->wfd = pipefd[1];
     oconn->udp_port = src_addr_[config_->host_name_].port;
         addr = addr+ "::" + std::to_string(oconn->udp_port);
     uint64_t conn_id=0;
@@ -104,6 +104,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
 
 
     out_connections[conn_id] = oconn;
+    rte_hash_add_key_data(conn_table, &conn_id, oconn);
     oconn->assign_bufring();
     oconn->pkt_mempool = tx_mbuf_pool[chosen_tx_thread];
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
@@ -132,7 +133,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     
     sleep(1);
     oconn->connected_=true;
-    oconn->burst_size = 32;
+    oconn->burst_size = conf->client_batch_size_;
     return conn_id;
 }
 
@@ -185,6 +186,14 @@ uint64_t DpdkTransport::connect(const char* addr_str){
     conn_id  = conn_id | rte_cpu_to_be_16(oconn->udp_port); //local host port in BE
     Log_info("Chosen threads for new conn: %llu is tx-thread %d, rx_thread %d",conn_id, chosen_tx_thread, rx_threads_);
     out_connections[conn_id] = oconn;
+    int ret;
+    ret = rte_hash_add_key_data(conn_table, &conn_id, oconn);
+    if(ret < 0){
+        Log_error("Error in connecting to %s, entry cannot be created in conn table", addr_str);
+        return 0;
+    }
+    ret = rte_hash_lookup(conn_table,&conn_id);
+
     oconn->assign_bufring();
     oconn->pkt_mempool = tx_mbuf_pool[chosen_tx_thread];
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
@@ -228,7 +237,7 @@ uint64_t DpdkTransport::connect(const char* addr_str){
             wait=0;
         }
     }
-    oconn->burst_size = 32;
+    oconn->burst_size = conf->client_batch_size_;;
     Log_info("Connected to %s, fd r: %d, w: %d",addr.c_str(),oconn->in_fd_,oconn->wfd);
    
     return conn_id;
@@ -340,7 +349,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     unsigned int available = 0;
     unsigned int nb_sm_reqs_ =0;
     unsigned int nb_pkts=0;
-    uint16_t ret=0;
+    int ret=0;
     uint16_t retry_count=0;
 
     uint16_t queue_id = info->queue_id;
@@ -353,8 +362,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     uint16_t d_offset = dpdk_th->data_offset;
     std::unordered_map<uint64_t,TransportConnection*>& connections = dpdk_th->out_connections;
     
-    int i,j;
-    uint64_t times=0;
+
     
     uint8_t* pkt_ptr;
     struct rte_ipv4_hdr* ip_hdr;
@@ -364,10 +372,13 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     const uint16_t udp_h_offset = dpdk_th->udp_hdr_offset;
     uint8_t pkt_type;
     uint8_t* data_ptr;
+ 
     Log_info("Enter RX thread %d on lcore: %d",
              info->thread_id, rte_lcore_id());
     int retry = 0;
-    
+    rte_hash* conn_tab = dpdk_th->conn_table;
+    uint64_t connId_arr[32];
+    uint64_t conn_id;
     while(!info->shutdown) {
        
        
@@ -403,7 +414,7 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
          
             uint16_t pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
         //LOG_DEBUG("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
-            uint64_t conn_id = 0;
+             conn_id = 0;
             conn_id = src_ip;
             conn_id = conn_id<<16;
             // server port in BE 
@@ -411,23 +422,31 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
             //local host port in BE
             conn_id = conn_id<<16;
             conn_id  = conn_id | (uint64_t)(udp_hdr->dst_port);
-            #ifdef LOG_LEVEL_AS_DEBUG
-                uint64_t conn_c =conn_id;
-                uint16_t local_port = conn_c & (0xffff);
-                conn_c = conn_c>>16;
-                uint16_t server_port = conn_c & (0xffff);
-                conn_c = conn_c>>16;
-                uint32_t ser_ip = conn_c & (0xffffffff);
-                LOG_DEBUG("Conn Id dissassemble : IP: %s, port: %d, local port: %d",ipv4_to_string(ser_ip).c_str(), ntohs(server_port), ntohs(local_port));
-            #endif
+            // #ifdef LOG_LEVEL_AS_DEBUG
+            //     uint64_t conn_c =conn_id;
+            //     uint16_t local_port = conn_c & (0xffff);
+            //     conn_c = conn_c>>16;
+            //     uint16_t server_port = conn_c & (0xffff);
+            //     conn_c = conn_c>>16;
+            //     uint32_t ser_ip = conn_c & (0xffffffff);
+            //     LOG_DEBUG("Conn Id dissassemble : IP: %s, port: %d, local port: %d",ipv4_to_string(ser_ip).c_str(), ntohs(server_port), ntohs(local_port));
+            // #endif
+            connId_arr[i] = conn_id;
             data_ptr = pkt_ptr + d_offset;
             mempcpy(&pkt_type,data_ptr,sizeof(uint8_t));
             data_ptr += sizeof(uint8_t);
             
             if(likely(pkt_type == RR) ){
-         
+                struct data *result;
+                ret = rte_hash_lookup_data(conn_tab, &conn_id, (void**)&current_conn );
+                //ret = rte_hash_lookup(conn_tab, &conn_id);
+                if(unlikely(ret < 0))
+                    continue;
+                //rte_hash_lookup_bulk
+                
+               // ret = rte_table_hash_lookup_data(conn_tab, &conn_id, (void**)&current_conn);
                 while(retry < 2000){
-                    if(rte_ring_sp_enqueue(connections[conn_id]->in_bufring, rx_buffers[i]) >= 0){
+                    if(rte_ring_sp_enqueue(current_conn->in_bufring, rx_buffers[i]) >= 0){
                         break;
                     }
                     retry++;
@@ -468,7 +487,8 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
             }
         }
     }
-
+    Log_info("Exiting RX thread %d ",
+             info->thread_id);
     return 0;
 }
 
@@ -595,7 +615,22 @@ void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
         if (rx_mbuf_pool[pool_idx] == NULL)
             rte_exit(EXIT_FAILURE, "Cannot create rx mbuf pool %d\n", pool_idx);
     }
-
+    /* Initialze conn table*/
+    struct rte_hash_parameters hash_params{
+        .name = "sRPC_CONNECTION_TABLE",
+        .entries = 1024,
+        .reserved=0,
+        .key_len = sizeof(uint64_t),
+        .hash_func = &rte_jhash,
+        .hash_func_init_val = 8123,
+        .socket_id = conf->cpu_info_.numa,
+        
+        .extra_flag = RTE_HASH_EXTRA_FLAGS_EXT_TABLE,
+        
+    };
+    conn_table = rte_hash_create(&hash_params);
+    
+    
     /* Will initialize buffers in port_init function */
     thread_rx_info = new dpdk_thread_info*[rx_threads_];
     thread_tx_info = new dpdk_thread_info*[tx_threads_];
@@ -835,10 +870,9 @@ int DpdkTransport::port_reset(uint16_t port_id) {
 }
 
 void DpdkTransport::shutdown() {
-    main_thread.join();
-    rte_eal_mp_wait_lcore();
-
-  //  qdma_port_info::print_opennic_regs(port_info_[0].user_bar_idx);
+    
+     rte_eal_mp_wait_lcore();
+     Log_info("All DPDK threads stopped");
     for (int port_id = 0; port_id < port_num_; port_id++) {
         
 
@@ -846,6 +880,9 @@ void DpdkTransport::shutdown() {
         rte_eth_dev_close(port_id);
         
     }
+    rte_hash_free(conn_table);
+    struct rte_flow_error err;
+    rte_flow_flush(0,&err);
 
     int ret = rte_eal_cleanup();
     if (ret==0)

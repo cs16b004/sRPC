@@ -83,9 +83,9 @@ int UDPClient::connect(const char * addr){
     
 
     conn_id = transport_->connect(addr);
-    sock_ = transport_->out_connections[conn_id]->in_fd_;
+    sock_ = conn_id;
     status_=CONNECTED;
-    verify(set_nonblocking(sock_, true) == 0);
+
     conn = transport_->get_conn(conn_id);
 
     pollmgr_->add(this);
@@ -99,16 +99,16 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
     }
 
      Future* fu = new Future(xid_counter_.next(), attr);
-    pending_fu_l_.lock();
-    //pending_fu_[fu->xid_] = fu;
-    // //Future* tfu = fu;
-     pending_fu_l_.unlock();
+    // pending_fu_l_.lock();
+    // pending_fu_[fu->xid_] = fu;
+    // // //Future* tfu = fu;
+    //  pending_fu_l_.unlock();
     current_req.allot_buffer(conn->get_new_pkt());
     current_req.set_book_mark(sizeof(i32));
     current_req << i64(fu->xid_);
     current_req << rpc_id;
     #ifdef RPC_STATISTICS
-    //    put_start_ts(fu->xid_);
+       // put_start_ts(fu->xid_);
     #endif
    
     return (Future *) fu->ref_copy();
@@ -162,7 +162,7 @@ void UDPClient::handle_read(){
                 fu->error_code_ = v_error_code;
                 fu->reply_.write(reply_array[i].get_offset(),reply_size-sizeof(i64) -sizeof(i32));
                 #ifdef RPC_STATISTICS
-               //  put_end_ts(fu->xid_);
+                // put_end_ts(fu->xid_);
                 #endif
                 //Log_info("For reply for req: %lu",v_reply_xid);
                 fu->notify_ready();

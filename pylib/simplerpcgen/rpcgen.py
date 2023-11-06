@@ -278,9 +278,11 @@ def parse(rule, text):
 
 def generate_rpc_table(rpc_source):
     rpc_table = {}
+    c = 0x10000000
     for service in rpc_source.services:
         for func in service.functions:
-            rpc_code = random.randint(0x10000000, 0x70000000)
+            rpc_code = c + 0x1  #random.randint(0x10000000, 0x70000000)
+            c = c + 0x1
             rpc_table["%s.%s" % (service.name, func.name)] = rpc_code
     return rpc_table
 

@@ -10,7 +10,7 @@ void Benchmarks::create_server(){
     base::ThreadPool *tp = new base::ThreadPool(0);
     
     #ifdef DPDK
-        rrr::DpdkTransport::create_transport(conf);
+        
         rrr::UDPServer *server = new rrr::UDPServer(pollmgr_,tp);
     #else
         rrr::TCPServer *server = new rrr::TCPServer(pollmgr_, tp);
@@ -37,15 +37,24 @@ void Benchmarks::create_server(){
     
     observe_server();
     rep->trigger_shutdown();
-    server->stop();
+    
+      
+      
+        #ifdef DPDK
+        
+        ((rrr::UDPServer*)server)->stop();
+        #else
+            ((rrr::TCPServer*)server)->stop();
+        #endif
+
+        pollmgr_->release();
+    
+     // pollmgr_->stop_threads();
+      
     
 
-    #ifdef DPDK
-        rrr::DpdkTransport::get_transport()->trigger_shutdown();
-        rrr::DpdkTransport::get_transport()->shutdown();
-    #endif
-    pollmgr_->release();
-    tp->release();
+    
+   
   
     
     delete server;
@@ -91,9 +100,9 @@ void* Benchmarks::launch_client_thread(void *arg){
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
     BenchmarkProxy* pr= ct->my_proxy;
     while(!ct->stop){
-         //rrr::FutureGroup fg;
+        // rrr::FutureGroup fg;
         for (int i = 0; i < ct->client_batch_size_; i++) {
-            (pr->add_bench_async());
+            (pr->add_bench_async())->release();
         }
         //fg.wait_all();
         #ifdef DPDK

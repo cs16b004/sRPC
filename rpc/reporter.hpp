@@ -9,6 +9,7 @@
 #include "dpdk_transport/transport.hpp"
 #include <unordered_map>
 namespace rrr{
+#ifdef RPC_STATISTICS
 class PollThread;
 
 class Reporter{
@@ -39,10 +40,11 @@ class Reporter{
         void trigger_shutdown(){
             stop = true;
             void ** ret;
-            Pthread_join(*recorder, ret);
+            
         }
        // double compute_avg(std::unordered_map<uint64_t,std::timespec>& end_book, 
        //         std::unordered_map<uint64_t,std::timespec>& start_book);
         
 };
+#endif
 }

@@ -1,1 +1,3 @@
 .vscode
+rpc_test/perf.data
+rpc_test/perf.data.old

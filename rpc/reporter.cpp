@@ -63,7 +63,7 @@ std::vector<double> compute_percentile(std::unordered_map<uint64_t,std::timespec
         double percentile_9999th = sample[percentile_9999th_i];
         percentiles.push_back(median);
         percentiles.push_back(percentile_9999th);
-        Log_info("Sample size %d, Median Latency: %f 99.99th: %f",sample_size,median,percentile_9999th);
+        Log_info("Sample size %d, Min: %f Median Latency: %f 99.99th: %f", sample_size,median,sample[0], percentile_9999th);
     }
     return percentiles;           
         
@@ -74,6 +74,7 @@ std::timespec deepCopyTimespec(const std::timespec& src) {
     copy.tv_nsec = src.tv_nsec;
     return copy;
 }
+
 void* Reporter::run(void* arg){
     Reporter* reporter = (Reporter*)arg;
     Log::info("Reporter Thread Launched, Observing %d poll threads", reporter->pm_->n_threads_);
@@ -113,26 +114,15 @@ void* Reporter::run(void* arg){
         for(int i=0;i<reporter->pm_->n_threads_;i++){
             for(rrr::Pollable* poll_job: reporter->pm_->poll_threads_[i]->poll_set_){
                
-                // deep copy the books to avoid locks;
+                
                 if(reporter->is_client){
                     poll_job->ts_lock.lock();
-                    for (const auto& pair : poll_job->end_book) {
-                        end_book_copy[pair.first] = deepCopyTimespec(pair.second);
-                    }
-                    for(const auto& pair: poll_job->start_book){
-                        start_book_copy[pair.first] = deepCopyTimespec(pair.second);
-                    }
+                    compute_percentile(poll_job->start_book ,poll_job->end_book);
                     poll_job->end_book.clear();
                     poll_job->start_book.clear();
                     poll_count++;
                     poll_job->ts_lock.unlock();
                     
-                    lat_avg+= rrr::compute_avg(start_book_copy,end_book_copy);
-                    
-                    compute_percentile(start_book_copy,end_book_copy);
-
-                    start_book_copy.clear();
-                    end_book_copy.clear();
                     job_count+= poll_job->read_and_set_counter(1);
                     
                 }
@@ -144,7 +134,7 @@ void* Reporter::run(void* arg){
 
         }
             if(reporter->is_client){
-               // Log_info("Across all poll, Average Latency %f micro-sec",lat_avg/poll_count);
+             //  Log_info("Across all poll, Average Latency %f micro-sec",lat_avg/poll_count);
             
             Log_info("Total RPCs: %lu, Throughput client %f/s", job_count-last_job_count, (job_count - last_job_count)*1000.0/(reporter->period_) );
             last_job_count = job_count;
@@ -157,4 +147,5 @@ void* Reporter::run(void* arg){
     }
     Log::info("Reporter Thread Stopped");
 }
-}
+
+}//rrr
