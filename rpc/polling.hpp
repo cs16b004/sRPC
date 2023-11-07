@@ -104,6 +104,8 @@ public:
         rrr::SpinLock l_;
         std::unordered_map<uint64_t, int> mode_;
         std::unordered_set<Pollable*> poll_set_;
+        Pollable* poll_set_arr_[1024];
+        int poll_arr_size = 0;
         int poll_fd_;
 
         std::set<FrequentJob*> fjobs_;

@@ -112,10 +112,12 @@ void PollMgr::PollThread::poll_loop() {
     std::ifstream("/proc/self/comm") >> sp;
     sp+=".prof";
     ProfilerStart(sp.c_str());
+    
     #endif
+    int i=0;
     while(!stop_flag_){
-        for(auto pollable:poll_set_){
-            pollable->handle_read();
+        for(i=0;i<poll_arr_size;i++){
+            poll_set_arr_[i]->handle_read();
         }
     }
     #ifdef PROFILE
@@ -256,6 +258,8 @@ void PollMgr::PollThread::add(Pollable* poll) {
     
     // register pollable
     poll_set_.insert(poll);
+    poll_set_arr_[poll_arr_size] = poll;
+    poll_arr_size++;
     mode_[fd] = poll_mode;
 
     l_.unlock();

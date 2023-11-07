@@ -105,12 +105,13 @@ uint64_t DpdkTransport::accept(const char* addr_str){
 
     out_connections[conn_id] = oconn;
    // rte_hash_add_key_data(conn_table, &conn_id, oconn);
+   oconn->conn_id = conn_id; 
     oconn->assign_bufring();
     oconn->pkt_mempool = tx_mbuf_pool[chosen_tx_thread];
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
     oconn->assign_availring();
     oconn->make_headers_and_produce();  
-    oconn->conn_id = conn_id;  
+     
 
     while(rte_ring_sp_enqueue(tx_sm_rings[chosen_tx_thread], (void*)oconn)<0)
         ;
@@ -193,13 +194,13 @@ uint64_t DpdkTransport::connect(const char* addr_str){
       //  return 0;
     //}
     //ret = rte_hash_lookup(conn_table,&conn_id);
-
+    oconn->conn_id = conn_id; 
     oconn->assign_bufring();
     oconn->pkt_mempool = tx_mbuf_pool[chosen_tx_thread];
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
     oconn->assign_availring();
     oconn->make_headers_and_produce();
-    oconn->conn_id = conn_id;    
+       
    while((rte_ring_enqueue(tx_sm_rings[chosen_tx_thread], (void*)oconn))< 0 ){
     ;
    }
