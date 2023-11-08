@@ -437,6 +437,10 @@ class UDPConnection: public ServerConnection {
     TransportMarshal* curr_reply;
     TransportConnection* conn;
     rte_mbuf* pkt_array[32];
+    Request<TransportMarshal>* request_array[32];
+
+    //test call_back
+    std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)> cb;
     
     void close();
     uint64_t connId;

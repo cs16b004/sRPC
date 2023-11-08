@@ -71,6 +71,23 @@ namespace rrr{
               
               offset+=1;
             }
+            void allot_buffer_x(rte_mbuf* req){
+              book_mark_offset=0;
+              book_mark_len=0;
+              offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+              req_data = (rte_mbuf*)req;     
+              uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+              eth_hdr = reinterpret_cast<rte_ether_hdr*>(dst);
+              
+              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + sizeof(rte_ether_hdr));
+              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + sizeof(rte_ether_hdr) + sizeof(rte_ipv4_hdr));
+             // verify(dst !=nullptr);
+              dst+=offset;
+              
+             
+              
+              offset+=1;
+            }
             size_t read(void *p, size_t n){
               void* src = rte_pktmbuf_mtod_offset(req_data, void*,offset);
               rte_memcpy(p, src, n);

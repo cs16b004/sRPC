@@ -27,6 +27,7 @@ UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
     for(int i=0;i<32;i++){
         pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);
     }
+    cb = server->us_handlers_.find(0x10000003)->second;
 }
 
 UDPConnection::~UDPConnection() {
@@ -74,12 +75,12 @@ void UDPConnection::handle_read() {
     unsigned int available;
     unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
 
-    Request<TransportMarshal>* request_array[32];
+    
     
     for(int i=0;i<nb_pkts;i++){
         
         request_array[i] = new Request<TransportMarshal>();
-        request_array[i]->m.allot_buffer(pkt_array[i]);
+        request_array[i]->m.allot_buffer_x(pkt_array[i]);
         i32 req_size=0;
         i64 xid;
         request_array[i]->m >> req_size >> request_array[i]->xid;
@@ -92,39 +93,39 @@ void UDPConnection::handle_read() {
         request_array[i]->m >> rpc_id;
 
       
-
-        auto it = server_->us_handlers_.find(rpc_id);
-        if (likely(it != server_->us_handlers_.end())) {
-            // the handler should delete req, and release server_connection refcopy.
-           // LOG_DEBUG("RPC Triggered");
-             #ifdef RPC_STATISTICS
-                count(0);
-             #endif // RPC_STATISTICS
-            it->second(request_array[i], (UDPConnection *) this->ref_copy());
+        cb(request_array[i], (UDPConnection *) this->ref_copy());
+        // auto it = server_->us_handlers_.find(rpc_id);
+        // if (likely(it != server_->us_handlers_.end())) {
+        //     // the handler should delete req, and release server_connection refcopy.
+        //    // LOG_DEBUG("RPC Triggered");
+        #ifdef RPC_STATISTICS
+                 count(0);
+              #endif // RPC_STATISTICS
+        //     it->second(request_array[i], (UDPConnection *) this->ref_copy());
             
-        } else {
-            rpc_id_missing_l_s.lock();
-            bool surpress_warning = false;
-            if (rpc_id_missing_s.find(rpc_id) == rpc_id_missing_s.end()) {
-                rpc_id_missing_s.insert(rpc_id);
-            } else {
-                surpress_warning = true;
-            }
-            rpc_id_missing_l_s.unlock();
-            if (!surpress_warning) {
-                Log_error("rrr::UDPConnection: no handler for rpc_id=0x%08x", rpc_id);
-            }
-            begin_reply(request_array[i], ENOENT);
-            end_reply();
-        }
-        #ifdef RPC_MICRO_STATISTICS
+        // } else {
+        //     rpc_id_missing_l_s.lock();
+        //     bool surpress_warning = false;
+        //     if (rpc_id_missing_s.find(rpc_id) == rpc_id_missing_s.end()) {
+        //         rpc_id_missing_s.insert(rpc_id);
+        //     } else {
+        //         surpress_warning = true;
+        //     }
+        //     rpc_id_missing_l_s.unlock();
+        //     if (!surpress_warning) {
+        //         Log_error("rrr::UDPConnection: no handler for rpc_id=0x%08x", rpc_id);
+        //     }
+        //     begin_reply(request_array[i], ENOENT);
+        //     end_reply();
+        // }
+        // #ifdef RPC_MICRO_STATISTICS
         // struct timespec ts;
         // timespec_get(&ts, TIME_UTC);
         // (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
         // (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
         // (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
         //LOG_DEBUG("Putting end ts in %ld",rx_pkt_ids[req->xid]);
-        #endif
+        //#endif
     }
     rte_pktmbuf_free_bulk(pkt_array, nb_pkts);
 }
