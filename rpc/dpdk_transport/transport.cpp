@@ -134,7 +134,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     
     sleep(1);
     oconn->connected_=true;
-    oconn->burst_size = conf->client_batch_size_;
+    oconn->burst_size = 32;//conf->client_batch_size_;
     return conn_id;
 }
 

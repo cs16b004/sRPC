@@ -135,11 +135,11 @@ public:
 
         void start(PollMgr* poll_mgr) {
             poll_mgr_ = poll_mgr;
-            // #ifdef DPDK
-            // rte_eal_remote_launch(PollMgr::PollThread::start_poll_loop_dpdk,this, LCORE_ID_ANY );
-            // #else
+             #ifdef DPDK
+             rte_eal_remote_launch(PollMgr::PollThread::start_poll_loop_dpdk,this, 6 );
+             #else
             Pthread_create(p_th_, nullptr, PollMgr::PollThread::start_poll_loop, this);
-            //#endif
+            #endif
         }
         public:
          

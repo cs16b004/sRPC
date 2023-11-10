@@ -118,6 +118,7 @@ void PollMgr::PollThread::poll_loop() {
     while(!stop_flag_){
         for(i=0;i<poll_arr_size;i++){
             poll_set_arr_[i]->handle_read();
+            poll_set_arr_[i]->handle_write();
         }
     }
     #ifdef PROFILE

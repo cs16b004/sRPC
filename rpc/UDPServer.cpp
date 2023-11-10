@@ -56,14 +56,16 @@ void UDPConnection::end_reply() {
         current_reply.write_book_mark(&reply_size, sizeof(i32));
         current_reply.format_header();
        int retry=0;
-     while(
-     rte_ring_enqueue(conn->out_bufring,current_reply.get_mbuf())< 0){
-        retry++;
-        if(retry > 100*1000){
-            Log_warn("Stuck in enquueing rpc_request");
-            retry=0;
-        }
-     }
+       reply_arr[reply_idx%32] = current_reply.get_mbuf();
+       reply_idx++;
+    //  while(
+    //  rte_ring_enqueue(conn->out_bufring,current_reply.get_mbuf())< 0){
+    //     retry++;
+    //     if(retry > 100*1000){
+    //         Log_warn("Stuck in enquueing rpc_request");
+    //         retry=0;
+    //     }
+    //  }
 }
 
 void UDPConnection::handle_read() {
@@ -98,9 +100,9 @@ void UDPConnection::handle_read() {
         // if (likely(it != server_->us_handlers_.end())) {
         //     // the handler should delete req, and release server_connection refcopy.
         //    // LOG_DEBUG("RPC Triggered");
-        #ifdef RPC_STATISTICS
-                 count(0);
-              #endif // RPC_STATISTICS
+         #ifdef RPC_STATISTICS
+                  count(0);
+               #endif // RPC_STATISTICS
         //     it->second(request_array[i], (UDPConnection *) this->ref_copy());
             
         // } else {
@@ -134,11 +136,23 @@ void UDPConnection::handle_write() {
     // if (status_ == CLOSED) {
     //     return;
     // }
-
+    int retry =0;
+    unsigned int available;
+    if(reply_idx == 0)
+        return;
+     while(
+     rte_ring_sp_enqueue_bulk(conn->out_bufring,(void* const*)&reply_arr,reply_idx,&available)< 0){
+        retry++;
+        if(retry > 100*1000){
+            Log_warn("Stuck in enqueing rpc_request");
+            retry=0;
+        }
+     }
+     reply_idx=0;
     // out_l_.lock();
     // out_.write_to_fd(socket_);
     // if (out_.empty()) {
-         server_->pollmgr_->update_mode(this, Pollable::READ);
+        // server_->pollmgr_->update_mode(this, Pollable::READ);
     // }
     // out_l_.unlock();
 }
