@@ -5,7 +5,7 @@
 - Undergoing optinmisation.
 - Thesis Project under [Dr. Shuai Mu](http://mpaxos.com)
 
- - Over 1M+ RPC/second acheived in latest experimental setup.
+ - Over 1M+ RPC/second acheived in latest experimental setup. Around 5.5 micro-sec median latency.
 
  - More optimisations to follow.
 
