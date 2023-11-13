@@ -71,7 +71,7 @@ public:
     void add_bench(const std::string& in, std::string* out ) {
        // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
         count_++;
-        out = &out_string;
+        out->append(out_string.c_str());
     }
 };
 class Benchmarks{

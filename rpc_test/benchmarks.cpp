@@ -2,7 +2,7 @@
 
 void Benchmarks::create_server(){
 
-     csi = new BenchmarkServiceImpl(conf->output_size_/64);
+     csi = new BenchmarkServiceImpl(conf->output_size_);
 
 
     pollmgr_ = new rrr::PollMgr(conf->server_poll_threads_);
