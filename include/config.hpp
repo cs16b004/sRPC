@@ -2,7 +2,7 @@
 #define _CONFIG_H_
 #include <string>
 #include <cstdint>
-#include "../../base/logging.hpp"
+#include "base/logging.hpp"
 #include <yaml-cpp/yaml.h>
 namespace rrr{
 class Config {

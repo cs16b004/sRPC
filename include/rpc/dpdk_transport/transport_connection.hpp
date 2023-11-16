@@ -1,4 +1,6 @@
-#pragma once
+#ifndef TRANSPORT_CONNECTION_HPP
+#define TRANSPORT_CONNECTION_HPP
+
 #include <iostream>
 #include <cstdint>
 #include <map>
@@ -86,3 +88,4 @@ namespace rrr{
 
     };
 }
+#endif

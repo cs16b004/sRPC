@@ -291,7 +291,8 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m,
 }
 
 inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal & m, rrr::Marshal m2){
-  m2.read(m.get_offset(),m.content_size());
+  m2.read(m.get_offset(),m2.content_size());
+  return m;
 }
 
 inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, rrr::i8 &v) {

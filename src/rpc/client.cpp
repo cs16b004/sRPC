@@ -128,9 +128,7 @@ void UDPClient::end_request(){
             retry=0;
         }
      }
-     #ifdef RPC_STATISTICS
-        count(1);
-     #endif
+   
      
 }
 
@@ -328,9 +326,6 @@ void TCPClient::handle_read() {
                 fu->reply_.read_from_marshal(in_, packet_size - v_reply_xid.val_size() - v_error_code.val_size());
 
                 fu->notify_ready();
-                #ifdef RPC_STATISTICS
-                     put_end_ts(fu->xid_);
-                #endif 
                 // since we removed it from pending_fu_
                 fu->release();
             } else {
@@ -384,9 +379,6 @@ Future* TCPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) 
 
     *this << v64(fu->xid_);
     *this << rpc_id;
-    #ifdef RPC_STATISTICS
-        put_start_ts(fu->xid_);
-    #endif
     // one ref is already in pending_fu_
     return (Future *) fu->ref_copy();
 }

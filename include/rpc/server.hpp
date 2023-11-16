@@ -406,11 +406,7 @@ public:
     ~DeferredReply() {
         cleanup_();
         delete req_;
-        #ifdef DPDK
-            (UDPConnection*)sconn_->release(); 
-        #else
-            ((TCPConnection*)sconn_)->release();
-        #endif
+        sconn_->release();
         req_ = nullptr;
         sconn_ = nullptr;
     }

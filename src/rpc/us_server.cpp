@@ -1,6 +1,3 @@
-#pragma once
-#include "rpc/server.hpp"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,9 +6,10 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/mman.h>
-#include<linux/memfd.h>
-#include "dpdk_transport/config.hpp"
-#include "dpdk_transport/transport_marshal.hpp"
+
+#include "rpc/server.hpp"
+#include "config.hpp"
+#include "rpc/dpdk_transport/transport_marshal.hpp"
 
 using namespace std;
 
