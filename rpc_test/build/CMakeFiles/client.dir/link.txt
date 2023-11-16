@@ -1,1 +1,0 @@
-/usr/bin/c++   -Wall   CMakeFiles/client.dir/c.cpp.o  -o client  librpc.a libbase.a -Wl,--whole-archive -ldpdk -Wl,--no-whole-archive -lpthread -lyaml-cpp 

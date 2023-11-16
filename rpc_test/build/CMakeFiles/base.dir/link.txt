@@ -1,2 +1,0 @@
-/usr/bin/ar qc libbase.a  CMakeFiles/base.dir/var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/base/basetypes.cpp.o CMakeFiles/base.dir/var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/base/logging.cpp.o CMakeFiles/base.dir/var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/base/misc.cpp.o CMakeFiles/base.dir/var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/base/strop.cpp.o CMakeFiles/base.dir/var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/base/threading.cpp.o CMakeFiles/base.dir/var/services/homes/ayujain/janus/ogrrr/dpdk-rrr/base/unittest.cpp.o
-/usr/bin/ranlib libbase.a
