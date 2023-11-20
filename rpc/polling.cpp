@@ -23,53 +23,6 @@ using namespace std;
 
 namespace rrr {
 
-
-#ifdef RPC_STATISTICS
-void Pollable::record_batch(size_t batch_size){
-       
-            batch_record[batch_id] = batch_size;
-            batch_id++;
-            batch_id %= 10000;
-          
-        }
-uint64_t Pollable::read_and_set_counter(uint8_t id){
-           
-            return counters[id];
-}
-
-void Pollable::count(uint8_t counter_id){
-           
-            counters[counter_id]++;
-            
-        }
-void Pollable::put_start_ts(uint64_t xid){
-    
-    if(start_book.size() > 1000)
-        return ;
-    ts_lock.lock();
-        
-        struct timespec ts;
-        timespec_get(&ts, TIME_UTC);
-        start_book[xid] = ts;
-        start_book_counter++;
-    
-    ts_lock.unlock();
-    
-
-}
-void Pollable::put_end_ts(uint64_t xid){
-        if(end_book.size() > 1000)
-            return;
-        ts_lock.lock();
-        struct timespec ts;
-        timespec_get(&ts, TIME_UTC);
-        end_book[xid] = ts;
-        end_book_counter++;
-        ts_lock.unlock();
-    
-}
-#endif
-
 PollMgr::PollThread::PollThread(pthread_t* th, uint16_t tid): RPC_Thread(th, tid, thread_type::POLL_THREAD), poll_mgr_(nullptr), stop_flag_(false) {
 #ifdef USE_KQUEUE
         poll_fd_ = kqueue();
@@ -118,7 +71,7 @@ void PollMgr::PollThread::poll_loop() {
     while(!stop_flag_){
         for(i=0;i<poll_arr_size;i++){
             poll_set_arr_[i]->handle_read();
-            poll_set_arr_[i]->handle_write();
+           // poll_set_arr_[i]->handle_write();
         }
     }
     #ifdef PROFILE

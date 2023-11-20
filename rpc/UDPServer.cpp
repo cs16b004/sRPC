@@ -45,6 +45,10 @@ void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_c
      i32 v_error_code = error_code;
     i64 v_reply_xid = req->xid;
    // rte_pktmbuf_free(req->m.get_mbuf());
+    #ifdef LATENCY
+        req->m >> timestamps[reply_idx%32] ;
+    #endif
+
     current_reply.set_book_mark(sizeof(i32)); // will write reply size later
 
     current_reply << v_reply_xid;
@@ -54,28 +58,31 @@ void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_c
 void UDPConnection::end_reply() {
     i32 reply_size = current_reply.content_size();
         current_reply.write_book_mark(&reply_size, sizeof(i32));
+        #ifdef LATENCY
+            current_reply << timestamps[reply_idx%32];
+        #endif
         current_reply.format_header();
        int retry=0;
-       reply_arr[reply_idx%32] = current_reply.get_mbuf();
+      // reply_arr[reply_idx%32] = current_reply.get_mbuf();
        reply_idx++;
-    //  while(
-    //  rte_ring_enqueue(conn->out_bufring,current_reply.get_mbuf())< 0){
-    //     retry++;
-    //     if(retry > 100*1000){
-    //         Log_warn("Stuck in enquueing rpc_request");
-    //         retry=0;
-    //     }
-    //  }
+     while(
+     rte_ring_enqueue(conn->out_bufring,current_reply.get_mbuf())< 0){
+        retry++;
+        if(retry > 100*1000){
+            Log_warn("Stuck in enquueing rpc_request");
+            retry=0;
+        }
+     }
 }
 
 void UDPConnection::handle_read() {
    
-    if (status_ == CLOSED) {
+    // if (status_ == CLOSED) {
        
-        return;
-    }
+    //     return;
+    // }
     unsigned int available;
-    unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
+     unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
 
     
     
@@ -95,39 +102,39 @@ void UDPConnection::handle_read() {
         request_array[i]->m >> rpc_id;
 
       
-        cb(request_array[i], (UDPConnection *) this->ref_copy());
-        // auto it = server_->us_handlers_.find(rpc_id);
-        // if (likely(it != server_->us_handlers_.end())) {
-        //     // the handler should delete req, and release server_connection refcopy.
-        //    // LOG_DEBUG("RPC Triggered");
+        //cb(request_array[i], (UDPConnection *) this->ref_copy());
+        auto it = server_->us_handlers_.find(rpc_id);
+        if (likely(it != server_->us_handlers_.end())) {
+            // the handler should delete req, and release server_connection refcopy.
+           // LOG_DEBUG("RPC Triggered");
          #ifdef RPC_STATISTICS
                   count(0);
                #endif // RPC_STATISTICS
-        //     it->second(request_array[i], (UDPConnection *) this->ref_copy());
+            it->second(request_array[i], (UDPConnection *) this->ref_copy());
             
-        // } else {
-        //     rpc_id_missing_l_s.lock();
-        //     bool surpress_warning = false;
-        //     if (rpc_id_missing_s.find(rpc_id) == rpc_id_missing_s.end()) {
-        //         rpc_id_missing_s.insert(rpc_id);
-        //     } else {
-        //         surpress_warning = true;
-        //     }
-        //     rpc_id_missing_l_s.unlock();
-        //     if (!surpress_warning) {
-        //         Log_error("rrr::UDPConnection: no handler for rpc_id=0x%08x", rpc_id);
-        //     }
-        //     begin_reply(request_array[i], ENOENT);
-        //     end_reply();
-        // }
-        // #ifdef RPC_MICRO_STATISTICS
-        // struct timespec ts;
-        // timespec_get(&ts, TIME_UTC);
-        // (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
-        // (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
-        // (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
-        //LOG_DEBUG("Putting end ts in %ld",rx_pkt_ids[req->xid]);
-        //#endif
+        } else {
+            rpc_id_missing_l_s.lock();
+            bool surpress_warning = false;
+            if (rpc_id_missing_s.find(rpc_id) == rpc_id_missing_s.end()) {
+                rpc_id_missing_s.insert(rpc_id);
+            } else {
+                surpress_warning = true;
+            }
+            rpc_id_missing_l_s.unlock();
+            if (!surpress_warning) {
+                Log_error("rrr::UDPConnection: no handler for rpc_id=0x%08x", rpc_id);
+            }
+            begin_reply(request_array[i], ENOENT);
+            end_reply();
+        }
+        #ifdef RPC_MICRO_STATISTICS
+        struct timespec ts;
+        timespec_get(&ts, TIME_UTC);
+        (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
+        (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
+        (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
+        LOG_DEBUG("Putting end ts in %ld",rx_pkt_ids[req->xid]);
+        #endif
     }
     rte_pktmbuf_free_bulk(pkt_array, nb_pkts);
 }
@@ -136,20 +143,20 @@ void UDPConnection::handle_write() {
     // if (status_ == CLOSED) {
     //     return;
     // }
-    int retry =0;
-    unsigned int available;
-    if(reply_idx == 0)
-        return;
-     while(
-     rte_ring_sp_enqueue_bulk(conn->out_bufring,(void* const*)&reply_arr,reply_idx,&available)< 0){
-        retry++;
-        if(retry > 100*1000){
-            Log_warn("Stuck in enqueing rpc_request");
-            retry=0;
-        }
-     }
-     reply_idx=0;
-    // out_l_.lock();
+    // int retry =0;
+    // unsigned int available;
+    // if(reply_idx == 0)
+    //     return;
+    //  while(
+    //  rte_ring_sp_enqueue_bulk(conn->out_bufring,(void* const*)&reply_arr,reply_idx,&available)< 0){
+    //     retry++;
+    //     if(retry > 100*1000){
+    //         Log_warn("Stuck in enqueing rpc_request");
+    //         retry=0;
+    //     }
+    //  }
+    //  reply_idx=0;
+    // // out_l_.lock();
     // out_.write_to_fd(socket_);
     // if (out_.empty()) {
         // server_->pollmgr_->update_mode(this, Pollable::READ);

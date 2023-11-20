@@ -73,6 +73,11 @@ namespace rrr{
         static DpdkTransport* transport_l;
     
         std::unordered_map<uint64_t, TransportConnection*> out_connections;
+
+        std::unordered_map<uint64_t, rte_ring*> in_rings;
+
+        
+
         struct rte_hash *conn_table;
         uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
@@ -107,17 +112,7 @@ namespace rrr{
         std::map<std::string, NetAddress> dest_addr_;
         SpinLock sm_queue_l;
         std::queue<Marshal*> sm_queue;
-        #ifdef RPC_MICRO_STATISTICS
-        std::unordered_map<uint64_t,std::timespec> pkt_rx_ts;
-        std::unordered_map<uint64_t,std::timespec> pkt_process_ts;
-        std::unordered_map<uint64_t,std::timespec> pkt_complete_ts;
-        rrr::SpinLock r_ts_lock;
-        rrr::SpinLock t_ts_lock;
-        uint64_t pkt_counter=0;
         
-        #endif
-        
-
         struct dpdk_thread_info **thread_rx_info{nullptr};
         struct dpdk_thread_info **thread_tx_info{nullptr};
         struct timeval start_clock, current;
@@ -206,13 +201,15 @@ public:
         int thread_id;
         int port_id;
         int queue_id;
-        int count = 0;
+        int conn_count = 0;
         int max_size=100;
         uint16_t conn_counter=0;
         bool shutdown=false;
         SpinLock conn_lock;
         // Dedicated Connections 
         std::unordered_map<uint64_t, TransportConnection*> out_connections;
+        rte_ring* out_rings[10000];
+        
         // Application thread put connection_ptr in this ring , 
         //thread will organize mbuf and other structs
         struct rte_ring* sm_ring;

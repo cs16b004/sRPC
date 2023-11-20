@@ -67,12 +67,10 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     // UDPConnection *conn = new UDPConnection(*s_addr);
    // LOG_DEBUG("Accept request %s",addr_str);
     TransportConnection* oconn = new TransportConnection();
-    //int pipefd[2];
-    //verify(pipe(pipefd)==0);
+
     oconn->src_addr = src_addr_[config_->host_name_];
     oconn->out_addr = NetAddress(getMacFromIp(server_ip).c_str(),server_ip.c_str(),port);
-    //oconn->in_fd_  = pipefd[0];
-    //oconn->wfd = pipefd[1];
+ 
     oconn->udp_port = src_addr_[config_->host_name_].port;
         addr = addr+ "::" + std::to_string(oconn->udp_port);
     uint64_t conn_id=0;
@@ -84,7 +82,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     uint16_t chosen_rx_thread = (next_thread_%(config_->num_rx_threads_));
 
     conn_counter++;
-    Log_info("Accept Called");
+ 
     //verify(thread_rx_info[chosen_rx_thread].conn_counter == thread_tx_info[chosen_tx_thread].conn_counter);
 
     conn_id = conn_id | oconn->out_addr.ip;
@@ -103,7 +101,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
    
 
 
-    out_connections[conn_id] = oconn;
+    
    // rte_hash_add_key_data(conn_table, &conn_id, oconn);
    oconn->conn_id = conn_id; 
     oconn->assign_bufring();
@@ -111,7 +109,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     oconn->buf_alloc(tx_mbuf_pool[chosen_tx_thread],conf->buffer_len);
     oconn->assign_availring();
     oconn->make_headers_and_produce();  
-     
+     out_connections[conn_id] = oconn;
 
     while(rte_ring_sp_enqueue(tx_sm_rings[chosen_tx_thread], (void*)oconn)<0)
         ;
