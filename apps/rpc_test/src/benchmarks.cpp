@@ -29,14 +29,11 @@ void Benchmarks::create_server(){
 
     
     
-    rep = new rrr::Reporter(2500,pollmgr_,false);
     
     server->start((std::string("0.0.0.0:") + port).c_str());
 
-    rep->launch();
-    
+  
     observe_server();
-    rep->trigger_shutdown();
     
       
       
@@ -135,13 +132,7 @@ void Benchmarks::create_client_threads(){
        pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]);
     }
     set_cpu_affinity();
-  
-    rep = new rrr::Reporter(2000,pollmgr_, true);
-    rep->launch();
-    
-     
-
-    
+      
     
 }
 void Benchmarks::observe_client(){
@@ -196,7 +187,6 @@ void Benchmarks::stop_client(){
        for(int i=0; i< conf->client_connections_; i++){
             service_proxies[i]->close();
        }
-       rep->trigger_shutdown();
        pollmgr_->release();
        
 }
