@@ -107,9 +107,7 @@ void UDPConnection::handle_read() {
         if (likely(it != server_->us_handlers_.end())) {
             // the handler should delete req, and release server_connection refcopy.
            // LOG_DEBUG("RPC Triggered");
-         #ifdef RPC_STATISTICS
-                  count(0);
-               #endif // RPC_STATISTICS
+        
             it->second(request_array[i], (UDPConnection *) this->ref_copy());
             
         } else {

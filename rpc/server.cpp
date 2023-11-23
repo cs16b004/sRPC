@@ -98,11 +98,6 @@ void TCPConnection::handle_read() {
         }
     }
 
-#ifdef RPC_STATISTICS
-    //stat_server_batching(complete_requests.size());
-    record_batch(complete_requests.size());
-
-#endif // RPC_STATISTICS
 
     for (auto& req: complete_requests) {
 
@@ -117,10 +112,6 @@ void TCPConnection::handle_read() {
         i32 rpc_id;
         req->m >> rpc_id;
 
-#ifdef RPC_STATISTICS
-      //  stat_server_rpc_counting(rpc_id);
-      count(0);
-#endif // RPC_STATISTICS
 
         auto it = server_->handlers_.find(rpc_id);
         if (it != server_->handlers_.end()) {

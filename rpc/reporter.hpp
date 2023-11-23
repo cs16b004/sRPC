@@ -1,3 +1,4 @@
+#pragma once
 #include<iostream>
 
 #include<ctime>
@@ -9,7 +10,7 @@
 #include "dpdk_transport/transport.hpp"
 #include <unordered_map>
 namespace rrr{
-#ifdef RPC_STATISTICS
+
 class PollThread;
 
 class Reporter{
@@ -46,5 +47,4 @@ class Reporter{
        //         std::unordered_map<uint64_t,std::timespec>& start_book);
         
 };
-#endif
 }
