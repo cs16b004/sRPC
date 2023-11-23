@@ -43,13 +43,6 @@ namespace rrr{
         friend class UDPServer;
         friend class UDPClient;
         friend class UDPConnection;
-        #ifdef RPC_MICRO_STATISTICS
-        friend class Reporter;
-        #endif
-        #ifdef RPC_STATISTICS
-        friend class Reporter;
-        #endif
-
         const uint8_t con_req[64] = {CON, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
                             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ,0x0,
@@ -72,16 +65,12 @@ namespace rrr{
     private:
         static DpdkTransport* transport_l;
     
-        std::unordered_map<uint64_t, TransportConnection*> out_connections;
+        std::unordered_map<uint64_t, TransportConnection*> connections;
+        std::unordered_map<uint64_t, rte_ring*> in_ring;
 
-        std::unordered_map<uint64_t, rte_ring*> in_rings;
-
-        
-
-        struct rte_hash *conn_table;
-        uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
-        uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
-        uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+        static const uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
+        static const uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
+        static const uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
         Config* config_;
         int port_num_ = 0;
         int tx_threads_ = 0;
@@ -100,7 +89,7 @@ namespace rrr{
         uint16_t u_port_counter = 9000;
         uint16_t conn_counter=0;
         rrr::SpinLock pc_l;
-      //  std::map<uint16_t,rrr::Connection*> connections_;
+
         SpinLock conn_th_lock;
         SpinLock init_lock;
         
@@ -112,10 +101,12 @@ namespace rrr{
         std::map<std::string, NetAddress> dest_addr_;
         SpinLock sm_queue_l;
         std::queue<Marshal*> sm_queue;
+       
         
+
         struct dpdk_thread_info **thread_rx_info{nullptr};
         struct dpdk_thread_info **thread_tx_info{nullptr};
-        struct timeval start_clock, current;
+     
         
         
         bool force_quit{false};
@@ -132,19 +123,9 @@ namespace rrr{
 
         static int dpdk_rx_loop(void* arg);
         static int dpdk_tx_loop(void* arg);
-        void tx_loop_one(dpdk_thread_info * arg);
-        void initialize_tx_mbufs(void* args);
-
-        
-        void process_incoming_packets(dpdk_thread_info* rx_buf_info);
-      
         
         int isolate(uint8_t phy_port);
-        void do_dpdk_send(int port_num, int queue_id, void** bufs, uint64_t num_pkts);
-        void send(uint8_t* payload, unsigned length,
-                      uint64_t conn_id, dpdk_thread_info* tx_info, uint8_t pkt_type);
-        SpinLock sendl;
-
+        
 public:
    // static int createTransport();
    // static DpdkTransport* getTransport();
@@ -154,14 +135,13 @@ public:
     }
     TransportConnection* get_conn(uint64_t conn_id){
         conn_th_lock.lock();
-        TransportConnection* conn =  out_connections[conn_id];
+        TransportConnection* conn =  connections[conn_id];
         conn_th_lock.unlock();
         return conn;
     }
     static void create_transport(Config* config);
     static DpdkTransport* get_transport();
-   // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
-
+   
     // Send a connec request to server at addr_str
     // Called from Application thread 
     // Assigns a dedicated dpdk thread 
@@ -201,15 +181,14 @@ public:
         int thread_id;
         int port_id;
         int queue_id;
-        int conn_count = 0;
+        int count = 0;
         int max_size=100;
         uint16_t conn_counter=0;
         bool shutdown=false;
         SpinLock conn_lock;
-        // Dedicated Connections 
-        std::unordered_map<uint64_t, TransportConnection*> out_connections;
-        rte_ring* out_rings[10000];
         
+        rte_ring* out_ring[20000];
+        rte_ring* avail_ring[20000];
         // Application thread put connection_ptr in this ring , 
         //thread will organize mbuf and other structs
         struct rte_ring* sm_ring;
@@ -230,12 +209,5 @@ public:
         ~dpdk_thread_info() {
         }
     };
-     /**
-      * Helper function to process Session Management (SM) requests from other threads;
-      * \param sm_ring, 
-      * the ring to deque and process
-      * \param mempool, 
-      * the  mempool to use allocate buffers etc.
-     */
-     uint16_t process_sm_requests(rte_ring* sm_ring, rte_mempool* mempool);  
+     
 }

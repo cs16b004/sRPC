@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "polling.hpp"
+#include "rpc/polling.hpp"
 #ifdef PROFILE
 #include<gperftools/profiler.h>
 #endif
@@ -59,7 +59,7 @@ PollMgr::~PollMgr() {
 
 void PollMgr::PollThread::poll_loop() {
     Log_info("Poll Thread %d started", thread_id_);
-    #ifdef DPDK
+#ifdef DPDK
     #ifdef PROFILE
     std::string sp;
     std::ifstream("/proc/self/comm") >> sp;
@@ -71,14 +71,13 @@ void PollMgr::PollThread::poll_loop() {
     while(!stop_flag_){
         for(i=0;i<poll_arr_size;i++){
             poll_set_arr_[i]->handle_read();
-           // poll_set_arr_[i]->handle_write();
         }
     }
     #ifdef PROFILE
     ProfilerStop();
     Log_info("PROFILER STOPPED !!");
     #endif
-    #endif
+ #endif
     
     while (!stop_flag_) {
         const int max_nev = 100;
@@ -411,6 +410,7 @@ int PollMgr::set_cpu_affinity(std::bitset<128> &core_mask){
    for(int i=0; i< n_threads_; i++){
     poll_threads_[i]->set_cpu_affinity(core_mask);
    }
+   return 0;
 }
 
 } // namespace rrr

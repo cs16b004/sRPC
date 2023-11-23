@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include <list>
 #include <map>
@@ -23,3 +24,4 @@ int find_open_port();
 std::string get_host_name();
 
 } // namespace rrr
+#endif

@@ -1,4 +1,3 @@
-#pragma once
 #include "config.hpp"
 #include <unistd.h>
 #include <boost/algorithm/string.hpp>

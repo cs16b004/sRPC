@@ -1,4 +1,6 @@
-#pragma once
+#ifndef TRANSPORT_CONNECTION_HPP
+#define TRANSPORT_CONNECTION_HPP
+
 #include <iostream>
 #include <cstdint>
 #include <map>
@@ -60,8 +62,6 @@ namespace rrr{
         public:
             TransportConnection(){}
             uint64_t conn_id;
-            int in_fd_;
-            int wfd;
             NetAddress out_addr;
             NetAddress src_addr;
             rte_mempool* pkt_mempool;
@@ -86,3 +86,4 @@ namespace rrr{
 
     };
 }
+#endif

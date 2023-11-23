@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
 #include <unordered_map>
 
@@ -342,3 +343,4 @@ public:
 };
 
 }
+#endif

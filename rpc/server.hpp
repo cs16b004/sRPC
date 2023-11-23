@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 #include <unordered_map>
 #include <unordered_set>
@@ -405,11 +406,7 @@ public:
     ~DeferredReply() {
         cleanup_();
         delete req_;
-        #ifdef DPDK
-            (UDPConnection*)sconn_->release(); 
-        #else
-            ((TCPConnection*)sconn_)->release();
-        #endif
+        sconn_->release();
         req_ = nullptr;
         sconn_ = nullptr;
     }
@@ -437,15 +434,9 @@ class UDPConnection: public ServerConnection {
     TransportMarshal* curr_reply;
     TransportConnection* conn;
     rte_mbuf* pkt_array[32];
-    rte_mbuf* reply_arr[32];
-
-    uint64_t timestamps[32];
-
-    Request<TransportMarshal>* request_array[32];
-    uint64_t reply_idx=0;
-    //test call_back
-    std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)> cb;
-    
+    std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>> us_handlers_;
+    rte_ring* in_ring;
+    rte_ring* out_ring;
     void close();
     uint64_t connId;
 
@@ -515,4 +506,4 @@ class UDPServer : public Server{
 };
 
 } // namespace rrr
-
+#endif

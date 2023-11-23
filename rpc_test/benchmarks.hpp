@@ -1,4 +1,4 @@
-#include <counter.h>
+#include "counter.h"
 #include <pthread.h>
 #include <stdlib.h>
 
@@ -46,7 +46,7 @@ private:
     unsigned int time_;
     uint16_t out_size=1;
     rrr::PollMgr* pollmgr_;
-    uint64_t count_=0;
+     uint64_t count_=0;
     std::string out_string;
 public:
     BenchmarkServiceImpl(uint16_t num_out): out_size(num_out){
@@ -54,7 +54,6 @@ public:
             out_string.push_back('a'+ rand()%26);
         }
     }
-
     void add() {
         count_++;
     }
@@ -73,12 +72,14 @@ public:
         count_++;
         out->append(out_string.c_str());
     }
+    uint64_t get_count(){
+        return count_;
+    }
 };
 class Benchmarks{
     BenchmarkServiceImpl *csi;
     BenchmarkProxy** service_proxies;
     pthread_t** client_threads;
-    rrr::Reporter* rep;
     std::bitset<128> affinity_mask;
 
     struct benchmark_thread_info** thread_info;

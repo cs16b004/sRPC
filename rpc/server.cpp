@@ -1,4 +1,3 @@
-#pragma once
 #include <string>
 #include <sstream>
 
@@ -10,7 +9,7 @@
 #include <netdb.h>
 #include <netinet/tcp.h>
 
-#include "server.hpp"
+#include "rpc/server.hpp"
 
 using namespace std;
 
@@ -99,8 +98,8 @@ void TCPConnection::handle_read() {
     }
 
 #ifdef RPC_STATISTICS
-    //stat_server_batching(complete_requests.size());
-    record_batch(complete_requests.size());
+    stat_server_batching(complete_requests.size());
+   
 
 #endif // RPC_STATISTICS
 
@@ -118,8 +117,8 @@ void TCPConnection::handle_read() {
         req->m >> rpc_id;
 
 #ifdef RPC_STATISTICS
-      //  stat_server_rpc_counting(rpc_id);
-      count(0);
+        stat_server_rpc_counting(rpc_id);
+ 
 #endif // RPC_STATISTICS
 
         auto it = server_->handlers_.find(rpc_id);

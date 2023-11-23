@@ -48,12 +48,12 @@ benchmarks.o: benchmarks.cpp benchmarks.hpp lib/librpc.a lib/libbase.a debugging
 	${CXX} ${CXXFLAGS} ${INC} -c benchmarks.cpp debugging.o ${LIB} -o benchmarks.o
 
 
-lib/librpc.a: client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o
-	ar rcs lib/librpc.a client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o
+lib/librpc.a: client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o transport_cm.o transport_init.o
+	ar rcs lib/librpc.a client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o transport_cm.o transport_init.o
 	rm -f client.o marshal.o polling.o server.o utils.o udpserver.o
 
-lib/libbase.a: basetypes.o logging.o misc.o strop.o threading.o unittest.o reporter.o
-	ar rcs lib/libbase.a basetypes.o logging.o misc.o strop.o threading.o unittest.o reporter.o debugging.o
+lib/libbase.a: basetypes.o logging.o misc.o strop.o threading.o unittest.o 
+	ar rcs lib/libbase.a basetypes.o logging.o misc.o strop.o threading.o unittest.o  debugging.o
 	rm -f basetypes.o logging.o misc.o strop.o threading.o unittest.o 
 
 client.o: ../rpc/client.cpp ../rpc/client.hpp  transport.o
@@ -103,8 +103,12 @@ threading.o: ../base/threading.cpp ../base/threading.hpp
 unittest.o: ../base/unittest.cpp ../base/unittest.hpp
 	${CXX} ${CXXFLAGS} ${INC} -c ../base/unittest.cpp -o unittest.o
 
-reporter.o: ../rpc/reporter.cpp ../rpc/reporter.hpp ../rpc/polling.hpp polling.o
-	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/reporter.cpp -o reporter.o
-
 transport_connection.o: ../rpc/dpdk_transport/transport_connection.cpp ../rpc/dpdk_transport/transport_connection.hpp ../rpc/dpdk_transport/transport_marshal.hpp config.o
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport_connection.cpp -o transport_connection.o
+
+transport_cm.o: ../rpc/dpdk_transport/transport_cm.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/transport_marshal.hpp config.o
+	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport_cm.cpp -o transport_cm.o
+
+transport_init.o: ../rpc/dpdk_transport/transport_init.cpp ../rpc/dpdk_transport/transport.hpp ../rpc/dpdk_transport/transport_marshal.hpp config.o
+	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/dpdk_transport/transport_init.cpp -o transport_init.o
+

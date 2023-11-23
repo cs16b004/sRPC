@@ -1,5 +1,5 @@
 #include "benchmarks.hpp"
-
+#include <stdio.h>
 void Benchmarks::create_server(){
 
      csi = new BenchmarkServiceImpl(conf->output_size_);
@@ -29,15 +29,11 @@ void Benchmarks::create_server(){
 
     
     
-    rep = new rrr::Reporter(2500,pollmgr_,false);
     
     server->start((std::string("0.0.0.0:") + port).c_str());
 
-    rep->launch();
     
     observe_server();
-    rep->trigger_shutdown();
-    
       
       
         #ifdef DPDK
@@ -59,7 +55,7 @@ void Benchmarks::create_server(){
     
     delete server;
     delete csi;
-    //delete rep;
+    
 
 }
 void Benchmarks::create_proxies(){
@@ -135,9 +131,7 @@ void Benchmarks::create_client_threads(){
        pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]);
     }
     set_cpu_affinity();
-  
-    rep = new rrr::Reporter(2000,pollmgr_, true);
-    rep->launch();
+
     
      
 
@@ -153,9 +147,17 @@ void Benchmarks::observe_client(){
 }
 void Benchmarks::observe_server(){
     int i=0;
- while (i < conf->server_duration_*1000){
-        usleep(1000);
+    uint64_t last_count = 0;
+    uint64_t  curr_count = 0;
+    std::cout<<"Observing server"<<std::endl;
+ while (i < conf->server_duration_*1){
+        sleep(1);
         i++;
+        curr_count = csi->get_count();
+        std::cout<<"Total RPC rate = "<< (curr_count - last_count)<<std::endl;
+        last_count = curr_count;
+
+
     }
 }
 void Benchmarks::set_cpu_affinity(){
@@ -196,7 +198,7 @@ void Benchmarks::stop_client(){
        for(int i=0; i< conf->client_connections_; i++){
             service_proxies[i]->close();
        }
-       rep->trigger_shutdown();
+       
        pollmgr_->release();
        
 }
