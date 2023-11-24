@@ -1,6 +1,6 @@
 benchmarks:
   input_size: 64 #input size in bytes
-  output_size: 20
+  output_size: 64
   client_poll_threads: 1
   server_poll_threads: 1
   client_connections: 1

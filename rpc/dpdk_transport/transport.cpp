@@ -4,13 +4,19 @@
 #include <rte_ring.h>
 #include<rte_ring_core.h>
 #include "rpc/utils.hpp"
-
+#include<rte_timer.h>
 #include "rpc/dpdk_transport/transport_marshal.hpp"
-
+#include<ctime>
 
 namespace rrr{
 
+static uint64_t raw_time(void) {
+    struct timespec tstart={0,0};
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
+    uint64_t t = (uint64_t)(tstart.tv_sec*1.0e9 + tstart.tv_nsec);
+    return t;
 
+}
 int DpdkTransport::dpdk_tx_loop(void* arg){
     dpdk_thread_info* info = reinterpret_cast<dpdk_thread_info*>(arg);
     DpdkTransport* dpdk_th = info->t_layer;
@@ -21,7 +27,7 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
     // Initialize sm_ring (multiproducer) Single consumer
     // put it in transport_layer global datastructure of rings
     // initalize data_structures locaaly which will be used in future;
-    rte_ring* sm_queue_ = info->sm_ring;
+
     rte_mempool* mem_pool = info->mem_pool;
     
     unsigned int available = 0;
@@ -45,11 +51,15 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
      Log_info("Entering TX thread %d at lcore %d",info->thread_id,rte_lcore_id());
    
     while(!info->shutdown){
+        rte_prefetch1(out_ring);
+        rte_prefetch1(avail_ring);
         for(i=0; i< conn_limit; i++)
         {
            
-            if (out_ring[i] == nullptr)
+            if (unlikely(out_ring[i] == nullptr))
                 continue;
+            
+
             times++;
             nb_pkts =  rte_ring_sc_dequeue_burst(out_ring[i], (void**) my_buffers, burst_size, &available);
 
@@ -62,7 +72,7 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
             while (ret != nb_pkts) {
                 ret += rte_eth_tx_burst(port_id, queue_id, &my_buffers[ret], nb_pkts - ret);
                 retry_count++;
-                if (unlikely(retry_count == 1000000)) {
+                if (unlikely(retry_count == 100)) {
                     Log_warn("stuck in rte_eth_tx_burst in port %u queue %u", port_id, queue_id);
                     retry_count = 0;
                 }
@@ -72,7 +82,7 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
             
             while(rte_ring_sp_enqueue_bulk(avail_ring[i], (void**) my_buffers, nb_pkts, &available) == 0){
                     retry_count++;
-                if (unlikely(retry_count == 1000000)) {
+                if (unlikely(retry_count == 100)) {
                     Log_warn("stuck in rte_avail_buffers enqueue for conn: %lld", i);
                     retry_count = 0;
                 }
@@ -123,8 +133,17 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
              info->thread_id, rte_lcore_id());
     int retry = 0;
     uint64_t conn_id;
+    uint64_t start;
+    uint64_t end;
+    uint64_t count=0;
+    uint64_t times=0;
+    uint64_t sum=0;
     while(!info->shutdown) {
-       
+        #ifdef RPC_STATISTICS
+            if((times % 30000) == 0)
+                start = raw_time();
+            
+        #endif
         uint16_t nb_rx = rte_eth_rx_burst(port_id, queue_id, rx_buffers, burst_size);
 
         if (unlikely(nb_rx == 0))
@@ -148,16 +167,16 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
             conn_id  = conn_id | (uint64_t)(udp_hdr->dst_port);
     
             data_ptr = pkt_ptr + data_offset;
-            pkt_type = *((uint8_t*)data_ptr);
+            rte_memcpy(&pkt_type,data_ptr,sizeof(uint8_t));
             data_ptr += sizeof(uint8_t);
             
             if(likely(pkt_type == RR) )
             {
-                if (unlikely(in_bufring[conn_id] == nullptr))
-                    continue;
+                // if(in_bufring[conn_id] == nullptr)
+                //     continue;
                 struct data *result;
                 while(retry < 2000){
-                    if(rte_ring_sp_enqueue(in_bufring[conn_id], rx_buffers[i]) >= 0){
+                    if(rte_ring_sp_enqueue(dpdk_th->in_ring[conn_id], rx_buffers[i]) >= 0){
                         break;
                     }
                     retry++;
@@ -201,6 +220,16 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
                 rte_pktmbuf_free(rx_buffers[i]);
             }
         }
+        #ifdef RPC_STATISTICS
+            if((times % 30000) == 0){
+                end = raw_time();
+                sum += (end - start);
+
+                count++;
+                Log_info("Avg Time spent (ns)  = %llu, sum = %llu", ((sum/count) ) );
+            }
+            times++;
+        #endif
     }
     Log_info("Exiting RX thread %d ", info->thread_id);
     return 0;

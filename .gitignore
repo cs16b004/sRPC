@@ -7,3 +7,4 @@ rpc_test/lib/
 apps
 build
 
+rpc_test/tmp

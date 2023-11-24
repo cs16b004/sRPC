@@ -86,18 +86,18 @@ void UDPConnection::handle_read() {
         
 
     }
+    
     for (int i=0;i<nb_pkts;i++) {
 
         i32 rpc_id;
         request_array[i]->m >> rpc_id;
 
-      
-
-        std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>>::iterator
-             it = us_handlers_.find(rpc_id);
+    
+        auto it = server_->us_handlers_.find(rpc_id);
         if (likely(it != us_handlers_.end())) {
             // the handler should delete req, and release server_connection refcopy.
            // LOG_DEBUG("RPC Triggered");
+            
             it->second(request_array[i], (UDPConnection *) this->ref_copy());
             
         } else {
