@@ -125,14 +125,7 @@ void UDPConnection::handle_read() {
             begin_reply(request_array[i], ENOENT);
             end_reply();
         }
-        #ifdef RPC_MICRO_STATISTICS
-        struct timespec ts;
-        timespec_get(&ts, TIME_UTC);
-        (((UDPServer*) server_)->transport_)->t_ts_lock.lock();
-        (((UDPServer*) server_)->transport_)->pkt_process_ts[rx_pkt_ids[req->xid]] = ts;
-        (((UDPServer*) server_)->transport_)->t_ts_lock.unlock();
-        LOG_DEBUG("Putting end ts in %ld",rx_pkt_ids[req->xid]);
-        #endif
+        
     }
     rte_pktmbuf_free_bulk(pkt_array, nb_pkts);
 }

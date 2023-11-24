@@ -25,7 +25,13 @@
 
 
 namespace rrr{
-    
+    static uint64_t raw_time(void) {
+    struct timespec tstart={0,0};
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
+    uint64_t t = (uint64_t)(tstart.tv_sec*1.0e9 + tstart.tv_nsec);
+    return t;
+
+}
 // Singleton tranport_layer
 DpdkTransport* DpdkTransport::transport_l = nullptr;
 
@@ -378,6 +384,8 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     rte_hash* conn_tab = dpdk_th->conn_table;
     uint64_t connId_arr[32];
     uint64_t conn_id;
+
+    uint64_t start,end, count=0, times=0, sum=0;
     while(!info->shutdown) {
        
        
@@ -393,7 +401,11 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
 
         // if(unlikely(rte_pktmbuf_alloc_bulk(mem_pool, rx_buffers, burst_size) < 0))
         //     continue;
-
+         #ifdef RPC_STATISTICS
+            if((times % 30000) == 1)
+                start = raw_time();
+            
+        #endif
         uint16_t nb_rx = rte_eth_rx_burst(port_id, queue_id, 
                                           rx_buffers, burst_size);
 
@@ -489,6 +501,16 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
                 rte_pktmbuf_free(rx_buffers[i]);
             }
         }
+         #ifdef RPC_STATISTICS
+            if((times % 30000) == 1){
+                end = raw_time();
+                sum += (end - start);
+
+                count++;
+                Log_info("Avg Time spent (ns)  = %llu, sum = %llu", ((sum/count) ) );
+            }
+            times++;
+        #endif
     }
     Log_info("Exiting RX thread %d ",
              info->thread_id);
