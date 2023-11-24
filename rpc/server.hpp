@@ -437,6 +437,9 @@ class UDPConnection: public ServerConnection {
     std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>> us_handlers_;
     rte_ring* in_ring;
     rte_ring* out_ring;
+    Request<TransportMarshal>* request_array[32];
+    i32 req_size=0;
+        i64 xid;
     void close();
     uint64_t connId;
 

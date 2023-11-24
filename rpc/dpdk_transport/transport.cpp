@@ -51,12 +51,11 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
      Log_info("Entering TX thread %d at lcore %d",info->thread_id,rte_lcore_id());
    
     while(!info->shutdown){
-        rte_prefetch1(out_ring);
-        rte_prefetch1(avail_ring);
+      
         for(i=0; i< conn_limit; i++)
         {
            
-            if (unlikely(out_ring[i] == nullptr))
+            if ((out_ring[i] == nullptr)|| rte_ring_count(out_ring[i]) < 5)
                 continue;
             
 
@@ -138,12 +137,14 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     uint64_t count=0;
     uint64_t times=0;
     uint64_t sum=0;
+    rte_ring* r2=nullptr;
     while(!info->shutdown) {
-        #ifdef RPC_STATISTICS
-            if((times % 30000) == 0)
-                start = raw_time();
+        // #ifdef RPC_STATISTICS
+        //     if((times % 30000) == 1)
+        //         start = raw_time();
             
-        #endif
+        // #endif
+        
         uint16_t nb_rx = rte_eth_rx_burst(port_id, queue_id, rx_buffers, burst_size);
 
         if (unlikely(nb_rx == 0))
@@ -172,11 +173,8 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
             
             if(likely(pkt_type == RR) )
             {
-                // if(in_bufring[conn_id] == nullptr)
-                //     continue;
-                struct data *result;
                 while(retry < 2000){
-                    if(rte_ring_sp_enqueue(dpdk_th->in_ring[conn_id], rx_buffers[i]) >= 0){
+                    if(rte_ring_sp_enqueue(in_bufring[conn_id], rx_buffers[i]) >= 0){
                         break;
                     }
                     retry++;
@@ -220,16 +218,16 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
                 rte_pktmbuf_free(rx_buffers[i]);
             }
         }
-        #ifdef RPC_STATISTICS
-            if((times % 30000) == 0){
-                end = raw_time();
-                sum += (end - start);
+        // #ifdef RPC_STATISTICS
+        //     if((times % 30000) == 1){
+        //         end = raw_time();
+        //         sum += (end - start);
 
-                count++;
-                Log_info("Avg Time spent (ns)  = %llu, sum = %llu", ((sum/count) ) );
-            }
-            times++;
-        #endif
+        //         count++;
+        //         Log_info("Avg Time spent (ns)  = %llu, sum = %llu", ((sum/count) ), end - start );
+        //     }
+        //     times++;
+        // #endif
     }
     Log_info("Exiting RX thread %d ", info->thread_id);
     return 0;

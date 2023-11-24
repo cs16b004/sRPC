@@ -38,7 +38,6 @@ namespace rrr{
     class Reporter;
     // Pakcet Type    
  
-    
     class DpdkTransport {
         friend class UDPServer;
         friend class UDPClient;
@@ -67,7 +66,7 @@ namespace rrr{
     
         std::unordered_map<uint64_t, TransportConnection*> connections;
         std::unordered_map<uint64_t, rte_ring*> in_ring;
-
+        
         static const uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
         static const uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
         static const uint16_t data_offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
@@ -75,7 +74,7 @@ namespace rrr{
         int port_num_ = 0;
         int tx_threads_ = 0;
         int rx_threads_ = 0;
-        
+        rte_ring* r = nullptr;
         uint16_t rx_queue_ = 1, tx_queue_ = 1;
         struct rte_mempool **tx_mbuf_pool;
         struct rte_mempool **rx_mbuf_pool;

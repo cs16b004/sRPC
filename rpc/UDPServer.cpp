@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/socket.h>
+
+
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/mman.h>
+
 
 #include "rpc/server.hpp"
-#include "config.hpp"
+#include "dpdk_transport/config.hpp"
 #include "rpc/dpdk_transport/transport_marshal.hpp"
 
 using namespace std;
@@ -19,9 +17,9 @@ namespace rrr {
 UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
         : ServerConnection((Server*) server,0),connId(socket) {
             conn = server->transport_->connections[socket];
-            in_ring = conn->in_bufring;
-            out_ring = conn->out_bufring;
-            us_handlers_.insert(server->us_handlers_.begin(), server_->us_handlers_.end());
+             in_ring = conn->in_bufring;
+             out_ring = conn->out_bufring;
+             us_handlers_.insert(server->us_handlers_.begin(), server_->us_handlers_.end());
     // increase number of open connections
     server_->sconns_ctr_.next(1);
     for(int i=0;i<32;i++){
@@ -56,10 +54,10 @@ void UDPConnection::end_reply() {
         current_reply.format_header();
        int retry=0;
      while(
-     rte_ring_enqueue(out_ring,current_reply.get_mbuf())< 0){
+     rte_ring_sp_enqueue(out_ring,current_reply.get_mbuf())< 0){
         retry++;
-        if(retry > 100*1000){
-            Log_warn("Stuck in enquueing rpc_request");
+        if(retry > 100){
+            Log_warn("Stuck in enqueing rpc_request");
             retry=0;
         }
      }
@@ -74,26 +72,25 @@ void UDPConnection::handle_read() {
     unsigned int available;
     unsigned int nb_pkts = rte_ring_sc_dequeue_burst(in_ring, (void**)pkt_array, 32,&available);
 
-    Request<TransportMarshal>* request_array[32];
     
+
     for(int i=0;i<nb_pkts;i++){
         
         request_array[i] = new Request<TransportMarshal>();
         request_array[i]->m.allot_buffer(pkt_array[i]);
-        i32 req_size=0;
-        i64 xid;
+        
         request_array[i]->m >> req_size >> request_array[i]->xid;
         
 
     }
-    
+    i32 rpc_id;
     for (int i=0;i<nb_pkts;i++) {
 
-        i32 rpc_id;
+        
         request_array[i]->m >> rpc_id;
 
     
-        auto it = server_->us_handlers_.find(rpc_id);
+        auto it = us_handlers_.find(rpc_id);
         if (likely(it != us_handlers_.end())) {
             // the handler should delete req, and release server_connection refcopy.
            // LOG_DEBUG("RPC Triggered");

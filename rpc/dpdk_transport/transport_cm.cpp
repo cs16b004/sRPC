@@ -91,7 +91,7 @@ uint64_t DpdkTransport::accept(const char* addr_str){
     oconn->make_headers_and_produce();  
     connections[conn_id] = oconn;
     in_ring[conn_id]  = oconn->in_bufring;
-    
+    r = in_ring[conn_id];
     thread_tx_info[chosen_tx_thread]->out_ring[thread_tx_info[chosen_tx_thread]->conn_counter] = oconn->out_bufring;
     thread_tx_info[chosen_tx_thread]->avail_ring[thread_tx_info[chosen_tx_thread]->conn_counter] = oconn->available_bufring;
     thread_tx_info[chosen_tx_thread]->conn_counter++;

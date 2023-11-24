@@ -75,11 +75,11 @@ public:
     uint16_t server_duration_ = 60;
     std::string server_address_;
     uint32_t rte_ring_size = 2*32768;
-    uint16_t client_batch_size_=5;
+    uint16_t client_batch_size_=32;
     //
 
     
-    uint16_t buffer_len=8*4096-2;
+    uint16_t buffer_len=8*4096-1;
 
  
 

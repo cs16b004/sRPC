@@ -14,12 +14,11 @@ rte_mbuf* TransportConnection::get_new_pkt(){
        
      }
 
-    rte_mbuf* ret = (rte_mbuf*) *buf; 
    // rte_mbuf* ret = rte_pktmbuf_alloc(pkt_mempool);
     
     //make_pkt_header(ret);
    // verify(ret != nullptr);
-    return ret;
+    return (rte_mbuf*) *buf;
 
 }
 int TransportConnection::assign_availring(){
