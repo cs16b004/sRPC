@@ -16,7 +16,7 @@ debug: all
 stat: CXXFLAGS += -g3 -O0 -DRPC_STATISTICS
 stat: all 
 
-dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS -DLATENCY  
+dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS -DLATENCY
 dpdk_debug: all
 
 dpdk_stat: CXXFLAGS += -DDPDK -DRPC_STATISTICS -DLATENCY
@@ -50,11 +50,11 @@ benchmarks.o: benchmarks.cpp benchmarks.hpp lib/librpc.a lib/libbase.a debugging
 
 lib/librpc.a: client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o
 	ar rcs lib/librpc.a client.o marshal.o polling.o server.o utils.o udpserver.o config.o transport.o transport_connection.o
-	rm -f client.o marshal.o polling.o server.o utils.o udpserver.o
+#	rm -f client.o marshal.o polling.o server.o utils.o udpserver.o
 
 lib/libbase.a: basetypes.o logging.o misc.o strop.o threading.o unittest.o reporter.o
 	ar rcs lib/libbase.a basetypes.o logging.o misc.o strop.o threading.o unittest.o reporter.o debugging.o
-	rm -f basetypes.o logging.o misc.o strop.o threading.o unittest.o 
+#	rm -f basetypes.o logging.o misc.o strop.o threading.o unittest.o 
 
 client.o: ../rpc/client.cpp ../rpc/client.hpp  transport.o
 	${CXX} ${CXXFLAGS} ${INC} -c ../rpc/client.cpp transport.o -o client.o

@@ -1,5 +1,3 @@
-
-#pragma once
 #include <cstdint>
 #include "transport.hpp"
 #include <rte_ring.h>
@@ -9,7 +7,7 @@
 
 #define _GNU_SOURCE
 #include <utmpx.h>
-#include "transport_marshal.hpp"
+
    
 
 #define DPDK_RX_DESC_SIZE           1024
@@ -23,15 +21,25 @@
 #define DPDK_RX_WRITEBACK_THRESH    64
 
 
-
 namespace rrr{
-    static uint64_t raw_time(void) {
-    struct timespec tstart={0,0};
-    clock_gettime(CLOCK_MONOTONIC, &tstart);
-    uint64_t t = (uint64_t)(tstart.tv_sec*1.0e9 + tstart.tv_nsec);
-    return t;
+   
+const uint8_t RPC[97] = {       0x09, // PKT TYPE RR
+                        0x54, 0x00, 0x00, 0x00, // Request Size 84 
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Future ID
+                        0x03, 0x00, 0x00, 0x10, // RPC_ID
+                        
+                        0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // String size
+                        0x6e, 0x77, 0x6c, 0x72, 0x62, 0x62, 0x6d, 0x71, // String
+                        0x62, 0x68, 0x63, 0x64, 0x61, 0x72, 0x7a, 0x6f,
+                        0x77, 0x6b, 0x6b, 0x79, 0x68, 0x69, 0x64, 0x64,
+                        0x71, 0x73, 0x63, 0x64, 0x78, 0x72, 0x6a, 0x6d,
+                        0x6f, 0x77, 0x66, 0x72, 0x78, 0x73, 0x6a, 0x79,
+                        0x62, 0x6c, 0x64, 0x62, 0x65, 0x66, 0x73, 0x61,
+                        0x72, 0x63, 0x62, 0x79, 0x6e, 0x65, 0x63, 0x64,
+                        0x79, 0x67, 0x67, 0x78, 0x78, 0x70, 0x6b, 0x6c, 
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-}
+
 // Singleton tranport_layer
 DpdkTransport* DpdkTransport::transport_l = nullptr;
 
@@ -51,6 +59,92 @@ inline uint16_t process_sm_requests(rte_ring* sm_ring, rte_mempool* mempool){
     
     return 0;
 }
+std::string out_string = "|aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa|";
+uint64_t count=0;
+
+void add_bench(std::string in, std::string* out){
+   // out->append(out_string);
+   count++;
+}
+const uint16_t DATA_OFFSET = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+const uint16_t IPV4_OFFSET =  sizeof(struct rte_ether_hdr);
+const uint16_t UDP_OFFSET = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
+
+static void inline swap_udp_addresses(struct rte_mbuf *pkt) {
+    // Extract Ethernet header
+        struct rte_ether_hdr *eth_hdr = rte_pktmbuf_mtod(pkt, struct rte_ether_hdr *);
+
+        struct rte_ether_addr temp = eth_hdr->src_addr;
+        eth_hdr->src_addr = eth_hdr->dst_addr;
+        eth_hdr->dst_addr = temp;
+
+    // Extract IP header
+    struct rte_ipv4_hdr *ip_hdr = (struct rte_ipv4_hdr *)(eth_hdr + IPV4_OFFSET);
+
+    // Extract UDP header
+    struct rte_udp_hdr *udp_hdr = (struct rte_udp_hdr *)(ip_hdr +  UDP_OFFSET);
+
+    // Swap IP addresses
+    uint32_t tmp_ip = ip_hdr->src_addr;
+    ip_hdr->src_addr = ip_hdr->dst_addr;
+    ip_hdr->dst_addr = tmp_ip;
+
+    // Swap UDP port numbers
+    uint16_t tmp_port = udp_hdr->src_port;
+    udp_hdr->src_port = udp_hdr->dst_port;
+    udp_hdr->dst_port = tmp_port;
+}
+
+void bench_rpc_handler(TransportMarshal* req, TransportConnection* conn){
+
+    
+
+
+//LOG_DEBUG("PRINT REQ %s", req->print_request().c_str());
+
+    i32 v_error_code = 0;
+    i64 v_reply_xid = 0;
+
+    std::string in_0;
+    (*req) >> in_0;
+    
+    #ifdef LATENCY
+    uint64_t ts;
+    (*req) >>ts;
+    #endif
+    std::string out_0;
+    add_bench(in_0, &out_0);
+    TransportMarshal current_reply;
+      swap_udp_addresses(req->get_mbuf());
+    current_reply.allot_buffer(req->get_mbuf());    
+    //
+    current_reply.set_book_mark(sizeof(i32)); // will write reply size later
+
+    current_reply << v_reply_xid;
+    current_reply << v_error_code;
+    current_reply << out_string; 
+    #ifdef LATENCY
+    current_reply <<ts;
+    #endif;
+    i32 reply_size = current_reply.content_size();
+    current_reply.write_book_mark(&reply_size, sizeof(i32));
+       
+    current_reply.format_header();
+   // LOG_DEBUG( "%s", current_reply.print_request().c_str());
+    int retry=0;
+
+      // reply_arr[reply_idx%32] = current_reply.get_mbuf();
+       
+    //  while(
+    //  rte_ring_enqueue(conn->out_bufring,current_reply.get_mbuf())< 0){
+    //     retry++;
+    //     if(retry > 100*1000){
+    //         Log_warn("Stuck in enquueing rpc_request");
+    //         retry=0;
+    //     }
+    //  }
+}
+
 
 uint64_t DpdkTransport::accept(const char* addr_str){
     Config* conf = rrr::Config::get_config();
@@ -295,7 +389,7 @@ int DpdkTransport::dpdk_tx_loop(void* arg){
             Dequeue each connection msg_buffers and transmit messages;
 
         */
-
+        
         for(auto conn_entry: info->out_connections){
             current_conn = conn_entry.second;
             if(current_conn->out_bufring == nullptr 
@@ -386,27 +480,28 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
     uint64_t conn_id;
 
     uint64_t start,end, count=0, times=0, sum=0;
+    uint16_t pkt_size;
+    uint16_t nb_rx;
+    rte_ring* t_ring=nullptr;
+    rte_mbuf* rpc_pkt = nullptr;
+    TransportMarshal req_m;
+    std::unordered_map<i32, std::function<void(rrr::TransportMarshal*, TransportConnection*)>> us_handlers_;
+    us_handlers_[0x10000003] = bench_rpc_handler;
+    i32 req_size=0;
+    i64 req_xid;
+    i32 req_rpc_id;
     while(!info->shutdown) {
-       
-       
-        // likely the rign is empty
-        // if(likely(rte_ring_empty(sm_queue_))){
-        //     nb_sm_reqs_  = rte_ring_sc_dequeue_burst(sm_queue_, (void**)conn_arr, 8,&available);
-        //     for(i=0;i<nb_sm_reqs_;i++){
-        //         connections[conn_arr[i]->conn_id] = conn_arr[i]; // Put the connection in local conn_table
-        //         LOG_DEBUG("Added Connection %lu to rx_thread %d",conn_arr[i]->conn_id, info->thread_id);
-        //     }
+        // if(likely(t_ring != nullptr)){
+        //     rte_ring_sp_enqueue(t_ring, rpc_pkt);
+        //     continue;
         // }
        
+       rte_prefetch0(&connections);
 
         // if(unlikely(rte_pktmbuf_alloc_bulk(mem_pool, rx_buffers, burst_size) < 0))
         //     continue;
-         #ifdef RPC_STATISTICS
-            if((times % 30000) == 1)
-                start = raw_time();
-            
-        #endif
-        uint16_t nb_rx = rte_eth_rx_burst(port_id, queue_id, 
+        
+        nb_rx = rte_eth_rx_burst(port_id, queue_id, 
                                           rx_buffers, burst_size);
 
        // LOG_DEBUG("nb_rx: %d, rx_buffers %p", nb_rx, &rx_buffers[nb_rx]);
@@ -415,18 +510,16 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
        
         if (unlikely(nb_rx == 0))
             continue;
-        for(int i=0;i<nb_rx;i++){
-            rte_prefetch2(rx_buffers[i]);
-        }
+       
         for (int i = 0; i < nb_rx; i++) {
+            rte_prefetch0(rx_buffers[i]);
             pkt_ptr = rte_pktmbuf_mtod(rx_buffers[i], uint8_t*);
-            ip_hdr = reinterpret_cast<struct rte_ipv4_hdr*>(pkt_ptr + ip_h_offset);
+            ip_hdr = ((rte_ipv4_hdr*)(pkt_ptr + ip_h_offset));
             src_ip = ip_hdr->src_addr;
-            udp_hdr = reinterpret_cast<struct rte_udp_hdr*> (pkt_ptr + udp_h_offset);
+            udp_hdr = ((rte_udp_hdr* )(pkt_ptr + udp_h_offset));
         
          
-            uint16_t pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
-        //LOG_DEBUG("Packet matched for connection id : %d, size %d!!",src_port, pkt_size);
+            pkt_size = ntohs(udp_hdr->dgram_len) -  sizeof(rte_udp_hdr);
              conn_id = 0;
             conn_id = src_ip;
             conn_id = conn_id<<16;
@@ -435,16 +528,8 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
             //local host port in BE
             conn_id = conn_id<<16;
             conn_id  = conn_id | (uint64_t)(udp_hdr->dst_port);
-            // #ifdef LOG_LEVEL_AS_DEBUG
-            //     uint64_t conn_c =conn_id;
-            //     uint16_t local_port = conn_c & (0xffff);
-            //     conn_c = conn_c>>16;
-            //     uint16_t server_port = conn_c & (0xffff);
-            //     conn_c = conn_c>>16;
-            //     uint32_t ser_ip = conn_c & (0xffffffff);
-            //     LOG_DEBUG("Conn Id dissassemble : IP: %s, port: %d, local port: %d",ipv4_to_string(ser_ip).c_str(), ntohs(server_port), ntohs(local_port));
-            // #endif
-            connId_arr[i] = conn_id;
+           
+    
             data_ptr = pkt_ptr + d_offset;
             rte_memcpy(&pkt_type,data_ptr,sizeof(uint8_t));
            // mempcpy
@@ -452,22 +537,29 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
             data_ptr += sizeof(uint8_t);
             
             if(likely(pkt_type == RR) ){
-                struct data *result;
-               // ret = rte_hash_lookup_data(conn_tab, &conn_id, (void**)&current_conn );
-                //ret = rte_hash_lookup(conn_tab, &conn_id);
-               // if(unlikely(ret < 0))
-                //    continue;
-                //rte_hash_lookup_bulk
+
+
+                req_m.allot_buffer_x(rx_buffers[i]);
+       
+                req_m >> req_size >> req_xid;
+                req_m >> req_rpc_id;
+                us_handlers_[req_rpc_id](&req_m, connections[conn_id]);
+                //LOG_DEBUG("RAN RPC");
+                //while(retry < 2000){
+                    //if(
+                        //rpc_pkt = rx_buffers[i];
+                        //t_ring = connections[conn_id]->in_bufring;
+                        //continue;
+                        //rte_ring_sp_enqueue(connections[conn_id]->in_bufring, rx_buffers[i]);// >= 0
+                        //){
+                        //break;
+                    //}
+                    //retry++;
+                //}
                 
-               // ret = rte_table_hash_lookup_data(conn_tab, &conn_id, (void**)&current_conn);
-                while(retry < 2000){
-                    if(rte_ring_sp_enqueue(connections[conn_id]->in_bufring, rx_buffers[i]) >= 0){
-                        break;
-                    }
-                    retry++;
-                }
+                //retry=0;
+
                 
-                retry=0;
             
             }else if (unlikely(pkt_type == SM)){
                 LOG_DEBUG("Session Management Packet received pkt type 0x%2x",pkt_type);
@@ -494,23 +586,27 @@ int DpdkTransport::dpdk_rx_loop(void* arg) {
                     dpdk_th->sm_queue.push(sm_req);
                     dpdk_th->sm_queue_l.unlock();
                 }
-               rte_pktmbuf_free(rx_buffers[i]);
+               
             
             }else{
                 LOG_DEBUG("Packet Type Not found");
-                rte_pktmbuf_free(rx_buffers[i]);
+                
             }
         }
-         #ifdef RPC_STATISTICS
-            if((times % 30000) == 1){
-                end = raw_time();
-                sum += (end - start);
 
-                count++;
-                Log_info("Avg Time spent (ns)  = %llu, sum = %llu", ((sum/count) ) );
-            }
-            times++;
-        #endif
+        nb_rx = rte_eth_tx_burst(port_id, queue_id, 
+                                          rx_buffers, nb_rx);
+        //rte_pktmbuf_free_bulk(rx_buffers,nb_rx);
+        //  #ifdef RPC_STATISTICS
+        //     if((times % 30000) == 1){
+        //         end = raw_time();
+        //         sum += (end - start);
+
+        //         count++;
+        //         Log_info("Avg Time spent (ns)  = %llu, sum = %llu", ((sum/count) ) );
+        //     }
+        //     times++;
+        // #endif
     }
     Log_info("Exiting RX thread %d ",
              info->thread_id);
@@ -582,6 +678,12 @@ DpdkTransport* DpdkTransport::get_transport(){
 void DpdkTransport::init_dpdk_main_thread(const char* argv_str) {
     bool in_numa_node=false;
     Config* conf = Config::get_config();
+    // #ifdef RPC_STATISTICS
+    // rs = new ring_stat();
+    // rs->num_sample=0;
+    // rs->free_c=0;
+    // rs->used_c=0;
+    // #endif
     while(1){
         if(sched_getcpu() >= (conf->cpu_info_.numa)*(conf->cpu_info_.core_per_numa)
                 || sched_getcpu() <= (conf->cpu_info_.numa +1)*(conf->cpu_info_.core_per_numa) ){
@@ -838,7 +940,7 @@ int DpdkTransport::port_init(uint16_t port_id) {
         // SM ring doesn't need size;
         thread_rx_info[i]->sm_ring = rte_ring_create(sm_ring_name,
                                                     (conf->rte_ring_size)/32,
-                                                    rte_socket_id(),
+                                                     rte_socket_id(),
                                                     RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
         rx_sm_rings[i] = thread_rx_info[i]->sm_ring;
         verify(rx_sm_rings[i] != nullptr);
@@ -854,7 +956,8 @@ int DpdkTransport::port_init(uint16_t port_id) {
         char sm_ring_name[128];
         sprintf(sm_ring_name, "sRPC_SMRING_THREAD_TX_%d",i);
         // SM ring doesn't need size;
-        thread_tx_info[i]->sm_ring = rte_ring_create(sm_ring_name,(conf->rte_ring_size)/32,rte_socket_id(), RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
+        thread_tx_info[i]->sm_ring = rte_ring_create(sm_ring_name,(conf->rte_ring_size)/32, rte_socket_id(),
+                     RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
         tx_sm_rings[i] = thread_tx_info[i]->sm_ring;
         verify(tx_sm_rings[i] != nullptr);
     }

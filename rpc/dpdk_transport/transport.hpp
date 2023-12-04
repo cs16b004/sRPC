@@ -7,7 +7,7 @@
 #include <string>
 #include <bitset>
 #include <unordered_map>
-#include "../../misc/marshal.hpp"
+
 #include "config.hpp"
 #include "transport_connection.hpp"
 #include "../polling.hpp"
@@ -19,7 +19,7 @@
 #include <mutex>
 #include <rte_hash.h>
 #include <rte_jhash.h>
-
+#include "transport_marshal.hpp"
 #define DEV_TX_OFFLOAD_VLAN_INSERT RTE_ETH_TX_OFFLOAD_VLAN_INSERT
 #define DEV_TX_OFFLOAD_IPV4_CKSUM RTE_ETH_TX_OFFLOAD_IPV4_CKSUM
 #define DEV_TX_OFFLOAD_UDP_CKSUM  RTE_ETH_TX_OFFLOAD_UDP_CKSUM
@@ -71,7 +71,7 @@ namespace rrr{
 
     private:
         static DpdkTransport* transport_l;
-    
+        
         std::unordered_map<uint64_t, TransportConnection*> out_connections;
 
         std::unordered_map<uint64_t, rte_ring*> in_rings;
@@ -200,6 +200,7 @@ public:
       struct dpdk_thread_info {
         int thread_id;
         int port_id;
+        std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, TransportConnection*)>> us_handlers_;
         int queue_id;
         int conn_count = 0;
         int max_size=100;

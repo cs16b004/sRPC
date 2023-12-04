@@ -1,19 +1,38 @@
-#pragma once
 #include "server.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/mman.h>
-#include<linux/memfd.h>
+
+
 #include "dpdk_transport/config.hpp"
 #include "dpdk_transport/transport_marshal.hpp"
 
 using namespace std;
+
+#ifdef RPC_STATISTICS
+struct ring_stat{
+    uint64_t num_sample;
+    uint64_t free_c;
+    uint64_t used_c;
+
+}* rs;
+
+
+void add_sample(ring_stat* rs, uint64_t num_used, uint64_t num_free){
+    rs->num_sample++;
+    
+    rs->free_c += num_free;
+    rs->used_c += num_used;
+    
+}
+ static uint64_t raw_time(void) {
+    struct timespec tstart={0,0};
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
+    uint64_t t = (uint64_t)(tstart.tv_sec*1.0e9 + tstart.tv_nsec);
+    return t;
+
+}
+#endif
 
 namespace rrr {
 
@@ -22,12 +41,20 @@ UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
         : ServerConnection((Server*) server,server->transport_->out_connections[socket]->in_fd_),connId(socket) {
             conn = server->transport_->out_connections[socket];
     // increase number of open connections
-
+    us_handlers_.insert(server_->us_handlers_.begin(), server_->us_handlers_.end());
     server_->sconns_ctr_.next(1);
-    for(int i=0;i<32;i++){
+    for(int i=0;i<64;i++){
         pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);
     }
     cb = server->us_handlers_.find(0x10000003)->second;
+
+    #ifdef RPC_STATISTICS
+    rs = new ring_stat();
+    rs->used_c=0;
+    rs->free_c=0;
+    rs->num_sample=0;
+    #endif
+
 }
 
 UDPConnection::~UDPConnection() {
@@ -82,8 +109,20 @@ void UDPConnection::handle_read() {
     //     return;
     // }
     unsigned int available;
-     unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
 
+
+    nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 64,&available);
+    if (nb_pkts == 0 )
+        return;
+    #ifdef RPC_STATISTICS
+            
+                add_sample(rs, nb_pkts, available);
+                times++;
+                if (times%30000 == 1){
+                    LOG_DEBUG("in Ring size average: %llu outstanding average %llu, size %d\n", rs->used_c / rs->num_sample, rs->free_c / rs->num_sample, rte_ring_get_size(conn->in_bufring));
+                    
+                }
+                #endif
     
     
     for(int i=0;i<nb_pkts;i++){
@@ -103,14 +142,15 @@ void UDPConnection::handle_read() {
 
       
         //cb(request_array[i], (UDPConnection *) this->ref_copy());
-        auto it = server_->us_handlers_.find(rpc_id);
-        if (likely(it != server_->us_handlers_.end())) {
+        auto it = us_handlers_.find(rpc_id);
+        if (likely(it != us_handlers_.end())) {
             // the handler should delete req, and release server_connection refcopy.
            // LOG_DEBUG("RPC Triggered");
         
             it->second(request_array[i], (UDPConnection *) this->ref_copy());
             
         } else {
+             Log_error("rrr::UDPConnection: no handler for rpc_id=0x%08x", rpc_id);
             rpc_id_missing_l_s.lock();
             bool surpress_warning = false;
             if (rpc_id_missing_s.find(rpc_id) == rpc_id_missing_s.end()) {

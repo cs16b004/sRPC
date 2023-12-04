@@ -135,12 +135,7 @@ struct start_server_loop_args_type {
  * For the request object, the marshal only contains <arg1>..<argN>,
  * other fields are already consumed.
  */
-template<class T>
-class Request {
-    public:
-    T m;
-    i64 xid;
-};
+
 
 class Service {
 public:
@@ -436,12 +431,13 @@ class UDPConnection: public ServerConnection {
 
     TransportMarshal* curr_reply;
     TransportConnection* conn;
-    rte_mbuf* pkt_array[32];
+    rte_mbuf* pkt_array[64];
     rte_mbuf* reply_arr[32];
-
+    uint32_t nb_pkts;
+    uint64_t times=0;
     uint64_t timestamps[32];
-
-    Request<TransportMarshal>* request_array[32];
+    std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>> us_handlers_;
+    Request<TransportMarshal>* request_array[64];
     uint64_t reply_idx=0;
     //test call_back
     std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)> cb;

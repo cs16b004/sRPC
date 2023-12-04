@@ -74,7 +74,7 @@ public:
     uint16_t client_duration_ = 20;
     uint16_t server_duration_ = 60;
     std::string server_address_;
-    uint32_t rte_ring_size = 32768*2;
+    uint32_t rte_ring_size = 32768;
     uint16_t client_batch_size_=5;
     //
 
