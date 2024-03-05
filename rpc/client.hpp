@@ -230,7 +230,7 @@ class UDPClient: public Client{
             
             if(transport_ == nullptr)
                 transport_=  DpdkTransport::get_transport();
-            //transport_->init(Config::get_config());
+            //transport_->init(RPCConfig::get_config());
             while(!transport_->initiated){
                 //LOG_DEBUG("Waiting for transport to initialize");
                 usleep(2000);

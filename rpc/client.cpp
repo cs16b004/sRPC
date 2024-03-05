@@ -78,7 +78,7 @@ int UDPClient::poll_mode(){
 int UDPClient::connect(const char * addr){
         
     
-    // Config* config = Config::get_config(); 
+    // RPCConfig* config = RPCConfig::get_config(); 
     // this->transport_->init(config);
     
 
@@ -115,6 +115,7 @@ void UDPClient::end_request(){
     // i32 rpc_size = current_req.content_size();
     // current_req.write_book_mark(&rpc_size, sizeof(i32));
      current_req.format_header();
+     //current_req.set_pkt_type_bg();
     // LOG_DEBUG("Request Data: \n %s", current_req.print_request().c_str());
     
      int retry=0;
@@ -163,7 +164,7 @@ void UDPClient::handle_read(){
                 #endif
                 //Log_info("For reply for req: %lu",v_reply_xid);
                 fu->notify_ready();
-               // LOG_DEBUG("Running reply future for %d",v_reply_xid);
+                LOG_DEBUG("Running reply future for %d",v_reply_xid);
                 // since we removed it from pending_fu_
                 fu->release();
         } 

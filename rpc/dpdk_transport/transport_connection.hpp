@@ -39,6 +39,7 @@ namespace rrr{
 
         NetAddress(const char* mac_i, const char* ip_i, const int port);
         NetAddress(const uint8_t* mac_i, const uint32_t ip, const int port);
+       // NetAddress()
         void init(const char* mac_i, const char* ip_i, const int port);
         bool operator==(const NetAddress& other);
         NetAddress& operator=(const NetAddress& other);

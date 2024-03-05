@@ -28,7 +28,6 @@
 
 
 namespace rrr {
-    class Reporter;
 enum thread_type{
         SERVER_THREAD,
         POLL_THREAD

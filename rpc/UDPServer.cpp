@@ -122,7 +122,7 @@ void UDPConnection::handle_read() {
                     LOG_DEBUG("in Ring size average: %llu outstanding average %llu, size %d\n", rs->used_c / rs->num_sample, rs->free_c / rs->num_sample, rte_ring_get_size(conn->in_bufring));
                     
                 }
-                #endif
+    #endif
     
     
     for(int i=0;i<nb_pkts;i++){
@@ -295,7 +295,7 @@ UDPServer::~UDPServer() {
 }
 
 void* UDPServer::start_server_loop(void* arg) {
-    Config* conf = Config::get_config();
+    RPCConfig* conf = RPCConfig::get_config();
 
     rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
     UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
@@ -324,21 +324,7 @@ void UDPServer::server_loop(void* arg) {
             uint8_t req_type;
             verify(sm_req->read(&req_type, sizeof(uint8_t)) == sizeof(uint8_t));
             LOG_DEBUG("Request Type %02x",req_type);
-            if(req_type == CON){
-                std::string src_addr;
-                *(sm_req)>>src_addr;
-                Log_info("SM REQ to connect %s",src_addr.c_str());
-                uint64_t connId = svr->transport_->accept(src_addr.c_str());
-                   
-                if (connId > 0){
-                    svr->sconns_l_.lock();
-                    verify(set_nonblocking(svr->transport_->out_connections[connId]->in_fd_, true) == 0);
-                    UDPConnection* sconn = new UDPConnection(svr, connId);
-                    svr->sconns_.insert((UDPConnection*) sconn->ref_copy());
-                    svr->pollmgr_->add((UDPConnection*)sconn->ref_copy());
-                    svr->sconns_l_.unlock();
-                }
-            }
+            
         }
     }
     Log_info("Server loop end");
@@ -353,7 +339,7 @@ void UDPServer::start(const char* addr) {
 
 void UDPServer::start() {
     status_ = RUNNING;
-    Config* config = Config::get_config(); 
+    RPCConfig* config = RPCConfig::get_config(); 
     //this->transport_->init(config);
     verify(transport_!=nullptr);
     while(!transport_->initiated){

@@ -93,13 +93,13 @@ public:
         SpinLock pending_remove_l_;
         bool stop_flag_;
 
-        static int start_poll_loop_dpdk(void* arg) {
+        static void* start_poll_loop_dpdk(void* arg) {
             PollThread* thiz = (PollThread *) arg;
             thiz->poll_loop();
            
             //pthread_exit(nullptr);
             
-            return 0;
+            return arg;
         }
         static void* start_poll_loop(void*arg){
             PollThread* thiz = (PollThread *) arg;
@@ -115,7 +115,7 @@ public:
         void start(PollMgr* poll_mgr) {
             poll_mgr_ = poll_mgr;
              #ifdef DPDK
-             rte_eal_remote_launch(PollMgr::PollThread::start_poll_loop_dpdk,this, 6 );
+             Pthread_create(p_th_, nullptr, PollMgr::PollThread::start_poll_loop_dpdk, this);
              #else
             Pthread_create(p_th_, nullptr, PollMgr::PollThread::start_poll_loop, this);
             #endif

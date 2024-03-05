@@ -14,6 +14,9 @@
 #include <rte_udp.h>
 #include <rte_ether.h>
 namespace rrr{
+  constexpr uint16_t udp_hdr_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr);
+    constexpr uint16_t ip_hdr_offset = sizeof(struct rte_ether_hdr);
+    constexpr uint16_t data_offset = sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
     const uint8_t pad[64] = {  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
                                 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                                 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
@@ -39,7 +42,7 @@ class Request {
 
             uint16_t book_mark_offset=0;
             uint16_t book_mark_len=0;
-            uint16_t offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+            uint16_t offset =  data_offset;
         public:
             TransportMarshal(){
 
@@ -49,8 +52,8 @@ class Request {
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               eth_hdr = reinterpret_cast<rte_ether_hdr*>(dst);
               
-              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + sizeof(rte_ether_hdr));
-              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + sizeof(rte_ether_hdr) + sizeof(rte_ipv4_hdr));
+              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + ip_hdr_offset);
+              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + udp_hdr_offset);
              // verify(dst !=nullptr);
               dst+=offset;
               
@@ -62,13 +65,13 @@ class Request {
             void allot_buffer(rte_mbuf* req){
               book_mark_offset=0;
               book_mark_len=0;
-              offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+              offset = data_offset;
               req_data = (rte_mbuf*)req;     
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               eth_hdr = reinterpret_cast<rte_ether_hdr*>(dst);
               
-              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + sizeof(rte_ether_hdr));
-              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + sizeof(rte_ether_hdr) + sizeof(rte_ipv4_hdr));
+              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + ip_hdr_offset);
+              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + udp_hdr_offset);
              // verify(dst !=nullptr);
               dst+=offset;
               
@@ -80,13 +83,13 @@ class Request {
             void allot_buffer_x(rte_mbuf* req){
               book_mark_offset=0;
               book_mark_len=0;
-              offset =  sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
-              req_data = (rte_mbuf*)req;     
+              offset =  data_offset;
+              req_data = req;     
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               eth_hdr = reinterpret_cast<rte_ether_hdr*>(dst);
               
-              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + sizeof(rte_ether_hdr));
-              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + sizeof(rte_ether_hdr) + sizeof(rte_ipv4_hdr));
+              ipv4_hdr = reinterpret_cast<rte_ipv4_hdr*>(dst + ip_hdr_offset);
+              udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + udp_hdr_offset);
              // verify(dst !=nullptr);
               dst+=offset;
               
@@ -167,6 +170,12 @@ class Request {
             }
             void* get_offset(){
               return rte_pktmbuf_mtod_offset(req_data, void*, offset);
+            }
+            void set_pkt_type_bg(){
+              uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+              dst+=sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+             
+              *dst = 0xa;
             }
 
     };

@@ -20,7 +20,6 @@
 #include "rpc/polling.hpp"
 #include "rpc/client.hpp"
 #include "rpc/server.hpp"
-#include "rpc/reporter.hpp"
 #include "rpc/dpdk_transport/transport_marshal.hpp"
 
 #include "coroutine/scheduler.h"

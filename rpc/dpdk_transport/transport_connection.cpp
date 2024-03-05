@@ -3,9 +3,9 @@
 namespace rrr{
 rte_mbuf* TransportConnection::get_new_pkt(){
     int i=0;
-    void** buf = (void**)new rte_mbuf*;
-    *buf = new rte_mbuf;
-    while(rte_ring_dequeue(available_bufring, buf) < 0){
+    void** tx_bufs = (void**)new rte_mbuf*;
+    *tx_bufs = new rte_mbuf;
+    while(rte_ring_dequeue(available_bufring, tx_bufs) < 0){
         i++;
         if(i > 1000*1000){
             Log_warn("Waiting to get a new pkt from connection %lld",conn_id);
@@ -14,7 +14,7 @@ rte_mbuf* TransportConnection::get_new_pkt(){
        
      }
 
-    rte_mbuf* ret = (rte_mbuf*) *buf; 
+    rte_mbuf* ret = (rte_mbuf*) *tx_bufs; 
    // rte_mbuf* ret = rte_pktmbuf_alloc(pkt_mempool);
     
     //make_pkt_header(ret);
@@ -23,7 +23,7 @@ rte_mbuf* TransportConnection::get_new_pkt(){
 
 }
 int TransportConnection::assign_availring(){
-    rrr::Config* conf = Config::get_config();
+    rrr::RPCConfig* conf = RPCConfig::get_config();
      char buf_ring_name[128];
     sprintf(buf_ring_name, "AV_%lu",conn_id);
     
@@ -42,7 +42,7 @@ int TransportConnection::assign_availring(){
         }
 }
 int TransportConnection::assign_bufring(){
-    rrr::Config* conf = Config::get_config();
+    rrr::RPCConfig* conf = RPCConfig::get_config();
      char buf_ring_name[128];
     sprintf(buf_ring_name, "BF_%lu",conn_id);
                 // bigger size queue;
@@ -72,12 +72,12 @@ int TransportConnection::buf_alloc(rte_mempool* mempool, uint16_t max_len){
 }
 void TransportConnection::make_headers_and_produce(){
      int retry=0;
-     for(int i=0;i<Config::get_config()->buffer_len;i++){
-        //LOG_DEBUG("Packet address for pkt %d while making header: %p",i,&buf[i]);
+     for(int i=0;i<RPCConfig::get_config()->buffer_len;i++){
+        //LOG_DEBUG("Packet address for pkt %d while making header: %p",i,&tx_bufs[i]);
         make_pkt_header(out_msg_buffers[i]);
         
     }
-    for(int i=0;i<Config::get_config()->buffer_len -1;i++){
+    for(int i=0;i<RPCConfig::get_config()->buffer_len -1;i++){
         retry=0;
         while(rte_ring_enqueue(available_bufring,out_msg_buffers[i]) < 0){
             retry++;
@@ -91,7 +91,7 @@ void TransportConnection::make_headers_and_produce(){
 }
 void TransportConnection::make_pkt_header(rte_mbuf* pkt){
     verify(pkt !=nullptr);
-    Config* conf = Config::get_config();
+    RPCConfig* conf = RPCConfig::get_config();
     uint16_t pkt_offset=0;
    
     pkt->next = NULL;
