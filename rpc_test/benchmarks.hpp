@@ -46,9 +46,10 @@ private:
     unsigned int time_;
     uint16_t out_size=1;
     rrr::PollMgr* pollmgr_;
-    uint64_t count_=0;
+    
     std::string out_string;
 public:
+    uint64_t count_=0;
     BenchmarkServiceImpl(uint16_t num_out): out_size(num_out){
         for(int i=0;i<num_out;i++){
             out_string.push_back('a'+ rand()%26);
@@ -78,16 +79,17 @@ class Benchmarks{
     BenchmarkServiceImpl *csi;
     BenchmarkProxy** service_proxies;
     pthread_t** client_threads;
-    rrr::Reporter* rep;
+    std::thread stat_thread;
+    bool stop=false;
     std::bitset<128> affinity_mask;
 
     struct benchmark_thread_info** thread_info;
-    rrr::Config* conf;
+    rrr::RPCConfig* conf;
 
     rrr::PollMgr* pollmgr_;
 
     public:
-    Benchmarks(rrr::Config* config) : conf(config){
+    Benchmarks(rrr::RPCConfig* config) : conf(config){
         for(int i=conf->core_affinity_mask_[0];i <= conf->core_affinity_mask_[1];i++)
             affinity_mask.set(i);
     

@@ -29,15 +29,14 @@ void Benchmarks::create_server(){
 
     
     
-    rep = new rrr::Reporter(2500,pollmgr_,false);
+   
     
     server->start((std::string("0.0.0.0:") + port).c_str());
 
-    rep->launch();
+    
     
     observe_server();
-    rep->trigger_shutdown();
-    
+   
       
       
         #ifdef DPDK
@@ -63,15 +62,18 @@ void Benchmarks::create_server(){
 
 }
 void Benchmarks::create_proxies(){
+     
       
         pollmgr_ = new rrr::PollMgr(conf->client_poll_threads_);
 
-        pollmgr_->set_cpu_affinity(affinity_mask);
 
+        // pollmgr_->set_cpu_affinity(affinity_mask);
+  
         service_proxies = new BenchmarkProxy*[conf->client_connections_];
 
         uint16_t input_size;
         input_size = conf->input_size_;
+     
         for (int i=0; i < conf->client_connections_; i++) {
             #ifdef DPDK
                 rrr::UDPClient *client = new rrr::UDPClient(pollmgr_);
@@ -85,7 +87,7 @@ void Benchmarks::create_proxies(){
        
 }
 void* Benchmarks::launch_client_thread(void *arg){
-    rrr::Config* conf= rrr::Config::get_config();
+    rrr::RPCConfig* conf= rrr::RPCConfig::get_config();
      while(1){
       //  Log_info("thread cpu %d",sched_getcpu());
         if(sched_getcpu() >= (conf->cpu_info_.numa)*(conf->cpu_info_.core_per_numa)
@@ -134,14 +136,8 @@ void Benchmarks::create_client_threads(){
     for(int j=0;j<conf->num_client_threads_;j++){
        pthread_create(client_threads[j], nullptr, Benchmarks::launch_client_thread, thread_info[j]);
     }
-    set_cpu_affinity();
-  
-    rep = new rrr::Reporter(2000,pollmgr_, true);
-    rep->launch();
-    
-     
-
-    
+    set_cpu_affinity();  
+      
     
 }
 void Benchmarks::observe_client(){
@@ -153,10 +149,21 @@ void Benchmarks::observe_client(){
 }
 void Benchmarks::observe_server(){
     int i=0;
+    stat_thread = std::thread([this]{
+        uint64_t last=0;
+        while(!this->stop){
+            sleep(1);
+            uint64_t num = this->csi->count_;
+            std::cout<<"RPC/sec "<<num-last<<std::endl;
+            last = num;
+
+        }
+    });
  while (i < conf->server_duration_*1000){
         usleep(1000);
         i++;
     }
+    this->stop = true;
 }
 void Benchmarks::set_cpu_affinity(){
 
@@ -196,7 +203,7 @@ void Benchmarks::stop_client(){
        for(int i=0; i< conf->client_connections_; i++){
             service_proxies[i]->close();
        }
-       rep->trigger_shutdown();
+
        pollmgr_->release();
        
 }

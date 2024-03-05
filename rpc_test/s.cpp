@@ -9,8 +9,8 @@
 
 int main(int argc, char **argv) {
     
-    rrr::Config::create_config(argc, argv);
-    rrr::Config* conf = rrr::Config::get_config();
+    rrr::RPCConfig::create_config(argc, argv);
+    rrr::RPCConfig* conf = rrr::RPCConfig::get_config();
         
     #ifdef DPDK
     rrr::DpdkTransport::create_transport(conf);
