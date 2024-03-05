@@ -1,9 +1,10 @@
 .vscode
-rpc_test/perf.data
-rpc_test/perf.data.old
-rpc_test/bin/
-rpc_test/*.o
-rpc_test/lib/
-apps
+apps/rpc_test/perf.data
+apps/rpc_test/perf.data.old
+apps/rpc_test/bin/
+apps/rpc_test/*.o
+apps/rpc_test/lib/
+apps/build
 build
+
 
