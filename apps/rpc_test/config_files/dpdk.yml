@@ -4,5 +4,5 @@ dpdk:
   # it is recommended to be between 1 and 2
   num_threads: 1
   pkt_burst_size: 32
-  option: ./server -a e3:00.0 -d librte_net_mlx5.so -d librte_mempool_ring.so -l 32-64
+  option: ./server -a e3:00.0 -l 32-64
   # option: ./client -a 0000:01:00.0,dv_flow_en=0,rxq_cqe_comp_en=0

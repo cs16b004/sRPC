@@ -18,18 +18,16 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DLOG_LEVEL_AS_DEBUG -DRPC_S
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS")
 
 
+add_definitions(-DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS)
+
 if (PKG_CONFIG_FOUND)
        pkg_check_modules(DPDK "libdpdk")
 endif()
 pkg_check_modules(DPDK "libdpdk")
 if (DPDK_FOUND)
-  add_definitions(${DPDK_STATIC_CFLAGS})
-  set(DPDK_LIBS ${DPDK_STATIC_LDFLAGS})
   include_directories(${DPDK_INCLUDE_DIR})
-  link_libraries(${DPDK_LIBS})
   add_definitions(-DDPDK)
 endif(DPDK_FOUND)
- add_definitions(-DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS)
 
 
 file(GLOB SRC "./src/benchmarks.cpp")
@@ -65,5 +63,5 @@ target_link_libraries(server PRIVATE rpc yaml-cpp pthread )
 target_link_libraries(client PRIVATE rpc yaml-cpp pthread )
 
 
-# target_link_directories(server PRIVATE ../../build)
-# target_link_directories(client PRIVATE ../../build)
+#target_link_directories(server PRIVATE ../../build)
+#target_link_directories(client PRIVATE ../../build)

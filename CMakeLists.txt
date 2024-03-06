@@ -13,22 +13,12 @@ set(RPCC ${CMAKE_CURRENT_LIST_DIR}/bin/rpcgen)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS -march=native -flto")
+
 
 find_package(PkgConfig REQUIRED)
+find_package(Boost REQUIRED COMPONENTS context)
 
-if (PKG_CONFIG_FOUND)
-       pkg_check_modules(DPDK "libdpdk")
-endif()
-pkg_check_modules(DPDK "libdpdk")
-if (DPDK_FOUND)
-  add_definitions(${DPDK_STATIC_CFLAGS})
-  set(DPDK_LIBS ${DPDK_STATIC_LDFLAGS})
-  include_directories(${DPDK_INCLUDE_DIR})
-  link_libraries(${DPDK_LIBS})
-  add_definitions(-DDPDK)
-endif(DPDK_FOUND)
- add_definitions(-DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS)
 
 include_directories( GLOB src src/base src/misc src/rpc src/rpc/dpdk_transport src/coroutine src/utils )
 
@@ -45,6 +35,24 @@ set(SOURCES
 
 
 add_library(rpc
-    ${SOURCES})
+    ${SOURCES} )
+
+
+target_link_libraries(rpc PRIVATE ${Boost_LIBRARIES})
+target_include_directories(rpc PUBLIC ${Boost_INCLUDE_DIRS})
+
+if (PKG_CONFIG_FOUND)
+       pkg_check_modules(DPDK "libdpdk")
+endif()
+pkg_check_modules(DPDK "libdpdk")
+if (DPDK_FOUND)
+  add_definitions(${DPDK_STATIC_CFLAGS})
+  set(DPDK_LIBS ${DPDK_STATIC_LDFLAGS})
+  include_directories(${DPDK_INCLUDE_DIR})
+  target_link_libraries(rpc PRIVATE ${DPDK_LIBS})
+  add_definitions(-DDPDK)
+endif(DPDK_FOUND)
+add_definitions(-DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS)
+
 
 add_subdirectory(apps/rpc_test)
