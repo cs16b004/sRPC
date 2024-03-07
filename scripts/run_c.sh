@@ -1,1 +1,1 @@
-sudo ../build/apps/rpc_test/client -f ../apps/rpc_test/config_files/cpu.yml -f ../apps/rpc_test/config_files/dpdk.yml -f ../apps/rpc_test/config_files/host_catskill.yml -f ../apps/rpc_test/config_files/network_catskill.yml -f ../apps/rpc_test/config_files/benchmarks.yml
+sudo ../build/apps/rpc_test/client -f ../apps/rpc_test/config_files/srpc.yml -f ../apps/rpc_test/config_files/host_catskill.yml  -- -f ../apps/rpc_test/config_files/app.yml 

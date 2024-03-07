@@ -26,7 +26,7 @@ namespace rrr{
 
 
     class DPDKTransport;
-    class UDPconnection;
+    class UDPConnection;
     class UDPServer;
     struct NetAddress {
         uint8_t id;
@@ -56,9 +56,11 @@ namespace rrr{
     class TransportConnection{
         friend class DPDKTransport;
         friend class UDPConnection;
+        friend class ServerConnection;
         friend class UDPServer;
         
         public:
+
             TransportConnection(){}
             uint64_t conn_id;
             int in_fd_;
@@ -77,7 +79,7 @@ namespace rrr{
             //My port nbumber ;
             uint16_t udp_port;
             bool connected_ = false;
-        public:
+            UDPConnection* sconn;
             int buf_alloc(rte_mempool* mempool,uint16_t max_len);
             void make_headers_and_produce();
             void make_pkt_header(rte_mbuf* pkt);

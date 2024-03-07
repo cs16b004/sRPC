@@ -3,6 +3,7 @@
 #include <rte_ring.h>
 #include <rte_ring_core.h>
 #include "utils.hpp"
+#include "../server.hpp"
 #define DPDK_RX_DESC_SIZE 1024
 #define DPDK_TX_DESC_SIZE 1024
 
@@ -103,6 +104,13 @@ namespace rrr
         sleep(1);
         oconn->connected_ = true;
         oconn->burst_size = 32; // conf->client_batch_size_;
+        us_server->sconns_l_.lock();
+        UDPConnection* n_conn = new UDPConnection(us_server, conn_id);
+        us_server->sconns_.insert(n_conn);
+        us_server->pollmgr_->add(n_conn);
+        oconn->sconn = n_conn;
+        us_server->sconns_l_.unlock();
+
         return;
     }
 
@@ -209,7 +217,7 @@ namespace rrr
                 goto send_con_req;
             }
         }
-        oconn->burst_size = conf->client_batch_size_;
+        oconn->burst_size = conf->burst_size;
         ;
         Log_info("Connected to %s", addr.c_str());
 
@@ -261,74 +269,7 @@ namespace rrr
         count++;
     }
     
-    static void inline swap_udp_addresses(struct rte_mbuf *pkt)
-    {
-        // Extract Ethernet header
-        struct rte_ether_hdr *eth_hdr = rte_pktmbuf_mtod(pkt, struct rte_ether_hdr *);
-        uint8_t* pkt_ptr = rte_pktmbuf_mtod(pkt, uint8_t* );
-        struct rte_ether_addr temp = eth_hdr->src_addr;
-        eth_hdr->src_addr = eth_hdr->dst_addr;
-        eth_hdr->dst_addr = temp;
-
-        // Extract IP header
-        struct rte_ipv4_hdr *ip_hdr = (struct rte_ipv4_hdr *)(pkt_ptr + ip_hdr_offset);
-
-        // Extract UDP header
-        struct rte_udp_hdr *udp_hdr = (struct rte_udp_hdr *)(pkt_ptr + udp_hdr_offset );
-
-        // Swap IP addresses
-        uint32_t tmp_ip = ip_hdr->src_addr;
-        ip_hdr->src_addr = ip_hdr->dst_addr;
-        ip_hdr->dst_addr = tmp_ip;
-
-        // Swap UDP port numbers
-        uint16_t tmp_port = udp_hdr->src_port;
-        udp_hdr->src_port = udp_hdr->dst_port;
-        udp_hdr->dst_port = tmp_port;
-        
-        
-    }
-
-    void bench_rpc_handler(TransportMarshal *req, TransportConnection *conn)
-    {
-
-        // LOG_DEBUG("PRINT REQ %s", req->print_request().c_str());
-
-        i32 v_error_code = 0;
-        i64 v_reply_xid = 0;
-
-        std::string in_0;
-        (*req) >> in_0;
-
-#ifdef LATENCY
-        uint64_t ts;
-        (*req) >> ts;
-#endif
-        std::string out_0;
-        add_bench(in_0, &out_0);
-        swap_udp_addresses(req->get_mbuf());
-        TransportMarshal current_reply;
-   
-      
-
-        current_reply.allot_buffer_x(req->get_mbuf());
-        current_reply.set_book_mark(sizeof(i32)); // will write reply size later
-
-        current_reply << v_reply_xid;
-        current_reply << v_error_code;
-        current_reply << out_string;
-#ifdef LATENCY
-        current_reply << ts;
-#endif
-        i32 reply_size = current_reply.content_size();
-        current_reply.write_book_mark(&reply_size, sizeof(i32));
-
-        current_reply.format_header();
-        current_reply.set_pkt_type_bg();
-        
-        // LOG_DEBUG( "%s", current_reply.print_request().c_str());
-        int retry = 0;
-    }
+    
 
     int DpdkTransport::ev_loop(void *arg)
     {
@@ -384,9 +325,8 @@ namespace rrr
         rte_mbuf **rx_buffers = ctx->rx_bufs;
 
         rte_mbuf *rpc_pkt = nullptr;
-        TransportMarshal req_m;
-        std::unordered_map<i32, std::function<void(rrr::TransportMarshal *, TransportConnection *)>> us_handlers_;
-        us_handlers_[0x10000003] = bench_rpc_handler;
+        Request<TransportMarshal> *req_m  = new Request<TransportMarshal>();;
+       
         i32 req_size = 0;
         i64 req_xid;
         i32 req_rpc_id;
@@ -428,16 +368,12 @@ namespace rrr
                 if (pkt_type == RR)
                 {
 
-                    
-                    req_m.allot_buffer_x(rx_buffers[i]);
+                  
+                    req_m->m.allot_buffer_x(rx_buffers[i]);
 
-                    req_m >> req_size >> req_xid;
-                    req_m >> req_rpc_id;
-                   
-                    us_handlers_[req_rpc_id](&req_m, out_connections[conn_id]);
-                    
-                    ctx->tx_bufs[ctx->nb_tx] = rx_buffers[i];
-                    ctx->nb_tx+=1;
+                    req_m->m >> req_size >> req_xid;
+                    req_m->m >> req_rpc_id;
+                    handlers[req_rpc_id]->run(req_m, out_connections[conn_id]);
                 }
                 else if(unlikely( pkt_type == RR_BG))
                 {

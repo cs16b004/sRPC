@@ -54,12 +54,17 @@ namespace rrr
     //  std::map<uint16_t,rrr::Connection*> connections_;
     SpinLock DpdkTransport::conn_th_lock;
     SpinLock DpdkTransport::init_lock;
+    
+    rrr::UDPServer* DpdkTransport::us_server=nullptr;
+    std::unordered_map<i32, USHWrapper*> DpdkTransport::handlers;
 
     
     Counter DpdkTransport::next_thread_;
 
     std::unordered_map<std::string, NetAddress> DpdkTransport::src_addr_;
     std::unordered_map<std::string, NetAddress> DpdkTransport::dest_addr_;
+    //std::unordered_map<i32, NetAddress> DpdkTransport::dest_addr_;
+    
     SpinLock DpdkTransport::sm_queue_l;
     std::queue<Marshal *> DpdkTransport::sm_queue;
 
@@ -248,7 +253,7 @@ namespace rrr
             /*     addr = &dest_addr_; */
 
             auto it = addr->find(host_name);
-            Log_info("Adding a host with name %s : info :\n %s", net.name.c_str(), net.to_string().c_str());
+           // Log_info("Adding a host with name %s : info :\n %s", net.name.c_str(), net.to_string().c_str());
             verify(it == addr->end());
 
             addr->emplace(std::piecewise_construct,
@@ -451,6 +456,10 @@ namespace rrr
     /*     }; */
     /* } */
 
+    void DpdkTransport::reg_us_handler(i32 id, std::function<void(Request<TransportMarshal>*, ServerConnection*)> func){
+        handlers[id] = new USHWrapper(id, func);
+    }
+
     void d_thread_ctx::init(DpdkTransport *th, int th_id, int p_id,
                             int q_id, int burst_size)
     {
@@ -586,4 +595,9 @@ namespace rrr
             Log_error("Failed to create flow rule: %s\n", error.message);
         }
     }
+
+    void DpdkTransport::reg_us_server(UDPServer* sv){
+         us_server = sv;
+    }
+    
 }

@@ -1,8 +1,0 @@
-dpdk:
-  # the ratio between number of rx threads to tx
-  # strictly it should be greater than zero but
-  # it is recommended to be between 1 and 2
-  num_threads: 1
-  pkt_burst_size: 32
-  option: ./server -a e3:00.0 -l 32-64
-  # option: ./client -a 0000:01:00.0,dv_flow_en=0,rxq_cqe_comp_en=0

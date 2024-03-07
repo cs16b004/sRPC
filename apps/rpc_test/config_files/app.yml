@@ -9,3 +9,4 @@ benchmarks:
   client_duration: 20
   client_batch_size: 3
   server_address: "172.19.0.121:8501"
+  core_affinity: [32, 64]

@@ -13,7 +13,8 @@
 #include<rte_launch.h>
 #include<rte_lcore.h>
 #endif
-struct benchmark_thread_info;
+#include "AppConfig.hpp"
+struct benchmark_ctx;
 class BenchmarkProxy:CounterProxy{
     private:
     uint16_t input_size;
@@ -46,6 +47,7 @@ private:
     unsigned int time_;
     uint16_t out_size=1;
     rrr::PollMgr* pollmgr_;
+    static rrr::Counter at_counter;
     
     std::string out_string;
 public:
@@ -72,6 +74,7 @@ public:
     void add_bench(const std::string& in, std::string* out ) {
        // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
         count_++;
+        at_counter.next();
         out->append(out_string.c_str());
     }
 };
@@ -83,13 +86,15 @@ class Benchmarks{
     bool stop=false;
     std::bitset<128> affinity_mask;
 
-    struct benchmark_thread_info** thread_info;
-    rrr::RPCConfig* conf;
+    struct benchmark_ctx** thread_info;
+    AppConfig* conf;
 
     rrr::PollMgr* pollmgr_;
 
     public:
-    Benchmarks(rrr::RPCConfig* config) : conf(config){
+    Benchmarks(AppConfig* config) : conf(config){
+        rrr::Log::info("Core Affinity Size %d", conf->core_affinity_mask_);
+        rrr::Log::info("Core Affinity from %d - %d", conf->core_affinity_mask_[0], conf->core_affinity_mask_[1]);
         for(int i=conf->core_affinity_mask_[0];i <= conf->core_affinity_mask_[1];i++)
             affinity_mask.set(i);
     
@@ -117,11 +122,11 @@ class Benchmarks{
 
     
 };
-struct benchmark_thread_info{
+struct benchmark_ctx{
     uint16_t tid;
     bool stop =false;
     BenchmarkProxy* my_proxy;
     uint16_t client_batch_size_;
-    benchmark_thread_info(uint16_t id, BenchmarkProxy* pr, uint16_t b_size): tid(id), my_proxy(pr), client_batch_size_(b_size)
+    benchmark_ctx(uint16_t id, BenchmarkProxy* pr, uint16_t b_size): tid(id), my_proxy(pr), client_batch_size_(b_size)
     {}
 };

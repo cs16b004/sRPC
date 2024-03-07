@@ -59,18 +59,7 @@ namespace rrr
 
         uint16_t num_threads_;
         uint16_t burst_size = 32;
-        // benchmarks yml
-        uint16_t num_client_threads_;
-        uint16_t client_poll_threads_ = 1;
-        uint16_t server_poll_threads_ = 1;
-        uint16_t client_connections_ = 1;
-        uint16_t input_size_ = 64;
-        uint16_t output_size_ = 64;
-        uint16_t client_duration_ = 20;
-        uint16_t server_duration_ = 60;
-        std::string server_address_;
         uint32_t rte_ring_size = 32768;
-        uint16_t client_batch_size_ = 5;
         //
 
         uint16_t buffer_len = 8 * 4096 - 2;
@@ -83,7 +72,6 @@ namespace rrr
         void load_cpu_yml(YAML::Node config);
         void load_host_yml(YAML::Node config);
         void load_server_yml(YAML::Node config);
-        void load_benchmark_yml(YAML::Node config);
         // void load_partition_type(YAML::Node config);
 
     public:

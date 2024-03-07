@@ -1,5 +1,7 @@
 #include "benchmarks.hpp"
 
+rrr::Counter BenchmarkServiceImpl::at_counter;
+
 void Benchmarks::create_server(){
 
      csi = new BenchmarkServiceImpl(conf->output_size_);
@@ -98,7 +100,7 @@ void* Benchmarks::launch_client_thread(void *arg){
             sleep(1);
         }
     }
-    benchmark_thread_info* ct = (benchmark_thread_info*)arg;
+    benchmark_ctx* ct = (benchmark_ctx*)arg;
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
     BenchmarkProxy* pr= ct->my_proxy;
     while(!ct->stop){
@@ -119,11 +121,11 @@ void* Benchmarks::launch_client_thread(void *arg){
     return  (void*)a;
 }
 void Benchmarks::create_client_threads(){
-    thread_info = new benchmark_thread_info* [conf->num_client_threads_];
+    thread_info = new benchmark_ctx* [conf->num_client_threads_];
     client_threads = new pthread_t*[conf->num_client_threads_];
     
     for(int j=0;j<conf->num_client_threads_;j++){
-        thread_info[j] = new benchmark_thread_info(j,service_proxies[j%conf->client_connections_],conf->client_batch_size_);
+        thread_info[j] = new benchmark_ctx(j,service_proxies[j%conf->client_connections_],conf->client_batch_size_);
     }
     int ret;
     for(int j=0;j<conf->num_client_threads_;j++){

@@ -1,5 +1,9 @@
+cpu:
+  numa: 1
+  core_per_numa: 32
+
 network:
-  - ampere00:
+  - ampere01:
       id: 0
       mac: 1c:01:dd:51:b2:ae
       ip: 192.168.2.115
@@ -17,25 +21,32 @@ network:
       ip: 192.168.2.125
       port: 8000
 
-  - ampere03:
+  - ampere02:
       id: 3
       mac: 1c:02:dd:51:b2:af
       ip: 192.168.2.126
       port: 8100
 
-  - catskill:
+  - brooklyn:
       id: 4
-      mac: e4:1d:2d:f2:9e:5c
+      mac: e0:07:1b:82:ed:74
       ip: 172.19.0.121
       port: 8501
 
-  - greenport:
+  - catskill:
       id: 5
+      mac: e4:1d:2d:f2:9e:5c
+      ip: 172.19.0.123
+      port: 8501
+
+  - greenport:
+      id: 6
       mac: 0c:42:a1:8e:e0:e6
       ip: 172.19.0.122
       port: 8501
-  - brooklyn:
-      id: 6
-      mac: e0:07:1b:82:ed:74
-      ip: 172.19.0.123
-      port: 8501
+
+dpdk:
+  num_threads: 1
+  pkt_burst_size: 32
+  option: ./server -a e3:00.0 -l 32-64
+

@@ -7,6 +7,8 @@
 int main(int argc, char **argv) {
     
     rrr::RPCConfig::create_config(argc, argv);
+
+    AppConfig::create_config(argc, argv);
     rrr::RPCConfig* conf = rrr::RPCConfig::get_config();
     while(1){
       //  Log_info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n thread cpu %d\n\n>>>>>>>>>>>>>>>>>>>>>>\n",sched_getcpu());
@@ -29,7 +31,7 @@ int main(int argc, char **argv) {
     }
 
 
-    Benchmarks bm(conf);
+    Benchmarks bm(AppConfig::get_config());
 
   
     bm.create_proxies();

@@ -37,7 +37,24 @@ namespace rrr
 
     class UDPConnection;
     class UDPClient;
-    
+    class UDPServer;
+    class ServerConnection;
+    void swap_udp_addresses(rte_mbuf* pkt);
+    struct USHWrapper{
+        std::function<void(Request<rrr::TransportMarshal> *, ServerConnection*)> us_handler_;
+        i32 rpc_id;
+
+        USHWrapper(i32 id, std::function<void(Request<rrr::TransportMarshal> *, ServerConnection*)>& uh){
+            us_handler_ = uh;
+            rpc_id = id;
+        }
+
+        void run(Request<rrr::TransportMarshal>* req, TransportConnection* conn){
+            us_handler_(req, (ServerConnection*)(conn->sconn));
+            swap_udp_addresses(req->m.get_mbuf());
+        }
+    };
+
     // Pakcet Type
 
     class DpdkTransport
@@ -80,6 +97,7 @@ namespace rrr
 
         static std::unordered_map<std::string, NetAddress> src_addr_;
         static std::unordered_map<std::string, NetAddress> dest_addr_;
+        static std::unordered_map<i32, USHWrapper*> handlers;
         static SpinLock sm_queue_l;
         static std::queue<Marshal *> sm_queue;
 
@@ -90,18 +108,17 @@ namespace rrr
         void addr_config(std::string host_name,
                          std::vector<RPCConfig::NetworkInfo> net_info);
         void init_dpdk_main_thread(const char *argv_str);
-        void init_dpdk_echo(const char *argv_str);
+
 
         int port_init(uint16_t port_id);
         int port_reset(uint16_t port_id);
         int port_close(uint16_t port_id);
         static void install_flow_rule(size_t phy_port);
 
-        static int dpdk_rx_loop(void *arg);
-        static int dpdk_tx_loop(void *arg);
+   
         static int ev_loop(void* arg);
-        void tx_loop_one(d_thread_ctx *arg);
-        void initialize_tx_mbufs(void *args);
+        static UDPServer* us_server;
+  
 
         
         static int isolate(uint8_t phy_port);
@@ -128,6 +145,8 @@ namespace rrr
         static void process_sm_req(d_thread_ctx* ctx);
         // static void
         static DpdkTransport *get_transport();
+        static void reg_us_server(UDPServer* ser);
+        static void reg_us_handler(i32 id, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>);
         // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
 
         // Send a connec request to server at addr_str
@@ -159,14 +178,16 @@ namespace rrr
                 delete[] rx_mbuf_pool;
         }
 
-    private:
+    
     };
+
+
+    
     // DPDK thread context;
     struct d_thread_ctx
     {
         int thread_id;
         int port_id;
-        std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal> *, TransportConnection *)>> us_handlers_;
         int queue_id;
         int conn_count = 0;
         int max_size = 100;
@@ -200,6 +221,9 @@ namespace rrr
         {
         }
     };
+    
+
+
     /**
      * Helper function to process Session Management (SM) requests from other threads;
      * \param sm_ring,
@@ -208,4 +232,31 @@ namespace rrr
      * the  mempool to use allocate buffers etc.
      */
     uint16_t process_sm_requests(rte_ring *sm_ring, rte_mempool *mempool);
+    void inline swap_udp_addresses(struct rte_mbuf *pkt)
+    {
+        // Extract Ethernet header
+        struct rte_ether_hdr *eth_hdr = rte_pktmbuf_mtod(pkt, struct rte_ether_hdr *);
+        uint8_t* pkt_ptr = rte_pktmbuf_mtod(pkt, uint8_t* );
+        struct rte_ether_addr temp = eth_hdr->src_addr;
+        eth_hdr->src_addr = eth_hdr->dst_addr;
+        eth_hdr->dst_addr = temp;
+
+        // Extract IP header
+        struct rte_ipv4_hdr *ip_hdr = (struct rte_ipv4_hdr *)(pkt_ptr + ip_hdr_offset);
+
+        // Extract UDP header
+        struct rte_udp_hdr *udp_hdr = (struct rte_udp_hdr *)(pkt_ptr + udp_hdr_offset );
+
+        // Swap IP addresses
+        uint32_t tmp_ip = ip_hdr->src_addr;
+        ip_hdr->src_addr = ip_hdr->dst_addr;
+        ip_hdr->dst_addr = tmp_ip;
+
+        // Swap UDP port numbers
+        uint16_t tmp_port = udp_hdr->src_port;
+        udp_hdr->src_port = udp_hdr->dst_port;
+        udp_hdr->dst_port = tmp_port;
+        
+        
+    }
 }

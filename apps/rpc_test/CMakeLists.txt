@@ -17,9 +17,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DLOG_LEVEL_AS_DEBUG -DRPC_S
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS")
 
-
-add_definitions(-DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS)
-
 if (PKG_CONFIG_FOUND)
        pkg_check_modules(DPDK "libdpdk")
 endif()
@@ -30,7 +27,8 @@ if (DPDK_FOUND)
 endif(DPDK_FOUND)
 
 
-file(GLOB SRC "./src/benchmarks.cpp")
+file(GLOB SRC "./src/benchmarks.cpp" 
+              "./src/AppConfig.cpp")
 
  set(SOURCES 
      ${SRC}

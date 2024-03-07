@@ -125,7 +125,7 @@ class Request {
               rte_memcpy(dst,p,n);
             }
             size_t content_size(){
-              return offset - (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr)) - book_mark_len -1;
+              return offset - (data_offset) - book_mark_len -1;
             }
             rte_mbuf* get_mbuf(){
               return req_data;
@@ -137,17 +137,17 @@ class Request {
                 offset = 64;
               }
 
-              uint32_t content_size = offset - (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr)) - book_mark_len -1;
+              uint32_t content_size = offset - (data_offset) - book_mark_len -1;
                void* dst = rte_pktmbuf_mtod_offset(req_data, void*, book_mark_offset);
               rte_memcpy(dst,&content_size,sizeof(uint32_t));
               req_data->data_len = offset;
               req_data->pkt_len = offset;
-              ipv4_hdr->total_length = htons(offset -  (sizeof(struct rte_ether_hdr)));
-              udp_hdr->dgram_len = htons(offset -  (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) ));
+              ipv4_hdr->total_length = htons(offset -  ip_hdr_offset);
+              udp_hdr->dgram_len = htons(offset -  udp_hdr_offset);
             }
             void set_pkt_type_sm(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
-              dst+=sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+              dst+= data_offset;
               uint8_t pkt_type = 0x07;
               rte_memcpy(dst,&pkt_type,1);
             }
@@ -155,7 +155,7 @@ class Request {
                char* req = new char[1024];
                uint8_t* pkt_data = rte_pktmbuf_mtod(req_data, uint8_t*);
                int j=0;
-               for(int i=  (sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr));
+               for(int i=  data_offset;
                         i < offset; i++){
                   
                     sprintf(req+j,"%02x ", pkt_data[i]);
@@ -173,9 +173,15 @@ class Request {
             }
             void set_pkt_type_bg(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
-              dst+=sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_udp_hdr);
+              dst += data_offset;
              
               *dst = 0xa;
+            }
+            bool is_type_st(){
+              uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+              dst += data_offset;
+              
+              return (*dst == 0xa);
             }
 
     };

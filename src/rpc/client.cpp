@@ -87,6 +87,7 @@ int UDPClient::connect(const char * addr){
     status_=CONNECTED;
 
     conn = transport_->get_conn(conn_id);
+    //conn->set_us_conn()
 
     pollmgr_->add(this);
 

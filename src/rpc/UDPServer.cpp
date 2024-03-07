@@ -46,7 +46,7 @@ UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
     for(int i=0;i<64;i++){
         pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);
     }
-    cb = server->us_handlers_.find(0x10000003)->second;
+   // cb = server->us_handlers_.find(0x10000003)->second;
 
     #ifdef RPC_STATISTICS
     rs = new ring_stat();
@@ -67,15 +67,19 @@ int UDPConnection::run_async(const std::function<void()>& f) {
 }
 
 void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code /* =... */) {
-    current_reply.allot_buffer(conn->get_new_pkt());
-
-     i32 v_error_code = error_code;
+    if(likely(req->m.is_type_st())){
+        current_reply.allot_buffer_x(req->m.get_mbuf());
+       
+    }else{
+        current_reply.allot_buffer(conn->get_new_pkt());
+    }
+    i32 v_error_code = error_code;
     i64 v_reply_xid = req->xid;
    // rte_pktmbuf_free(req->m.get_mbuf());
     #ifdef LATENCY
         req->m >> timestamps[reply_idx%32] ;
     #endif
-
+    current_reply.set_pkt_type_bg();
     current_reply.set_book_mark(sizeof(i32)); // will write reply size later
 
     current_reply << v_reply_xid;
@@ -312,20 +316,9 @@ void UDPServer::server_loop(void* arg) {
     rrr::start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
     UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
     Log_info("Starting Server Loop");
-
+    vector<TransportConnection*> new_conns;
     while(svr->status_ == RUNNING ){
-        if( !svr->transport_->sm_queue.empty()){
-            svr->transport_->sm_queue_l.lock();
-            
-            Marshal* sm_req = svr->transport_->sm_queue.front();
-            svr->transport_->sm_queue.pop();
-            
-            svr->transport_->sm_queue_l.unlock();
-            uint8_t req_type;
-            verify(sm_req->read(&req_type, sizeof(uint8_t)) == sizeof(uint8_t));
-            LOG_DEBUG("Request Type %02x",req_type);
-            
-        }
+        
     }
     Log_info("Server loop end");
     server_sock_ = -1;
@@ -345,7 +338,12 @@ void UDPServer::start() {
     while(!transport_->initiated){
         usleep(2);
     }
-
+    // Add functios to tranport
+    transport_->reg_us_server(this);
+    for(auto entry: us_handlers_){
+        transport_->reg_us_handler(entry.first, entry.second);
+    }
+    Log_info("Registered User Space server at transport layer");
     start_server_loop_args_type* start_server_loop_args = new start_server_loop_args_type();
     start_server_loop_args->server = (Server*)this;
     start_server_loop_args->gai_result = nullptr;

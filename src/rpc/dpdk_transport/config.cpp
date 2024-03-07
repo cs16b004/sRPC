@@ -13,8 +13,30 @@ RPCConfig* RPCConfig::get_config() {
 int RPCConfig::create_config(int argc, char** argv) {
     if (config_s != nullptr) return -1;
 
+    std::vector<std::string> all_args(argv, argv + argc);
+    std::vector<std::string> rpc_opts;
+    std::vector<std::string> app_opts;
+    int i=0;
+    for( i=0; i< argc; i++){
+        if(all_args[i] == "--")
+            break;
+        rpc_opts.push_back(all_args[i]);
+    }
+    for(; i< argc; i++){
+        app_opts.push_back(all_args[i]);
+    }
     config_s = new RPCConfig();
     int c;
+    int rpc_argc = rpc_opts.size();
+    char ** rpc_argv = new char*[rpc_argc];
+    for(i=0;i<rpc_argc;i++){
+        rpc_argv[i] = new char[256];
+    }
+    i=0;
+    // for(std::string opt: rpc_opts){
+    //     strcpy (rpc_argv[i] ,rpc_opts[i].c_str());
+    //     i++;
+    // }
     std::string filename;
     while ((c = getopt(argc, argv, "f:")) != -1) {
         switch(c) {
@@ -33,7 +55,12 @@ int RPCConfig::create_config(int argc, char** argv) {
     }
 
     config_s->load_cfg_files();
-    return 0;
+    // for( i=0; i <app_opts.size(); i++ ){
+    //     strcpy(argv[i], app_opts[i].c_str());
+    // }
+    // argv[0] = "aa";
+    // optind=0;
+    return app_opts.size();
 }
 
 void RPCConfig::load_cfg_files() {
@@ -66,8 +93,6 @@ void RPCConfig::load_yml(std::string& filename) {
 
     if (config["server"])
         load_server_yml(config["server"]);
-    if (config["benchmarks"])
-        load_benchmark_yml(config["benchmarks"]);
 }
 
 void RPCConfig::load_network_yml(YAML::Node config) {
@@ -109,18 +134,4 @@ void RPCConfig::load_host_yml(YAML::Node config) {
 void RPCConfig::load_server_yml(YAML::Node config) {
     
 }
-void RPCConfig::load_benchmark_yml(YAML::Node config){
-    server_poll_threads_ = config["server_poll_threads"].as<int>();
-    client_poll_threads_ = config["client_poll_threads"].as<int>();
-    client_connections_ = config["client_connections"].as<std::uint16_t>();
-    num_client_threads_ = config["client_threads"].as<uint16_t>();
-    input_size_ = config["input_size"].as<std::uint16_t>();
-    output_size_ = config["output_size"].as<std::uint16_t>();
-
-    server_address_ = config["server_address"].as<std::string>();
-    client_batch_size_ = config["client_batch_size"].as<uint16_t>();
-
-}
-
-
 }

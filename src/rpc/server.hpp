@@ -322,6 +322,7 @@ class Server: public NoCopy{
     friend class TCPConnection;
     friend class ServerConnection;
     friend class UDPConnection;
+    
     protected:
      std::unordered_map<i32, std::function<void(Request<rrr::Marshal>*, ServerConnection*)>> handlers_;
      std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>> us_handlers_;
@@ -484,6 +485,7 @@ public:
 
 class UDPServer : public Server{
     friend class UDPConnection;
+    friend class DpdkTransport;
     DpdkTransport* transport_;
     
 
