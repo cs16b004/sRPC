@@ -39,29 +39,35 @@ namespace rrr
     class UDPClient;
     class UDPServer;
     class ServerConnection;
-    void swap_udp_addresses(rte_mbuf* pkt);
-    struct USHWrapper{
-        std::function<void(Request<rrr::TransportMarshal> *, ServerConnection*)> us_handler_;
+    void swap_udp_addresses(rte_mbuf *pkt);
+    struct USHWrapper
+    {
+        std::function<void(Request<rrr::TransportMarshal> *, ServerConnection *)> us_handler_;
         i32 rpc_id;
 
-        USHWrapper(i32 id, std::function<void(Request<rrr::TransportMarshal> *, ServerConnection*)>& uh){
+        USHWrapper(i32 id, std::function<void(Request<rrr::TransportMarshal> *, ServerConnection *)> &uh)
+        {
             us_handler_ = uh;
             rpc_id = id;
         }
 
-        void run(Request<rrr::TransportMarshal>* req, TransportConnection* conn){
-            us_handler_(req, (ServerConnection*)(conn->sconn));
-            swap_udp_addresses(req->m.get_mbuf());
+        void run(Request<rrr::TransportMarshal> *req, TransportConnection *conn)
+        {
+            LOG_DEBUG("%s", req->m.print_request().c_str());
+            us_handler_(req, (ServerConnection *)(conn->sconn));
+            LOG_DEBUG("pkt %p", req->m.get_mbuf());
+            // swap_udp_addresses((req->m.get_mbuf()));
         }
     };
 
     // Pakcet Type
-
+    
     class DpdkTransport
     {
         friend class UDPServer;
         friend class UDPClient;
         friend class UDPConnection;
+
     private:
         static DpdkTransport *transport_l;
 
@@ -70,10 +76,10 @@ namespace rrr
         static std::unordered_map<uint64_t, rte_ring *> in_rings;
 
         struct rte_hash *conn_table;
-        
+
         static RPCConfig *config_;
         int port_num_ = 0;
-        
+
         int num_threads_ = 0;
 
         uint16_t rx_queue_ = 1, tx_queue_ = 1;
@@ -97,30 +103,26 @@ namespace rrr
 
         static std::unordered_map<std::string, NetAddress> src_addr_;
         static std::unordered_map<std::string, NetAddress> dest_addr_;
-        static std::unordered_map<i32, USHWrapper*> handlers;
+        static std::unordered_map<i32, USHWrapper *> handlers;
         static SpinLock sm_queue_l;
         static std::queue<Marshal *> sm_queue;
 
         struct d_thread_ctx **thread_ctx_arr{nullptr};
-        
+
         bool force_quit{false};
-        static uint8_t* getMacFromIp(uint32_t ip);
+        static uint8_t *getMacFromIp(uint32_t ip);
         void addr_config(std::string host_name,
                          std::vector<RPCConfig::NetworkInfo> net_info);
         void init_dpdk_main_thread(const char *argv_str);
-
 
         int port_init(uint16_t port_id);
         int port_reset(uint16_t port_id);
         int port_close(uint16_t port_id);
         static void install_flow_rule(size_t phy_port);
 
-   
-        static int ev_loop(void* arg);
-        static UDPServer* us_server;
-  
+        static int ev_loop(void *arg);
+        static UDPServer *us_server;
 
-        
         static int isolate(uint8_t phy_port);
         SpinLock sendl;
 
@@ -140,13 +142,14 @@ namespace rrr
             return conn;
         }
         static void create_transport(RPCConfig *config);
-        static void process_requests(d_thread_ctx* ctx);
-        static void do_transmit(d_thread_ctx* ctx);
-        static void process_sm_req(d_thread_ctx* ctx);
+        static void process_requests(d_thread_ctx *ctx);
+        static void do_transmit(d_thread_ctx *ctx);
+        static void process_sm_req(d_thread_ctx *ctx);
         // static void
         static DpdkTransport *get_transport();
-        static void reg_us_server(UDPServer* ser);
-        static void reg_us_handler(i32 id, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>);
+        static void reg_us_server(UDPServer *ser);
+        static void reg_us_handler(i32 id, std::function<void(Request<rrr::TransportMarshal> *, ServerConnection *)>);
+        static void send_ack(TransportConnection *oconn);
         // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
 
         // Send a connec request to server at addr_str
@@ -154,7 +157,6 @@ namespace rrr
         // Assigns a dedicated dpdk thread
         // returns the conn_id to use in future
         uint64_t connect(const char *addr);
-
         // Accept a Connection
         // Called from application thread to (server loop)
         // creates a transport_connection, assigns a dedicated tx_thread;
@@ -177,12 +179,8 @@ namespace rrr
             if (rx_mbuf_pool)
                 delete[] rx_mbuf_pool;
         }
-
-    
     };
 
-
-    
     // DPDK thread context;
     struct d_thread_ctx
     {
@@ -192,14 +190,12 @@ namespace rrr
         int conn_count = 0;
         int max_size = 100;
         uint16_t conn_counter = 0;
-        uint16_t nb_rx=0;
-        uint16_t nb_tx=0;
+        uint16_t nb_rx = 0;
+        uint16_t nb_tx = 0;
         bool shutdown = false;
         SpinLock conn_lock;
         // Dedicated Connections
         std::unordered_map<uint64_t, TransportConnection *> out_connections;
-
-        
 
         // Application thread put connection_ptr in this ring ,
         // thread will organize mbuf and other structs
@@ -221,8 +217,6 @@ namespace rrr
         {
         }
     };
-    
-
 
     /**
      * Helper function to process Session Management (SM) requests from other threads;
@@ -232,31 +226,26 @@ namespace rrr
      * the  mempool to use allocate buffers etc.
      */
     uint16_t process_sm_requests(rte_ring *sm_ring, rte_mempool *mempool);
-    void inline swap_udp_addresses(struct rte_mbuf *pkt)
+    void inline swap_udp_addresses(rte_mbuf *pkt)
     {
         // Extract Ethernet header
-        struct rte_ether_hdr *eth_hdr = rte_pktmbuf_mtod(pkt, struct rte_ether_hdr *);
-        uint8_t* pkt_ptr = rte_pktmbuf_mtod(pkt, uint8_t* );
-        struct rte_ether_addr temp = eth_hdr->src_addr;
-        eth_hdr->src_addr = eth_hdr->dst_addr;
-        eth_hdr->dst_addr = temp;
-
+        rte_ether_hdr *eth_hdr = rte_pktmbuf_mtod(pkt, rte_ether_hdr *);
+        uint8_t *pkt_ptr = rte_pktmbuf_mtod(pkt, uint8_t *);
         // Extract IP header
-        struct rte_ipv4_hdr *ip_hdr = (struct rte_ipv4_hdr *)(pkt_ptr + ip_hdr_offset);
+        rte_ipv4_hdr *ip_hdr = (rte_ipv4_hdr *)(pkt_ptr + ip_hdr_offset);
 
         // Extract UDP header
-        struct rte_udp_hdr *udp_hdr = (struct rte_udp_hdr *)(pkt_ptr + udp_hdr_offset );
+        rte_udp_hdr *udp_hdr = (rte_udp_hdr *)(pkt_ptr + udp_hdr_offset);
+
+        // LOG_DEBUG("src MAC: %s  dst MAC: %s", rte_eth_add)
+        rte_ether_addr temp;
+        rte_ether_addr_copy(&(eth_hdr->src_addr), &temp);
+        rte_ether_addr_copy(&(eth_hdr->dst_addr), &(eth_hdr->src_addr));
+        rte_ether_addr_copy(&temp, &(eth_hdr->dst_addr));
 
         // Swap IP addresses
-        uint32_t tmp_ip = ip_hdr->src_addr;
-        ip_hdr->src_addr = ip_hdr->dst_addr;
-        ip_hdr->dst_addr = tmp_ip;
-
+        RTE_SWAP(ip_hdr->dst_addr, ip_hdr->src_addr);
         // Swap UDP port numbers
-        uint16_t tmp_port = udp_hdr->src_port;
-        udp_hdr->src_port = udp_hdr->dst_port;
-        udp_hdr->dst_port = tmp_port;
-        
-        
+        RTE_SWAP(udp_hdr->src_port, udp_hdr->dst_port);
     }
 }

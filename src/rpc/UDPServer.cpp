@@ -38,7 +38,7 @@ namespace rrr {
 
 
 UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
-        : ServerConnection((Server*) server,server->transport_->out_connections[socket]->in_fd_),connId(socket) {
+        : ServerConnection((Server*) server, 0),connId(socket) {
             conn = server->transport_->out_connections[socket];
     // increase number of open connections
     us_handlers_.insert(server_->us_handlers_.begin(), server_->us_handlers_.end());
@@ -68,6 +68,7 @@ int UDPConnection::run_async(const std::function<void()>& f) {
 
 void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code /* =... */) {
     if(likely(req->m.is_type_st())){
+        LOG_DEBUG("Single thread req");
         current_reply.allot_buffer_x(req->m.get_mbuf());
        
     }else{
@@ -94,6 +95,10 @@ void UDPConnection::end_reply() {
         #endif
         current_reply.format_header();
        int retry=0;
+       if(current_reply.is_type_st()){
+        current_reply.set_pkt_type_bg();
+        return ; 
+       }
       // reply_arr[reply_idx%32] = current_reply.get_mbuf();
        reply_idx++;
      while(
@@ -317,8 +322,18 @@ void UDPServer::server_loop(void* arg) {
     UDPServer* svr = (UDPServer*)(start_server_loop_args->server);
     Log_info("Starting Server Loop");
     vector<TransportConnection*> new_conns;
+    
+    while(!svc_registered){
+        ;
+
+        usleep(10000);
+    }
+
+    transport_->reg_us_server(this);
+    
+    Log_info("Registered User Space server at transport layer");
     while(svr->status_ == RUNNING ){
-        
+        ;
     }
     Log_info("Server loop end");
     server_sock_ = -1;
@@ -339,11 +354,8 @@ void UDPServer::start() {
         usleep(2);
     }
     // Add functios to tranport
-    transport_->reg_us_server(this);
-    for(auto entry: us_handlers_){
-        transport_->reg_us_handler(entry.first, entry.second);
-    }
-    Log_info("Registered User Space server at transport layer");
+    
+    
     start_server_loop_args_type* start_server_loop_args = new start_server_loop_args_type();
     start_server_loop_args->server = (Server*)this;
     start_server_loop_args->gai_result = nullptr;

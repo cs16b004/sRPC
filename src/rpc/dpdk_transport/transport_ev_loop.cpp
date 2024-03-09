@@ -34,11 +34,24 @@ namespace rrr
                                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
 
+
+    void DpdkTransport::reg_us_server(UDPServer* sv){
+         us_server = sv;
+        //  for(std::pair<i32,std::function<void(Request<TransportMarshal>*, ServerConnection*)>>  rpc_handler: us_server->us_handlers_ ){
+            
+        //     handlers[rpc_handler.first] = new USHWrapper(rpc_handler.first, rpc_handler.second);
+        //     LOG_DEBUG("Registering : rpc against %d", rpc_handler.first); 
+        //  }
+    }
     void DpdkTransport::accept(uint64_t conn_id)
     {
         // RPCConfig *conf = rrr::RPCConfig::get_config();
 
+        if(us_server == nullptr)
+            return;
+
         TransportConnection *oconn = new TransportConnection();
+        
         uint64_t port = 0xFFFF;
         port = port<<16;
         uint64_t server_ip = 0xFFFFFFFF;
@@ -65,8 +78,8 @@ namespace rrr
         conn_counter.next();
 
         if (out_connections.find(conn_id) != out_connections.end()){
-            oconn = out_connections[conn_id];
-            goto send_ack;
+            send_ack(oconn);
+            return;
         }
         // thread_ctx_arr[chosen_thread]->conn_lock.unlock();
         // return 0;
@@ -80,12 +93,23 @@ namespace rrr
         oconn->assign_availring();
         oconn->make_headers_and_produce();
         out_connections[conn_id] = oconn;
+        UDPConnection* n_conn = new UDPConnection(us_server, conn_id);
         
 
         while (rte_ring_sp_enqueue(sm_rings[chosen_thread], (void *)oconn) < 0)
             ;
 
-    send_ack:
+
+    us_server->sconns_l_.lock();
+    
+    us_server->sconns_.insert(n_conn);
+    us_server->pollmgr_->add(n_conn);
+    oconn->sconn = n_conn;
+    us_server->sconns_l_.unlock();
+    send_ack(oconn);        
+    
+    }
+    void DpdkTransport::send_ack(TransportConnection* oconn){
         oconn->burst_size = 1;
         conn_th_lock.unlock();
         // this->connections_[conn_id] = conn;
@@ -104,16 +128,9 @@ namespace rrr
         sleep(1);
         oconn->connected_ = true;
         oconn->burst_size = 32; // conf->client_batch_size_;
-        us_server->sconns_l_.lock();
-        UDPConnection* n_conn = new UDPConnection(us_server, conn_id);
-        us_server->sconns_.insert(n_conn);
-        us_server->pollmgr_->add(n_conn);
-        oconn->sconn = n_conn;
-        us_server->sconns_l_.unlock();
-
+        
         return;
     }
-
     uint64_t DpdkTransport::connect(const char *addr_str)
     {
         RPCConfig *conf = rrr::RPCConfig::get_config();
@@ -260,14 +277,6 @@ namespace rrr
 
         return 0;
     }
-    std::string out_string = "|aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa||aaaaaa|";
-    uint64_t count = 0;
-
-    void add_bench(std::string in, std::string *out)
-    {
-        // out->append(out_string);
-        count++;
-    }
     
     
 
@@ -276,8 +285,13 @@ namespace rrr
         d_thread_ctx *ctx = reinterpret_cast<d_thread_ctx *>(arg);
         RPCConfig *conf = RPCConfig::get_config();
         DpdkTransport *t_layer = ctx->t_layer;
+        
+
+        //wait for us space to be made available by the application
+        
         Log_info("Launching even loop %d on lcore: %d",
                  ctx->thread_id, rte_lcore_id());
+
 
         while (!ctx->shutdown)
         {
@@ -373,7 +387,9 @@ namespace rrr
 
                     req_m->m >> req_size >> req_xid;
                     req_m->m >> req_rpc_id;
-                    handlers[req_rpc_id]->run(req_m, out_connections[conn_id]);
+
+                    auto it = us_server->us_handlers_.find(req_rpc_id);
+                    it->second(req_m, (UDPConnection*) (out_connections[conn_id]->sconn));
                 }
                 else if(unlikely( pkt_type == RR_BG))
                 {

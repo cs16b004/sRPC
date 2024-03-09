@@ -35,7 +35,7 @@ file(GLOB SRC "./src/benchmarks.cpp"
  )
 add_custom_command(
   OUTPUT src/counter.h
-  COMMAND ${RPCC} ${CMAKE_CURRENT_SOURCE_DIR}/src/counter.rpc
+  COMMAND ${RPCC} --cpp --dpdk ${CMAKE_CURRENT_SOURCE_DIR}/src/counter.rpc
 )
 add_executable(server "./src/s.cpp" ${SRC} src/counter.h)
 

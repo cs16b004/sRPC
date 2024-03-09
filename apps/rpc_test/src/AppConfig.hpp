@@ -35,7 +35,7 @@ public:
     std::vector<uint16_t> core_affinity_mask_;
     //
 
-    uint16_t buffer_len = 8 * 4096 - 2;
+    uint16_t buffer_len = 8 * 1024 - 2;
 
 private:
     void load_cfg_files();

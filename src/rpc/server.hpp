@@ -207,7 +207,6 @@ class UDPConnection: public ServerConnection {
   
     friend class DpdkTransport;
 
-    TransportMarshal* curr_reply;
     TransportConnection* conn;
     rte_mbuf* pkt_array[64];
     rte_mbuf* reply_arr[32];
@@ -239,7 +238,7 @@ public:
     }
     template<class T>
     ServerConnection& operator <<(const T& v) {
-      (*curr_reply) << v;
+      current_reply << v;
         return *this;
     }
     ServerConnection& operator <<(Marshal& m) {
@@ -327,6 +326,7 @@ class Server: public NoCopy{
      std::unordered_map<i32, std::function<void(Request<rrr::Marshal>*, ServerConnection*)>> handlers_;
      std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>> us_handlers_;
      std::unordered_set<ServerConnection*> sconns_{};
+    bool svc_registered=false;
     PollMgr* pollmgr_;
     ThreadPool* threadpool_;
    
@@ -358,7 +358,13 @@ public:
    
 
     int reg(Service* svc) {
-        return svc->__reg_to__(this);
+        
+        int ret = svc->__reg_to__(this);
+        
+        if(ret == 0)
+            svc_registered = true;
+        LOG_DEBUG("Registered Service at the server thread");
+        return ret;
     }
    
      virtual void stop()=0;
@@ -385,6 +391,7 @@ public:
     int reg(i32 rpc_id, S* svc, void (S::*svc_func)(Request<rrr::TransportMarshal>*, ServerConnection*)) {
 
         // disallow duplicate rpc_id
+        
         if (us_handlers_.find(rpc_id) != us_handlers_.end()) {
             return EEXIST;
         }
@@ -392,7 +399,8 @@ public:
         us_handlers_[rpc_id] = [svc, svc_func] (Request<rrr::TransportMarshal>* req, ServerConnection* sconn) {
             (svc->*svc_func)(req, sconn);
         };
-
+        
+       // LOG_DEBUG("Adding2 %d, to  udp server", rpc_id);
         return 0;
     }
 

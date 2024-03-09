@@ -379,8 +379,9 @@ int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::Marshal>*, Ser
     if (handlers_.find(rpc_id) != handlers_.end()) {
         return EEXIST;
     }
-
+    LOG_DEBUG("Adding %d, to  udp server", rpc_id);
     handlers_[rpc_id] = func;
+    
 
     return 0;
 }
@@ -392,6 +393,7 @@ int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::TransportMarsh
     }
 
     us_handlers_[rpc_id] = func;
+    LOG_DEBUG("Adding %d, to  udp server", rpc_id);
 
     return 0;
 }

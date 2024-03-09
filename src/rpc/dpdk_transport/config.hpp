@@ -59,10 +59,10 @@ namespace rrr
 
         uint16_t num_threads_;
         uint16_t burst_size = 32;
-        uint32_t rte_ring_size = 32768;
+        uint32_t rte_ring_size = 8192;
         //
 
-        uint16_t buffer_len = 8 * 4096 - 2;
+        uint16_t buffer_len = 8 * 1024 - 2;
 
     private:
         void load_cfg_files();

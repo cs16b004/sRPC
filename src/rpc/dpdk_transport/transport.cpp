@@ -596,8 +596,5 @@ namespace rrr
         }
     }
 
-    void DpdkTransport::reg_us_server(UDPServer* sv){
-         us_server = sv;
-    }
-    
+
 }

@@ -348,8 +348,8 @@ def emit_service_and_proxy_dpdk(service, f, rpc_table):
                     for i in range(out_counter):
                         f.writeln("*sconn << out_%d;" % i)
                     f.writeln("sconn->end_reply();")
-                    f.writeln("delete req;")
-                    f.writeln("sconn->release();")
+                  #  f.writeln("delete req;")
+                  #  f.writeln("sconn->release();")
                     if func.attr != "fast":
                         f.decr_indent()
                         f.writeln("};")
