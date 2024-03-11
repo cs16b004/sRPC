@@ -18,10 +18,12 @@ struct benchmark_ctx;
 class BenchmarkProxy:CounterProxy{
     private:
     uint16_t input_size;
+
     
     std::string in;
      std::string out;
     public:
+    uint64_t reply_count=0;
     BenchmarkProxy(uint16_t in_size, rrr::Client* cl): CounterProxy(cl), input_size(in_size){
         
         for(int i=0;i<input_size;i++){
@@ -74,7 +76,7 @@ public:
     void add_bench(const std::string& in, std::string* out ) {
        // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
         count_++;
-        at_counter.next();
+       // at_counter.next();
         out->append(out_string.c_str());
     }
 };
@@ -84,6 +86,7 @@ class Benchmarks{
     pthread_t** client_threads;
     std::thread stat_thread;
     bool stop=false;
+    int num_client=0;
     std::bitset<128> affinity_mask;
 
     struct benchmark_ctx** thread_info;

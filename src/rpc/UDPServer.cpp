@@ -67,11 +67,13 @@ int UDPConnection::run_async(const std::function<void()>& f) {
 }
 
 void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code /* =... */) {
+   // LOG_DEBUG("Reply: %s", req->m.print_request().c_str());
     if(likely(req->m.is_type_st())){
-        LOG_DEBUG("Single thread req");
+       // LOG_DEBUG("Single thread req");
         current_reply.allot_buffer_x(req->m.get_mbuf());
        
     }else{
+        
         current_reply.allot_buffer(conn->get_new_pkt());
     }
     i32 v_error_code = error_code;
@@ -80,7 +82,6 @@ void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_c
     #ifdef LATENCY
         req->m >> timestamps[reply_idx%32] ;
     #endif
-    current_reply.set_pkt_type_bg();
     current_reply.set_book_mark(sizeof(i32)); // will write reply size later
 
     current_reply << v_reply_xid;

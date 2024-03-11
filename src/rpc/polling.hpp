@@ -21,7 +21,6 @@
 using rrr::FrequentJob;
 
 namespace rrr {
-class Reporter;
 class Pollable: public rrr::RefCounted {
    
 protected:

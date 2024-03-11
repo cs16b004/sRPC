@@ -210,7 +210,7 @@ class UDPClient: public Client{
         TransportConnection* conn;
         rte_mbuf* pkt_array[32];
         Marshal::bookmark* bmark_;
-        DpdkTransport* transport_;
+        DpdkTransport* transport_ =nullptr;
         using RefCounted::release;
 
     public:
@@ -228,12 +228,12 @@ class UDPClient: public Client{
            
             out_ptr_ = &out_;
             
-            if(transport_ == nullptr)
-                transport_=  DpdkTransport::get_transport();
+        
+            transport_=  DpdkTransport::get_transport();
             //transport_->init(RPCConfig::get_config());
-            while(!transport_->initiated){
+            while((transport_->initialized()) == false){
                 //LOG_DEBUG("Waiting for transport to initialize");
-                usleep(2000);
+                ;
             }
             for(int i=0;i<32;i++){
                 pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);

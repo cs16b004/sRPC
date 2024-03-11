@@ -100,10 +100,10 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
     }
 
      Future* fu = new Future(xid_counter_.next(), attr);
-    // pending_fu_l_.lock();
-    // pending_fu_[fu->xid_] = fu;
-    // // //Future* tfu = fu;
-    //  pending_fu_l_.unlock();
+     pending_fu_l_.lock();
+     pending_fu_[fu->xid_] = fu;
+     Future* tfu = fu;
+     pending_fu_l_.unlock();
     current_req.allot_buffer(conn->get_new_pkt());
     current_req.set_book_mark(sizeof(i32));
     current_req << i64(fu->xid_);
@@ -128,11 +128,11 @@ void UDPClient::end_request(){
             retry=0;
         }
      }
-  
      
 }
 
 void UDPClient::handle_read(){
+        
      if (status_ != CONNECTED) {
         return;
     }
@@ -141,13 +141,14 @@ void UDPClient::handle_read(){
     unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
 
     TransportMarshal reply_array[32];
-    
+   
     for(int i=0;i<nb_pkts;i++){
         i32 reply_size;
         i64 v_reply_xid;
         i32 v_error_code;
 
         reply_array[i].allot_buffer(pkt_array[i]);   
+       // LOG_DEBUG("Reply %s",reply_array[i].print_request().c_str());
         reply_array[i] >> reply_size >>  v_reply_xid >> v_error_code;    
         pending_fu_l_.lock();
         Future* fu;
@@ -162,10 +163,11 @@ void UDPClient::handle_read(){
                 fu->reply_.write(reply_array[i].get_offset(),reply_size-sizeof(i64) -sizeof(i32));
                 #ifdef RPC_STATISTICS
                 // put_end_ts(fu->xid_);
+
                 #endif
                 //Log_info("For reply for req: %lu",v_reply_xid);
                 fu->notify_ready();
-                LOG_DEBUG("Running reply future for %d",v_reply_xid);
+               // LOG_DEBUG("Running reply future for %d",v_reply_xid);
                 // since we removed it from pending_fu_
                 fu->release();
         } 

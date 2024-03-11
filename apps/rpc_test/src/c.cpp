@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     while(!(rrr::DpdkTransport::get_transport()->initialized())){
         ;
     }
-
+    LOG_DEBUG("Tranport at %p", rrr::DpdkTransport::get_transport());
 
     Benchmarks bm(AppConfig::get_config());
 
@@ -38,7 +38,12 @@ int main(int argc, char **argv) {
 
     bm.create_client_threads();
     bm.observe_client();
+    #ifdef DPDK
+         rrr::DpdkTransport::get_transport()->trigger_shutdown();
+         rrr::DpdkTransport::get_transport()->shutdown();
+    #endif
     bm.stop_client();
-   \
+    
+
     
 }

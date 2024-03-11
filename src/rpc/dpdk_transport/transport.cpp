@@ -185,7 +185,7 @@ namespace rrr
         {
             char pool_name[1024];
             sprintf(pool_name, "sRPC_RX_MBUF_POOL_%d", pool_idx);
-            rx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, DPDK_NUM_MBUFS,
+            rx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, 32* DPDK_NUM_MBUFS,
                                                              DPDK_MBUF_CACHE_SIZE, 0,
                                                              RTE_MBUF_DEFAULT_BUF_SIZE,
                                                              rte_socket_id());
@@ -220,7 +220,6 @@ namespace rrr
         uint8_t numa_id = config_->get_cpu_info().numa;
         // Add core per numa so that threads are scheduled on rigt lcores
         uint16_t lcore;
-        initiated = true;
         rx_lcore_lim += numa_id * RPCConfig::get_config()->cpu_info_.core_per_numa;
         Log_info("thread_core limit: %d, my core_id %d ", rx_lcore_lim + 1, sched_getcpu());
         for (lcore = numa_id * RPCConfig::get_config()->cpu_info_.core_per_numa + 1; lcore < rx_lcore_lim + 1; lcore++)
@@ -429,7 +428,7 @@ namespace rrr
             rte_eth_dev_stop(port_id);
             rte_eth_dev_close(port_id);
         }
-        rte_hash_free(conn_table);
+        
         struct rte_flow_error err;
         rte_flow_flush(0, &err);
 

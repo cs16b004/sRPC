@@ -11,9 +11,18 @@ set(CMAKE_COLOR_MAKEFILE   ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(RPCC ${CMAKE_CURRENT_LIST_DIR}/bin/rpcgen)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS")
+if(PERF)
+  message(STATUS "Compilation optimized for performance.")
+  message(STATUS "Debugging is disabled.")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O02")
+else(PERF)
+  message(STATUS "Compilation not optimized for performance.")
+  message(STATUS "Debugging is enabled. Perf will be low.")
+  set(CMAKE_BUILD_TYPE Debug)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -Wall")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS -march=native -flto")
+endif(PERF)
+
 
 
 find_package(PkgConfig REQUIRED)
@@ -52,7 +61,10 @@ if (DPDK_FOUND)
   target_link_libraries(rpc PRIVATE ${DPDK_LIBS})
   add_definitions(-DDPDK)
 endif(DPDK_FOUND)
-add_definitions(-DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS)
-
+if(PERF)
+  add_definitions(-DRPC_STATISTICS -DLATENCY )
+else(PERF)
+  add_definitions(-DRPC_STATISTICS -DLOG_LEVEL_AS_DEBUG -DLATENCY )
+endif(PERF)
 
 add_subdirectory(apps/rpc_test)

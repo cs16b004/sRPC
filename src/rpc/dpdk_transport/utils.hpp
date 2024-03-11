@@ -81,8 +81,8 @@ static inline void rt_assert(bool condition) {
 static void mac_from_str(const char* str, uint8_t* mac) {
   sscanf(str, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &mac[0], &mac[1], &mac[2],
       &mac[3], &mac[4], &mac[5]);
-      printf("mac converted %s to %hhx:%hhx:%hhx:%hhx:%hhx:%hhx\n",str,mac[0], mac[1],mac[2],
-      mac[3], mac[4], mac[5]);
+      // printf("mac converted %s to %hhx:%hhx:%hhx:%hhx:%hhx:%hhx\n",str,mac[0], mac[1],mac[2],
+      // mac[3], mac[4], mac[5]);
 }
 
 static std::string mac_to_string(const uint8_t* mac) {

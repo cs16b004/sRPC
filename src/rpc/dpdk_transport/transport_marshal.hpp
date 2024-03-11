@@ -156,7 +156,7 @@ class Request {
                uint8_t* pkt_data = rte_pktmbuf_mtod(req_data, uint8_t*);
                int j=0;
                for(int i=  data_offset;
-                        i < offset; i++){
+                        i < 70; i++){
                   
                     sprintf(req+j,"%02x ", pkt_data[i]);
                     j+=3;   
@@ -181,7 +181,7 @@ class Request {
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               dst += data_offset;
               
-              return (*dst == 0xa);
+              return (*dst == 0x09);
             }
 
     };

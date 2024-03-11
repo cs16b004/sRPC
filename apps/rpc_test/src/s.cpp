@@ -24,10 +24,11 @@ int main(int argc, char **argv) {
 
     Benchmarks bm(appConf);
     bm.create_server();
+   // bm.observe_server();
 
     #ifdef DPDK
-        // rrr::DpdkTransport::get_transport()->trigger_shutdown();
-        // rrr::DpdkTransport::get_transport()->shutdown();
+         rrr::DpdkTransport::get_transport()->trigger_shutdown();
+         rrr::DpdkTransport::get_transport()->shutdown();
     #endif
     
     return 0;

@@ -78,7 +78,7 @@ namespace rrr
         conn_counter.next();
 
         if (out_connections.find(conn_id) != out_connections.end()){
-            send_ack(oconn);
+            send_ack(out_connections[conn_id]);
             return;
         }
         // thread_ctx_arr[chosen_thread]->conn_lock.unlock();
@@ -125,7 +125,7 @@ namespace rrr
             ;
         wait = 0;
 
-        sleep(1);
+        //sleep(1);
         oconn->connected_ = true;
         oconn->burst_size = 32; // conf->client_batch_size_;
         
@@ -329,6 +329,8 @@ namespace rrr
     void DpdkTransport::process_requests(d_thread_ctx *ctx)
     {
 
+        
+
         uint8_t *pkt_ptr;
         uint8_t *data_ptr;
         uint16_t pkt_size;
@@ -347,10 +349,12 @@ namespace rrr
 
         uint8_t pkt_type;
 
+        
         if (unlikely(ctx->nb_rx == 0))
             return;
        // LOG_DEBUG("Packets received %d", ctx->nb_rx);
         ctx->nb_tx=0;
+        
         for (int i = 0; i < ctx->nb_rx; i++)
         {
             rte_prefetch0(rx_buffers[i]);
@@ -385,17 +389,21 @@ namespace rrr
                   
                     req_m->m.allot_buffer_x(rx_buffers[i]);
 
-                    req_m->m >> req_size >> req_xid;
+                    req_m->m >> req_size >> req_m->xid;
                     req_m->m >> req_rpc_id;
-
+                    
                     auto it = us_server->us_handlers_.find(req_rpc_id);
                     it->second(req_m, (UDPConnection*) (out_connections[conn_id]->sconn));
+                    swap_udp_addresses(rx_buffers[i]);
+                    ctx->tx_bufs[ctx->nb_tx] = rx_buffers[i];
+                    ctx->nb_tx++;
                 }
                 else if(unlikely( pkt_type == RR_BG))
                 {
                     // background
-                    //LOG_DEBUG("Back Ground request");
-                    rte_ring_enqueue(out_connections[conn_id]->in_bufring, (void *)rx_buffers[i]);
+                    //LOG_DEBUG("Back Ground Reply");
+                    
+                    rte_ring_mp_enqueue(out_connections[conn_id]->in_bufring, (void *)rx_buffers[i]);
                 }
             }
             else if (unlikely(pkt_type == SM))
@@ -446,21 +454,22 @@ namespace rrr
         {
             prev_packets+= rte_eth_tx_burst(ctx->port_id, ctx->queue_id, &(ctx->tx_bufs[prev_packets]), ctx->nb_tx);
             #ifdef LOG_LEVEL_AS_DEBUG
-            for(int j=0;j<ctx->nb_tx;j++){
-                uint8_t* pkt_ptr = rte_pktmbuf_mtod(ctx->tx_bufs[j], uint8_t *);
-                struct rte_ether_hdr *eth_hdr = rte_pktmbuf_mtod(ctx->tx_bufs[0], struct rte_ether_hdr *);
-                rte_ipv4_hdr* ip_hdr = ((rte_ipv4_hdr *)(pkt_ptr + ip_hdr_offset));
+            // for(int j=0;j<ctx->nb_tx;j++){
+            //     uint8_t* pkt_ptr = rte_pktmbuf_mtod(ctx->tx_bufs[j], uint8_t *);
+            //     struct rte_ether_hdr *eth_hdr = rte_pktmbuf_mtod(ctx->tx_bufs[0], struct rte_ether_hdr *);
+            //     rte_ipv4_hdr* ip_hdr = ((rte_ipv4_hdr *)(pkt_ptr + ip_hdr_offset));
                 
-                rte_udp_hdr* udp_hdr = ((rte_udp_hdr *)(pkt_ptr + udp_hdr_offset));
-                LOG_DEBUG("Sent %d packets to: %s::%d, size: %d",  prev_packets,
-                                ipv4_to_string(ip_hdr->dst_addr).c_str(), ntohs(udp_hdr->dst_port), ntohs(udp_hdr->dgram_len));
-            }
+            //     rte_udp_hdr* udp_hdr = ((rte_udp_hdr *)(pkt_ptr + udp_hdr_offset));
+            //     LOG_DEBUG("Sent %d packets to: %s::%d, size: %d",  prev_packets,
+            //                     ipv4_to_string(ip_hdr->dst_addr).c_str(), ntohs(udp_hdr->dst_port), ntohs(udp_hdr->dgram_len));
+            // }
 
             #endif
             ctx->nb_tx -= prev_packets;
         }
+        //rte_pktmbuf_free_bulk(ctx->tx_bufs, prev_packets);
         // slow path send background requests
-
+        
         unsigned int available;
         int nb_pkts = 0;
         int ret = 0;
@@ -478,7 +487,8 @@ namespace rrr
                 return;
 
             ret = rte_eth_tx_burst(ctx->port_id, ctx->queue_id, ctx->tx_bufs, nb_pkts);
-           //  LOG_DEBUG("NB pkts %d, sent %d, conn_id %lld", nb_pkts, ret, conn_entry.first);
+            if (ret > 0)
+            
             if (unlikely(ret < 0))
                 rte_panic("Can't send packets from connection %lu\n", current_conn->conn_id);
             while (ret != nb_pkts)

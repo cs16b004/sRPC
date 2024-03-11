@@ -8,7 +8,7 @@ rte_mbuf* TransportConnection::get_new_pkt(){
     while(rte_ring_dequeue(available_bufring, tx_bufs) < 0){
         i++;
         if(i > 1000*1000){
-            Log_warn("Waiting to get a new pkt from connection %lld",conn_id);
+            LOG_DEBUG("Waiting to get a new pkt from connection %lld",conn_id);
              i=0;
         }
        

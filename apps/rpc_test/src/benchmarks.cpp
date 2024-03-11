@@ -13,9 +13,9 @@ void Benchmarks::create_server(){
     
     #ifdef DPDK
         
-        rrr::UDPServer *server = new rrr::UDPServer(pollmgr_,tp);
+        rrr::UDPServer *server = new rrr::UDPServer((rrr::PollMgr*)pollmgr_->ref_copy(),tp);
     #else
-        rrr::TCPServer *server = new rrr::TCPServer(pollmgr_, tp);
+        rrr::TCPServer *server = new rrr::TCPServer((rrr::PollMgr*)pollmgr_->ref_copy(), tp);
     #endif
     
     server->reg(csi);
@@ -78,10 +78,10 @@ void Benchmarks::create_proxies(){
      
         for (int i=0; i < conf->client_connections_; i++) {
             #ifdef DPDK
-                rrr::UDPClient *client = new rrr::UDPClient(pollmgr_);
+                rrr::UDPClient *client = new rrr::UDPClient((rrr::PollMgr*)pollmgr_->ref_copy());
              
             #else
-            rrr::TCPClient* client = new rrr::TCPClient(pollmgr_);
+            rrr::TCPClient* client = new rrr::TCPClient((rrr::PollMgr*)pollmgr_->ref_copy());
             #endif
             client->connect(conf->server_address_.c_str());
             service_proxies[i] = new BenchmarkProxy(input_size,client);
@@ -104,11 +104,12 @@ void* Benchmarks::launch_client_thread(void *arg){
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
     BenchmarkProxy* pr= ct->my_proxy;
     while(!ct->stop){
-        // rrr::FutureGroup fg;
+         rrr::FutureGroup fg;
         for (int i = 0; i < ct->client_batch_size_; i++) {
-            (pr->add_bench_async())->release();
+            (pr->add_bench_async());
         }
         //fg.wait_all();
+        pr->reply_count+=ct->client_batch_size_;
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG
         //break;
@@ -142,30 +143,30 @@ void Benchmarks::create_client_threads(){
       
     
 }
-void Benchmarks::observe_client(){
-    int i=0;
-    while (i < conf->client_duration_*1000){
-        usleep(1000);
-        i++;
-    }
-}
 void Benchmarks::observe_server(){
     int i=0;
-    stat_thread = std::thread([this]{
+    while(i < AppConfig::get_config()->server_duration_){
+        sleep(1);
+        i++;
+    }
+    return;
+}
+void Benchmarks::observe_client(){
+    int i=0;
+        rrr::Timer t;
+        t.start();
         uint64_t last=0;
-        while(!this->stop){
+        while(t.elapsed() < conf->client_duration_){
             sleep(1);
-            uint64_t num = this->csi->count_;
+            uint64_t num =0;
+            for(int i=0; i< conf->num_client_threads_; i++)
+                num+= service_proxies[i]->reply_count;
             std::cout<<"RPC/sec "<<num-last<<std::endl;
             last = num;
 
         }
-    });
- while (i < conf->server_duration_*1000){
-        usleep(1000);
-        i++;
-    }
-    this->stop = true;
+        std::cout<<"Observed for : "<<t.elapsed()<<" seconds"<<std::endl;
+        t.stop();
 }
 void Benchmarks::set_cpu_affinity(){
 
