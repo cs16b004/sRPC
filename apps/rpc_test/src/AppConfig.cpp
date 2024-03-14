@@ -61,6 +61,8 @@ void AppConfig::load_benchmark_yml(YAML::Node config){
     num_client_threads_ = config["client_threads"].as<uint16_t>();
     input_size_ = config["input_size"].as<std::uint16_t>();
     output_size_ = config["output_size"].as<std::uint16_t>();
+    client_duration_ = config["client_duration"].as<std::uint16_t>();
+    server_duration_ = config["server_duration"].as<std::uint16_t>();
 
     server_address_ = config["server_address"].as<std::string>();
     client_batch_size_ = config["client_batch_size"].as<uint16_t>();

@@ -102,9 +102,10 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
      Future* fu = new Future(xid_counter_.next(), attr);
      pending_fu_l_.lock();
      pending_fu_[fu->xid_] = fu;
-     Future* tfu = fu;
+     //Future* tfu = fu;
      pending_fu_l_.unlock();
     current_req.allot_buffer(conn->get_new_pkt());
+    current_req.set_pkt_type_st();
     current_req.set_book_mark(sizeof(i32));
     current_req << i64(fu->xid_);
     current_req << rpc_id;
@@ -116,15 +117,16 @@ void UDPClient::end_request(){
     // i32 rpc_size = current_req.content_size();
     // current_req.write_book_mark(&rpc_size, sizeof(i32));
      current_req.format_header();
+     //current_req.set_pkt_type_st();
      //current_req.set_pkt_type_bg();
     // LOG_DEBUG("Request Data: \n %s", current_req.print_request().c_str());
-    
+    int available=0;
      int retry=0;
      while(
      rte_ring_sp_enqueue(conn->out_bufring,current_req.get_mbuf())< 0){
         retry++;
         if(retry > 1000*1000){
-            Log_warn("Stuck in enquueing rpc_request");
+            Log_warn("Stuck in enquueing rpc_request, ring size = %d, available = %d", rte_ring_count(conn->out_bufring), 0 );
             retry=0;
         }
      }
@@ -138,10 +140,7 @@ void UDPClient::handle_read(){
     }
 
     unsigned int available;
-    unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
-
-    TransportMarshal reply_array[32];
-   
+    unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);   
     for(int i=0;i<nb_pkts;i++){
         i32 reply_size;
         i64 v_reply_xid;
@@ -155,21 +154,31 @@ void UDPClient::handle_read(){
         unordered_map<i64, Future*>::iterator it = pending_fu_.find(v_reply_xid);
         if (likely(it != pending_fu_.end())) {
                 fu = it->second;
-                verify(fu->xid_ == v_reply_xid);
+                //verify(fu->xid_ == v_reply_xid);
                 pending_fu_.erase(it);
                 pending_fu_l_.unlock();
 
+               
+               
                 fu->error_code_ = v_error_code;
                 fu->reply_.write(reply_array[i].get_offset(),reply_size-sizeof(i64) -sizeof(i32));
-                #ifdef RPC_STATISTICS
-                // put_end_ts(fu->xid_);
-
-                #endif
+                
                 //Log_info("For reply for req: %lu",v_reply_xid);
                 fu->notify_ready();
+
                // LOG_DEBUG("Running reply future for %d",v_reply_xid);
                 // since we removed it from pending_fu_
-                fu->release();
+                
+                int k = fu->release();
+                #ifdef RPC_STATISTICS
+                // put_end_ts(fu->xid_);
+                // must be released for memory safety other wise the application has to release 
+
+                while(k)
+                     k = fu->release();
+
+                #endif
+
         } 
         else {
                 // the future might timed out
@@ -185,8 +194,6 @@ void UDPClient::close() {
     }
     status_ = CLOSED;
     invalidate_pending_futures();
-    transport_->trigger_shutdown();
-    transport_->shutdown();
 }
 /*TCP Client Implementation
 

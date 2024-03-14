@@ -3,21 +3,32 @@
 namespace rrr{
 rte_mbuf* TransportConnection::get_new_pkt(){
     int i=0;
-    void** tx_bufs = (void**)new rte_mbuf*;
-    *tx_bufs = new rte_mbuf;
-    while(rte_ring_dequeue(available_bufring, tx_bufs) < 0){
+    // void** tx_bufs = (void**)new rte_mbuf*;
+    // *tx_bufs = new rte_mbuf;
+    // while(rte_ring_dequeue(available_bufring, tx_bufs) < 0){
+    //     i++;
+    //     if(i > 1000*1000){
+    //         Log_warn("Waiting to get a new pkt from connection %lld",conn_id);
+    //          i=0;
+    //     }
+       
+    //  }
+
+    // rte_mbuf* ret = (rte_mbuf*) *tx_bufs; 
+
+   rte_mbuf* ret = rte_pktmbuf_alloc(pkt_mempool);
+    while(ret == NULL){
         i++;
         if(i > 1000*1000){
-            LOG_DEBUG("Waiting to get a new pkt from connection %lld",conn_id);
+            Log_warn("Waiting to get a new pkt from connection %lld",conn_id);
              i=0;
         }
        
      }
 
-    rte_mbuf* ret = (rte_mbuf*) *tx_bufs; 
-   // rte_mbuf* ret = rte_pktmbuf_alloc(pkt_mempool);
     
-    //make_pkt_header(ret);
+    
+    make_pkt_header(ret);
    // verify(ret != nullptr);
     return ret;
 
@@ -54,7 +65,7 @@ int TransportConnection::assign_bufring(){
          in_bufring = rte_ring_create(buf_ring_name,
                                                     conf->rte_ring_size,
                                                     rte_socket_id(), 
-                                                    RING_F_SC_DEQ | RING_F_SP_ENQ);
+                                                    RING_F_SC_DEQ | RING_F_MP_RTS_ENQ);
         if(out_bufring && in_bufring)
             return 0;
         else{

@@ -28,7 +28,7 @@ public:
     uint16_t input_size_ = 64;
     uint16_t output_size_ = 64;
     uint16_t client_duration_ = 20;
-    uint16_t server_duration_ = 60;
+    uint16_t server_duration_ = 30;
     std::string server_address_;
     uint16_t client_batch_size_ = 3;
 

@@ -263,9 +263,6 @@ class RPC_Thread{
     protected:
         pthread_t* p_th_;
         uint16_t thread_id_;
-        uint64_t clamps[200*1000] = {0};
-        uint64_t counter[6] = {0};
-        uint64_t clamp_counter=0;
         thread_type type_;
         bool init;
     
@@ -273,13 +270,7 @@ class RPC_Thread{
         RPC_Thread(pthread_t* th, uint16_t tid, thread_type type): p_th_(th), thread_id_(tid), type_(type){
 
         }
-        void add_clamp(){
-                clamps[clamp_counter%200000] = rrr::rdtsc();
-                clamp_counter++;
-        }
-        void count(){
-            counter[0]++;
-        }
+        
     pthread_t* get_thread(){
         return p_th_;
     }

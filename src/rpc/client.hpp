@@ -42,8 +42,11 @@ class Future: public RefCounted {
     i32 error_code_;
 
     FutureAttr attr_;
-    Marshal reply_;
-
+    // #ifdef DPDK
+    //     TransportMarshal reply_;
+    
+        Marshal reply_;
+    
     bool ready_;
     bool timed_out_;
     pthread_cond_t ready_cond_;
@@ -148,13 +151,12 @@ protected:
     // prevent direct usage, use close_and_release() instead
     using RefCounted::release;
 public:
+    #ifdef RPC_STATISTICS
+    uint64_t rep_count=0;   
+        
+    #endif
     Client(PollMgr* pollmgr): pollmgr_(pollmgr), status_(NEW) { 
-        #ifdef RPC_STATISTICS
-       // rJob = new rrr::ReportLatencyJob();
-       // pollmgr_->add(rJob);
-       // Log_info("Job Added");
-       
-        #endif
+        
     }
     /**
      * Start a new request. Must be paired with end_request(), even if nullptr returned.
@@ -209,11 +211,13 @@ class UDPClient: public Client{
         uint64_t conn_id;
         TransportConnection* conn;
         rte_mbuf* pkt_array[32];
+        TransportMarshal reply_array[32];
         Marshal::bookmark* bmark_;
         DpdkTransport* transport_ =nullptr;
         using RefCounted::release;
 
     public:
+        
         void handle_read();
         void handle_write(){
             pollmgr_->update_mode(this, Pollable::READ);

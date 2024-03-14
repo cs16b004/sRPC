@@ -61,7 +61,11 @@ namespace rrr{
         
         public:
 
-            TransportConnection(){}
+            TransportConnection(uint16_t num_dpdk_threads){
+                sconn = new UDPConnection*[num_dpdk_threads];
+                for( int i=0;i<num_dpdk_threads;i++)
+                    sconn[i] = nullptr;
+            }
             uint64_t conn_id;
             int in_fd_;
             int wfd;
@@ -79,7 +83,7 @@ namespace rrr{
             //My port nbumber ;
             uint16_t udp_port;
             bool connected_ = false;
-            UDPConnection* sconn;
+            UDPConnection** sconn;
             int buf_alloc(rte_mempool* mempool,uint16_t max_len);
             void make_headers_and_produce();
             void make_pkt_header(rte_mbuf* pkt);

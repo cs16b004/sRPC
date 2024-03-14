@@ -12,6 +12,15 @@
 #define MAX_PATTERN_NUM 3
 #define MAX_ACTION_NUM 2
 #define DPDK_RX_WRITEBACK_THRESH 64
+#define RSS_HASH_KEY_LENGTH 40
+static uint8_t hash_key[RSS_HASH_KEY_LENGTH] = {
+        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+};
+
 
 namespace rrr
 {
@@ -38,15 +47,15 @@ namespace rrr
 
     std::unordered_map<uint64_t, rte_ring *> DpdkTransport::in_rings;
 
-    RPCConfig * DpdkTransport::config_;
+    RPCConfig *DpdkTransport::config_;
 
     uint16_t rx_queue_ = 1, tx_queue_ = 1;
-    struct rte_mempool**  DpdkTransport::tx_mbuf_pool;
-    struct rte_mempool**  DpdkTransport::rx_mbuf_pool;
+    struct rte_mempool **DpdkTransport::tx_mbuf_pool;
+    struct rte_mempool **DpdkTransport::rx_mbuf_pool;
 
     // Session Management rings for each thread;
     //    (Single consumer multiple producer)
-    struct rte_ring ** DpdkTransport::sm_rings;
+    struct rte_ring **DpdkTransport::sm_rings;
 
     Counter DpdkTransport::u_port_counter(9000);
     Counter DpdkTransport::conn_counter(0);
@@ -54,17 +63,17 @@ namespace rrr
     //  std::map<uint16_t,rrr::Connection*> connections_;
     SpinLock DpdkTransport::conn_th_lock;
     SpinLock DpdkTransport::init_lock;
-    
-    rrr::UDPServer* DpdkTransport::us_server=nullptr;
-    std::unordered_map<i32, USHWrapper*> DpdkTransport::handlers;
 
-    
+    rrr::UDPServer *DpdkTransport::us_server = nullptr;
+    std::unordered_map<i32, USHWrapper *> DpdkTransport::handlers;
+    int DpdkTransport::num_threads_;
+
     Counter DpdkTransport::next_thread_;
 
     std::unordered_map<std::string, NetAddress> DpdkTransport::src_addr_;
     std::unordered_map<std::string, NetAddress> DpdkTransport::dest_addr_;
-    //std::unordered_map<i32, NetAddress> DpdkTransport::dest_addr_;
-    
+    // std::unordered_map<i32, NetAddress> DpdkTransport::dest_addr_;
+
     SpinLock DpdkTransport::sm_queue_l;
     std::queue<Marshal *> DpdkTransport::sm_queue;
 
@@ -81,14 +90,14 @@ namespace rrr
             const char *argv_str = config->get_dpdk_options();
 
             num_threads_ = config->num_threads_;
-            
+
             std::bitset<128> affinity_mask;
             for (int i = config->core_affinity_mask_[0]; i <= config->core_affinity_mask_[1]; i++)
                 affinity_mask.set(i);
-            
-          //   std::thread main_thread([this, argv_str](){
+
+            //   std::thread main_thread([this, argv_str](){
             this->init_dpdk_main_thread(argv_str);
-        //});
+            //});
 
             cpu_set_t cpuset;
             CPU_ZERO(&cpuset);
@@ -185,14 +194,13 @@ namespace rrr
         {
             char pool_name[1024];
             sprintf(pool_name, "sRPC_RX_MBUF_POOL_%d", pool_idx);
-            rx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, 32* DPDK_NUM_MBUFS,
+            rx_mbuf_pool[pool_idx] = rte_pktmbuf_pool_create(pool_name, 32 * DPDK_NUM_MBUFS - 1,
                                                              DPDK_MBUF_CACHE_SIZE, 0,
                                                              RTE_MBUF_DEFAULT_BUF_SIZE,
                                                              rte_socket_id());
             if (rx_mbuf_pool[pool_idx] == NULL)
                 rte_exit(EXIT_FAILURE, "Cannot create rx mbuf pool %d\n", pool_idx);
         }
-
         /* Will initialize buffers in port_init function */
         thread_ctx_arr = new d_thread_ctx *[num_threads_];
 
@@ -252,7 +260,7 @@ namespace rrr
             /*     addr = &dest_addr_; */
 
             auto it = addr->find(host_name);
-           // Log_info("Adding a host with name %s : info :\n %s", net.name.c_str(), net.to_string().c_str());
+            // Log_info("Adding a host with name %s : info :\n %s", net.name.c_str(), net.to_string().c_str());
             verify(it == addr->end());
 
             addr->emplace(std::piecewise_construct,
@@ -291,6 +299,9 @@ namespace rrr
         memset(&txconf, 0x0, sizeof(struct rte_eth_txconf));
         memset(&rxconf, 0x0, sizeof(struct rte_eth_rxconf));
         port_conf = {
+             .rxmode = {
+                .mq_mode = RTE_ETH_MQ_RX_RSS,
+            },
             .txmode = {
                 .offloads =
                     DEV_TX_OFFLOAD_VLAN_INSERT |
@@ -300,12 +311,20 @@ namespace rrr
                     DEV_TX_OFFLOAD_SCTP_CKSUM |
                     DEV_TX_OFFLOAD_TCP_TSO,
             },
+            .rx_adv_conf = {
+                .rss_conf = {
+                                .rss_hf = RTE_ETH_RSS_IPV4 | RTE_ETH_RSS_NONFRAG_IPV4_UDP ,
+                            }
+            },
         };
 
         port_conf.txmode.offloads &= dev_info.tx_offload_capa;
         memcpy((void *)(&rxconf), (void *)&(dev_info.default_rxconf), sizeof(struct rte_eth_rxconf));
         rxconf.offloads = port_conf.rxmode.offloads;
+
+        // rxconf.
         /**Configure nic port with offloads like CKSUM/SEGMENTATION and other features*/
+
         retval = rte_eth_dev_configure(port_id, rx_queue_, tx_queue_, &port_conf);
 
         if (retval != 0)
@@ -314,7 +333,7 @@ namespace rrr
                       port_id, strerror(-retval));
             return retval;
         }
-
+        LOG_DEBUG("COnfigured with % tx queues, %d rx queues", tx_queue_, rx_queue_);
         retval = rte_eth_dev_adjust_nb_rx_tx_desc(port_id, &nb_rxd, &nb_txd);
         if (retval != 0)
         {
@@ -377,8 +396,8 @@ namespace rrr
             sm_rings[i] = thread_ctx_arr[i]->sm_ring;
             verify(sm_rings[i] != nullptr);
         }
-
-        install_flow_rule(port_id);
+        // for(int i=0;i<num_threads_;i++)
+        //     install_flow_rule(port_id,i);
         return 0;
     }
 
@@ -428,7 +447,7 @@ namespace rrr
             rte_eth_dev_stop(port_id);
             rte_eth_dev_close(port_id);
         }
-        
+
         struct rte_flow_error err;
         rte_flow_flush(0, &err);
 
@@ -455,7 +474,8 @@ namespace rrr
     /*     }; */
     /* } */
 
-    void DpdkTransport::reg_us_handler(i32 id, std::function<void(Request<TransportMarshal>*, ServerConnection*)> func){
+    void DpdkTransport::reg_us_handler(i32 id, std::function<void(Request<TransportMarshal> *, ServerConnection *)> func)
+    {
         handlers[id] = new USHWrapper(id, func);
     }
 
@@ -469,6 +489,10 @@ namespace rrr
         max_size = burst_size;
         tx_bufs = new struct rte_mbuf *[burst_size];
         rx_bufs = new struct rte_mbuf *[burst_size];
+        // conn_arr = new TransportConnection* [51];
+        // for(int i=0; i <= 50; i++){
+        //     conn_arr[i] = nullptr;
+        // }
         for (int i = 0; i < burst_size; i++)
         {
             rx_bufs[i] = (rte_mbuf *)rte_malloc("deque_objs", sizeof(struct rte_mbuf), 0);
@@ -483,22 +507,22 @@ namespace rrr
     int DpdkTransport::isolate(uint8_t phy_port)
     {
         struct rte_flow_error *error = (struct rte_flow_error *)malloc(sizeof(struct rte_flow_error));
-        int ret = rte_flow_isolate(phy_port, 1, error);
-        if (ret < 0)
-            Log_error("Failed to enable flow isolation for port %d\n, message: %s", phy_port, error->message);
-        else
-            Log_info("Flow isolation enabled for port %d\n", phy_port);
-        return ret;
+        // int ret = rte_flow_isolate(phy_port, 1, error);
+        // if (ret < 0)
+        //     Log_error("Failed to enable flow isolation for port %d\n, message: %s", phy_port, error->message);
+        // else
+        //     Log_info("Flow isolation enabled for port %d\n", phy_port);
+        // return ret;
     }
 
-    void DpdkTransport::install_flow_rule(size_t phy_port)
+    void DpdkTransport::install_flow_rule(size_t phy_port, uint16_t q_id)
     {
 
         struct rte_flow_attr attr;
         struct rte_flow_item pattern[MAX_PATTERN_NUM];
         struct rte_flow_action action[MAX_ACTION_NUM];
         struct rte_flow *flow = NULL;
-        struct rte_flow_action_queue queue = {.index = 0};
+        struct rte_flow_action_queue queue = {.index = q_id};
         struct rte_flow_item_ipv4 ip_spec;
         struct rte_flow_item_ipv4 ip_mask;
         struct rte_flow_item_eth eth_spec;
@@ -555,7 +579,7 @@ namespace rrr
         // ip_spec.hdr.src_addr = 0;
         // ip_mask.hdr.src_addr = RTE_BE32(0);
 
-        Log_info("IP Address to be queued %s", ipv4_to_string(ip_spec.hdr.dst_addr).c_str());
+        Log_info("IP Address to be queued %s at queue: %d", ipv4_to_string(ip_spec.hdr.dst_addr).c_str(), q_id);
 
         // ip_mask.hdr.dst_addr =
 
@@ -594,6 +618,5 @@ namespace rrr
             Log_error("Failed to create flow rule: %s\n", error.message);
         }
     }
-
 
 }

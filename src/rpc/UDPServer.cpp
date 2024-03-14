@@ -49,13 +49,32 @@ UDPConnection::UDPConnection(UDPServer* server, uint64_t socket)
    // cb = server->us_handlers_.find(0x10000003)->second;
 
     #ifdef RPC_STATISTICS
-    rs = new ring_stat();
-    rs->used_c=0;
-    rs->free_c=0;
-    rs->num_sample=0;
+ 
     #endif
 
 }
+
+
+// UDPConnection::UDPConnection(const UDPConnection& other)
+//         : ServerConnection(other.server_, 0), connId(other.connId) {
+
+//             conn =  ((UDPServer *)other.server_)->transport_->out_connections[connId];
+//     // increase number of open connections
+//     us_handlers_.insert(server_->us_handlers_.begin(), server_->us_handlers_.end());
+//     server_->sconns_ctr_.next(1);
+//     for(int i=0;i<64;i++){
+//         pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);
+//     }
+//    // cb = server->us_handlers_.find(0x10000003)->second;
+
+//     #ifdef RPC_STATISTICS
+//     rs = new ring_stat();
+//     rs->used_c=0;
+//     rs->free_c=0;
+//     rs->num_sample=0;
+//     #endif
+
+// }
 
 UDPConnection::~UDPConnection() {
     // decrease number of open connections
@@ -75,6 +94,7 @@ void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_c
     }else{
         
         current_reply.allot_buffer(conn->get_new_pkt());
+        current_reply.set_pkt_type_bg();
     }
     i32 v_error_code = error_code;
     i64 v_reply_xid = req->xid;
@@ -90,6 +110,8 @@ void UDPConnection::begin_reply(Request<rrr::TransportMarshal>* req, i32 error_c
 
 void UDPConnection::end_reply() {
     i32 reply_size = current_reply.content_size();
+
+
         current_reply.write_book_mark(&reply_size, sizeof(i32));
         #ifdef LATENCY
             current_reply << timestamps[reply_idx%32];
@@ -98,6 +120,7 @@ void UDPConnection::end_reply() {
        int retry=0;
        if(current_reply.is_type_st()){
         current_reply.set_pkt_type_bg();
+       
         return ; 
        }
       // reply_arr[reply_idx%32] = current_reply.get_mbuf();
@@ -105,11 +128,12 @@ void UDPConnection::end_reply() {
      while(
      rte_ring_enqueue(conn->out_bufring,current_reply.get_mbuf())< 0){
         retry++;
-        if(retry > 100*1000){
+        if(retry > 10){
             Log_warn("Stuck in enquueing rpc_request");
             retry=0;
         }
      }
+     LOG_DEBUG("Enqueued Packet");
 }
 
 void UDPConnection::handle_read() {
@@ -121,20 +145,9 @@ void UDPConnection::handle_read() {
     unsigned int available;
 
 
-    nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 64,&available);
+    nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring, (void**)pkt_array, 32,&available);
     if (nb_pkts == 0 )
         return;
-    #ifdef RPC_STATISTICS
-            
-                add_sample(rs, nb_pkts, available);
-                times++;
-                if (times%30000 == 1){
-                    LOG_DEBUG("in Ring size average: %llu outstanding average %llu, size %d\n", rs->used_c / rs->num_sample, rs->free_c / rs->num_sample, rte_ring_get_size(conn->in_bufring));
-                    
-                }
-    #endif
-    
-    
     for(int i=0;i<nb_pkts;i++){
         
         request_array[i] = new Request<TransportMarshal>();
@@ -149,15 +162,14 @@ void UDPConnection::handle_read() {
 
         i32 rpc_id;
         request_array[i]->m >> rpc_id;
-
+        request_array[i]->m.set_pkt_type_bg();
       
         //cb(request_array[i], (UDPConnection *) this->ref_copy());
         auto it = us_handlers_.find(rpc_id);
         if (likely(it != us_handlers_.end())) {
-            // the handler should delete req, and release server_connection refcopy.
-           // LOG_DEBUG("RPC Triggered");
-        
-            it->second(request_array[i], (UDPConnection *) this->ref_copy());
+            
+          
+            it->second(request_array[i], (UDPConnection *) this);
             
         } else {
              Log_error("rrr::UDPConnection: no handler for rpc_id=0x%08x", rpc_id);
@@ -229,7 +241,7 @@ void UDPConnection::close() {
         server_->sconns_l_.unlock();
 
         LOG_DEBUG("rrr::UDPConnection: closed on fd=%d", socket_);
-
+        
         status_ = CLOSED;
        
     }
@@ -277,13 +289,6 @@ UDPServer::UDPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */, 
   
 }
 void UDPServer::stop(){
-     if (status_ == RUNNING) {
-        status_ = STOPPED;
-        // wait till accepting thread done
-        Pthread_join(loop_th_, nullptr);
-
-        verify(server_sock_ == -1 && status_ == STOPPED);
-    }
 
     sconns_l_.lock();
     vector<ServerConnection*> sconns(sconns_.begin(), sconns_.end());
@@ -295,13 +300,29 @@ void UDPServer::stop(){
     for (auto& it: sconns) {
         ((UDPConnection*)it)->close();
     }
+   
+       LOG_DEBUG("UDP Server Stopped");
     pollmgr_->release();
+    LOG_DEBUG("PollMgr Released");
+    
     // make sure all open connections are closed
    
 }
+void UDPServer::stop_loop(){
+    if (status_ == RUNNING) {
+        status_ = STOPPED;
+        // wait till accepting thread done
+        Pthread_join(loop_th_, nullptr);
+
+        verify(server_sock_ == -1 && status_ == STOPPED);
+    }
+
+    
+
+}
 UDPServer::~UDPServer() {
     //LOG_DEBUG("rrr::UDPServer: destroyed");
-    stop();
+    //stop();
 }
 
 void* UDPServer::start_server_loop(void* arg) {

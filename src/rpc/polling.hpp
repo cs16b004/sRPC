@@ -50,8 +50,12 @@ class PollMgr: public rrr::RefCounted {
     PollThread** poll_threads_;
     const int n_threads_;
 
-protected:
 
+protected:
+    #ifdef DPDK
+    Counter poll_counter;
+    std::unordered_map<Pollable*, int> poll_map;
+    #endif
     // RefCounted object uses protected dtor to prevent accidental deletion
     ~PollMgr();
 
@@ -76,6 +80,7 @@ public:
         #ifdef RPC_STATISTICS
         friend class Reporter;
         #endif
+        
         PollMgr* poll_mgr_;
 
         // guard mode_ and poll_set_

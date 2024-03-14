@@ -41,12 +41,12 @@ network:
 
   - greenport:
       id: 6
-      mac: 0c:42:a1:8e:e0:e6
+      mac: 9c:dc:71:42:46:00
       ip: 172.19.0.122
       port: 8501
 
 dpdk:
-  num_threads: 1
+  num_threads: 4
   pkt_burst_size: 32
-  option: ./server -a e3:00.0 -l 32-48
+  option: ./server -a e3:00.0 -l 32-42
 

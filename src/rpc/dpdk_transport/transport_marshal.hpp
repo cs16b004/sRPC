@@ -39,15 +39,18 @@ class Request {
             rte_ipv4_hdr* ipv4_hdr;
             rte_ether_hdr* eth_hdr;
             rte_udp_hdr* udp_hdr; 
-
+            uint8_t* place_holder=nullptr;
             uint16_t book_mark_offset=0;
             uint16_t book_mark_len=0;
-            uint16_t offset =  data_offset;
+            uint16_t offset   =  data_offset;
+            uint16_t r_offset = data_offset;
         public:
             TransportMarshal(){
+            //  req_data =   (rte_mbuf*) new uint8_t[1892] ;
 
             }
             TransportMarshal(rte_mbuf* req){
+              //place_holder   = (uint8_t*)req_data;
               req_data = (rte_mbuf*)req;     
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               eth_hdr = reinterpret_cast<rte_ether_hdr*>(dst);
@@ -57,12 +60,18 @@ class Request {
              // verify(dst !=nullptr);
               dst+=offset;
               
+              uint16_t magic = htons(0xfeed); 
+              rte_memcpy(dst,&magic,sizeof(uint16_t));
+              dst += sizeof(uint16_t);
+              offset += sizeof(uint16_t); 
+              
               uint8_t pkt_type = 0x09;
               rte_memcpy(dst,&pkt_type,1);
               
               offset+=1;
             }
             void allot_buffer(rte_mbuf* req){
+              //place_holder = (uint8_t*)req_data;
               book_mark_offset=0;
               book_mark_len=0;
               offset = data_offset;
@@ -74,13 +83,20 @@ class Request {
               udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + udp_hdr_offset);
              // verify(dst !=nullptr);
               dst+=offset;
+              uint16_t magic = htons(0xfeed); 
+              rte_memcpy(dst,&magic,sizeof(uint16_t));
+              dst += sizeof(uint16_t);
+              offset += sizeof(uint16_t); 
               
               uint8_t pkt_type = 0x09;
               rte_memcpy(dst,&pkt_type,1);
               
               offset+=1;
+              r_offset+=1;
             }
             void allot_buffer_x(rte_mbuf* req){
+
+              //place_holder = (uint8_t*)req_data;
               book_mark_offset=0;
               book_mark_len=0;
               offset =  data_offset;
@@ -96,6 +112,7 @@ class Request {
              
               
               offset+=1;
+              r_offset+=1;
             }
             size_t read(void *p, size_t n){
               void* src = rte_pktmbuf_mtod_offset(req_data, void*,offset);
@@ -177,13 +194,21 @@ class Request {
              
               *dst = 0xa;
             }
+            void set_pkt_type_st(){
+              uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+              dst += data_offset;
+             
+              *dst = 0x9;
+            }
             bool is_type_st(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               dst += data_offset;
               
               return (*dst == 0x09);
             }
-
+          ~TransportMarshal(){
+            //  delete[] place_holder;
+          }
     };
 
 

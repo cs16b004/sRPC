@@ -45,8 +45,10 @@ PollMgr::PollMgr(int n_threads /* =... */)
 void PollMgr::stop_threads(){
     for(int i=0;i<n_threads_;i++){
         poll_threads_[i]->stop_flag_ = true;
+        pthread_join( *poll_threads_[i]->get_thread(),nullptr);
         
     }
+    
 }
 PollMgr::~PollMgr() {
     
@@ -376,8 +378,12 @@ void PollMgr::add(Pollable* poll) {
     uint64_t fd = poll->fd();
     if (fd >= 0) {
         int tid = hash_fd(fd) % n_threads_;
+        #ifdef DPDK
+            tid =  poll_counter.next() % n_threads_;
+            poll_map[poll] = tid;
+        #endif
         poll_threads_[tid]->add(poll);
-        Log_debug("Poll Job added to thread :%d",tid);
+        Log_info("Poll Job added to thread :%d",tid);
     }
 }
 
@@ -385,6 +391,9 @@ void PollMgr::remove(Pollable* poll) {
     uint64_t fd = poll->fd();
     if (fd >= 0) {
         int tid = hash_fd(fd) % n_threads_;
+        #ifdef DPDK
+            tid = poll_map[poll];
+        #endif
         poll_threads_[tid]->remove(poll);
     }
 }

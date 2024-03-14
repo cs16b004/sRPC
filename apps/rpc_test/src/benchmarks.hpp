@@ -24,8 +24,9 @@ class BenchmarkProxy:CounterProxy{
      std::string out;
     public:
     uint64_t reply_count=0;
+    rrr::Client* clnt = nullptr;
     BenchmarkProxy(uint16_t in_size, rrr::Client* cl): CounterProxy(cl), input_size(in_size){
-        
+        clnt = cl;
         for(int i=0;i<input_size;i++){
            in.push_back('a'+ rand()%26);
         }
@@ -49,11 +50,12 @@ private:
     unsigned int time_;
     uint16_t out_size=1;
     rrr::PollMgr* pollmgr_;
-    static rrr::Counter at_counter;
+   
     
     std::string out_string;
 public:
     uint64_t count_=0;
+     static rrr::Counter at_counter;
     BenchmarkServiceImpl(uint16_t num_out): out_size(num_out){
         for(int i=0;i<num_out;i++){
             out_string.push_back('a'+ rand()%26);
@@ -75,8 +77,8 @@ public:
     }
     void add_bench(const std::string& in, std::string* out ) {
        // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
-        count_++;
-       // at_counter.next();
+        //count_++;
+        at_counter.next();
         out->append(out_string.c_str());
     }
 };
@@ -85,6 +87,12 @@ class Benchmarks{
     BenchmarkProxy** service_proxies;
     pthread_t** client_threads;
     std::thread stat_thread;
+     #ifdef DPDK
+        
+        rrr::UDPServer *server = nullptr;
+    #else
+        rrr::TCPServer *server = nullptr;
+    #endif
     bool stop=false;
     int num_client=0;
     std::bitset<128> affinity_mask;
@@ -96,7 +104,6 @@ class Benchmarks{
 
     public:
     Benchmarks(AppConfig* config) : conf(config){
-        rrr::Log::info("Core Affinity Size %d", conf->core_affinity_mask_);
         rrr::Log::info("Core Affinity from %d - %d", conf->core_affinity_mask_[0], conf->core_affinity_mask_[1]);
         for(int i=conf->core_affinity_mask_[0];i <= conf->core_affinity_mask_[1];i++)
             affinity_mask.set(i);
@@ -107,11 +114,13 @@ class Benchmarks{
     }
     static void* launch_client_thread(void* args);
     void create_server();
+    void stop_server();
+    void stop_server_loop();
+    void observe_server();
     void create_proxies();
     void create_client_threads();
     void set_cpu_affinity();
     void observe_client();
-    void observe_server();
     void stop_client();
     double diff_timespec(const struct timespec &time1, const struct timespec &time0) {
         if (time1.tv_sec - time0.tv_sec ==0)

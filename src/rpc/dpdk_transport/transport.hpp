@@ -75,17 +75,16 @@ namespace rrr
 
         static std::unordered_map<uint64_t, rte_ring *> in_rings;
 
-        struct rte_hash *conn_table;
 
         static RPCConfig *config_;
         int port_num_ = 0;
 
-        int num_threads_ = 0;
+        static int num_threads_;
 
         uint16_t rx_queue_ = 1, tx_queue_ = 1;
         static struct rte_mempool **tx_mbuf_pool;
         static struct rte_mempool **rx_mbuf_pool;
-
+        
         // Session Management rings for each thread;
         //    (Single consumer multiple producer)
         static struct rte_ring **sm_rings;
@@ -118,7 +117,7 @@ namespace rrr
         int port_init(uint16_t port_id);
         int port_reset(uint16_t port_id);
         int port_close(uint16_t port_id);
-        static void install_flow_rule(size_t phy_port);
+        static void install_flow_rule(size_t phy_port, uint16_t q_id);
 
         static int ev_loop(void *arg);
         static UDPServer *us_server;
@@ -189,13 +188,17 @@ namespace rrr
         int queue_id;
         int conn_count = 0;
         int max_size = 100;
-        uint16_t conn_counter = 0;
         uint16_t nb_rx = 0;
         uint16_t nb_tx = 0;
         bool shutdown = false;
         SpinLock conn_lock;
+        uint64_t sent_pkts  =0;
+        uint64_t rx_pkts=0;
         // Dedicated Connections
         std::unordered_map<uint64_t, TransportConnection *> out_connections;
+        //TransportConnection** conn_arr;
+        Counter conn_counter;
+        uint16_t max_conn=0;
 
         // Application thread put connection_ptr in this ring ,
         // thread will organize mbuf and other structs

@@ -232,6 +232,8 @@ protected:
 public:
 
     UDPConnection(UDPServer* server, uint64_t socket);
+
+    // UDPConnection(const UDPConnection &other);
     int run_async(const std::function<void()>& f);
     uint64_t fd() {
         return connId;
@@ -255,6 +257,7 @@ public:
         verify(1);
     }
     void begin_reply(Request<rrr::TransportMarshal>* req, i32 error_code=0);
+   
     void end_reply();
 };
 class TCPConnection: public ServerConnection {
@@ -516,6 +519,7 @@ class UDPServer : public Server{
         void stop();
         static void* start_server_loop(void* arg);
         void server_loop(void* arg);
+         void stop_loop();
 
     public:
         ~UDPServer();

@@ -4,15 +4,6 @@
 #include <rte_ring_core.h>
 #include "utils.hpp"
 #include "../server.hpp"
-#define DPDK_RX_DESC_SIZE 1024
-#define DPDK_TX_DESC_SIZE 1024
-
-#define DPDK_NUM_MBUFS 8192
-#define DPDK_MBUF_CACHE_SIZE 250
-
-#define MAX_PATTERN_NUM 3
-#define MAX_ACTION_NUM 2
-#define DPDK_RX_WRITEBACK_THRESH 64
 
 namespace rrr
 {
@@ -50,7 +41,7 @@ namespace rrr
         if(us_server == nullptr)
             return;
 
-        TransportConnection *oconn = new TransportConnection();
+        TransportConnection *oconn = new TransportConnection(num_threads_);
         
         uint64_t port = 0xFFFF;
         port = port<<16;
@@ -89,11 +80,16 @@ namespace rrr
         oconn->conn_id = conn_id;
         oconn->assign_bufring();
         oconn->pkt_mempool = tx_mbuf_pool[chosen_thread];
-        oconn->buf_alloc(tx_mbuf_pool[chosen_thread], config_->buffer_len);
-        oconn->assign_availring();
-        oconn->make_headers_and_produce();
+        //oconn->buf_alloc(tx_mbuf_pool[chosen_thread], config_->buffer_len);
+        //oconn->assign_availring();
+        //oconn->make_headers_and_produce();
+       // oconn->pkt_mempool = 
         out_connections[conn_id] = oconn;
-        UDPConnection* n_conn = new UDPConnection(us_server, conn_id);
+        UDPConnection* n_conn[num_threads_+1];
+        for(int i=0;i<=num_threads_;i++){
+            n_conn[i] = new UDPConnection(us_server, conn_id);
+        }
+
         
 
         while (rte_ring_sp_enqueue(sm_rings[chosen_thread], (void *)oconn) < 0)
@@ -101,10 +97,15 @@ namespace rrr
 
 
     us_server->sconns_l_.lock();
-    
-    us_server->sconns_.insert(n_conn);
-    us_server->pollmgr_->add(n_conn);
-    oconn->sconn = n_conn;
+    // Copies of Server Connection for parallely running the rpc;
+    for(int i=0;i<=num_threads_;i++)
+        n_conn[i]->conn = out_connections[conn_id];    
+    // First copy goes to poll mgr and upper layers;
+    us_server->sconns_.insert(n_conn[0]);
+    us_server->pollmgr_->add(n_conn[0]);
+    // Other copies are added to connections sonn list used by event loop to run the request in parallel
+    for(int i=1;i<=num_threads_;i++)
+        oconn->sconn[i-1] = n_conn[i];
     us_server->sconns_l_.unlock();
     send_ack(oconn);        
     
@@ -152,7 +153,7 @@ namespace rrr
         uint16_t port = atoi(addr.substr(idx + 1).c_str());
 
         // UDPConnection *conn = new UDPConnection(*s_addr);
-        TransportConnection *oconn = new TransportConnection();
+        TransportConnection *oconn = new TransportConnection(num_threads_);
 
         LOG_DEBUG("Connecting to a server %s , %s::%d", addr.c_str(), ipv4_to_string(server_ip).c_str(), port );
         // LOG_DEBUG("Mac: %s",getMacFromIp(server_ip).c_str());
@@ -188,9 +189,9 @@ namespace rrr
         oconn->conn_id = conn_id;
         oconn->assign_bufring();
         oconn->pkt_mempool = tx_mbuf_pool[chosen_thread];
-        oconn->buf_alloc(tx_mbuf_pool[chosen_thread], conf->buffer_len);
-        oconn->assign_availring();
-        oconn->make_headers_and_produce();
+       // oconn->buf_alloc(tx_mbuf_pool[chosen_thread], conf->buffer_len);
+       // oconn->assign_availring();
+       // oconn->make_headers_and_produce();
         
         while ((rte_ring_enqueue(sm_rings[chosen_thread], (void *)oconn)) < 0)
         {
@@ -298,14 +299,16 @@ namespace rrr
 
             ctx->nb_rx = rte_eth_rx_burst(ctx->port_id, ctx->queue_id,
                                           ctx->rx_bufs, conf->burst_size);
-
+            #ifdef RPC_STATISTICS
+            ctx->rx_pkts+= ctx->nb_rx;
+            #endif
             t_layer->process_requests(ctx);
             t_layer->process_sm_req(ctx);
             t_layer->do_transmit(ctx);
             // transmit
         }
-        Log_info("Exiting RX thread %d ",
-                 ctx->thread_id);
+        Log_info("Exiting RX thread %d, num pkts sent: %lu, num pkts received: %lu",
+                 ctx->thread_id, ctx->sent_pkts, ctx->rx_pkts);
         return 0;
     }
 
@@ -317,13 +320,22 @@ namespace rrr
         TransportConnection **conn_arr = new TransportConnection *[8];
         if (unlikely(rte_ring_empty(ctx->sm_ring) == 0))
         {
-            nb_sm_reqs_ = rte_ring_sc_dequeue_burst(ctx->sm_ring, (void **)conn_arr, 8, &available);
+             nb_sm_reqs_ = rte_ring_sc_dequeue_burst(ctx->sm_ring, (void **)conn_arr, 8, &available);
             for (int i = 0; i < nb_sm_reqs_; i++)
             {
                 ctx->out_connections[conn_arr[i]->conn_id] = conn_arr[i]; // Put the connection in local conn_table
+
                 LOG_DEBUG("Added Connection %lu to thread %d", conn_arr[i]->conn_id, ctx->thread_id);
             }
+            // for (int i = 0; i < nb_sm_reqs_; i++)
+            // {
+            //     ctx->conn_arr[conn_counter.next()] = conn_arr[i]; // Put the connection in local conn_table
+            //     ctx->max_conn = conn_counter.peek_next();
+            //     LOG_DEBUG("Added Connection %lu to thread %d", conn_arr[i]->conn_id, ctx->thread_id);
+            // }
+
         }
+        delete[]conn_arr;
     }
 
     void DpdkTransport::process_requests(d_thread_ctx *ctx)
@@ -341,20 +353,21 @@ namespace rrr
         rte_mbuf **rx_buffers = ctx->rx_bufs;
 
         rte_mbuf *rpc_pkt = nullptr;
-        Request<TransportMarshal> *req_m  = new Request<TransportMarshal>();;
+        
        
         i32 req_size = 0;
         i64 req_xid;
         i32 req_rpc_id;
 
         uint8_t pkt_type;
+        uint16_t net_type;
 
         
         if (unlikely(ctx->nb_rx == 0))
             return;
        // LOG_DEBUG("Packets received %d", ctx->nb_rx);
         ctx->nb_tx=0;
-        
+        Request<TransportMarshal> *req_m  = new Request<TransportMarshal>();
         for (int i = 0; i < ctx->nb_rx; i++)
         {
             rte_prefetch0(rx_buffers[i]);
@@ -375,6 +388,14 @@ namespace rrr
             conn_id = conn_id | (uint64_t)(udp_hdr->dst_port);
 
             data_ptr = pkt_ptr + data_offset;
+
+            net_type = *((uint16_t*)data_ptr);
+            LOG_DEBUG("PKT TYPE 0x%x", net_type);
+            if(unlikely(ntohs(net_type) != 0xfeed) ){
+                rte_pktmbuf_free(rx_buffers[i]);
+                continue;
+            }
+            data_ptr+= sizeof(uint16_t);
             pkt_type = *data_ptr;
             // mempcpy
             // pkt_type = *((uint8_t*)data_ptr);
@@ -393,7 +414,7 @@ namespace rrr
                     req_m->m >> req_rpc_id;
                     
                     auto it = us_server->us_handlers_.find(req_rpc_id);
-                    it->second(req_m, (UDPConnection*) (out_connections[conn_id]->sconn));
+                    it->second(req_m, (UDPConnection*) (out_connections[conn_id]->sconn[ctx->thread_id]));
                     swap_udp_addresses(rx_buffers[i]);
                     ctx->tx_bufs[ctx->nb_tx] = rx_buffers[i];
                     ctx->nb_tx++;
@@ -401,18 +422,16 @@ namespace rrr
                 else if(unlikely( pkt_type == RR_BG))
                 {
                     // background
-                    //LOG_DEBUG("Back Ground Reply");
-                    
+                   // rte_pktmbuf_free(rx_buffers[i]);
                     rte_ring_mp_enqueue(out_connections[conn_id]->in_bufring, (void *)rx_buffers[i]);
                 }
             }
             else if (unlikely(pkt_type == SM))
             {
                 LOG_DEBUG("Session Management Packet received pkt type 0x%2x", pkt_type);
-                Marshal *sm_req = new Marshal();
                 uint8_t req_type;
 
-                mempcpy(&req_type, data_ptr, sizeof(uint8_t));
+                rte_memcpy(&req_type, data_ptr, sizeof(uint8_t));
                 data_ptr += sizeof(uint8_t);
                 // LOG_DEBUG("Req Type 0x%2x, src_addr : %s",req_type, src_addr.c_str());
                 switch (req_type)
@@ -444,6 +463,7 @@ namespace rrr
                 LOG_DEBUG("Packet Type Not found");
             }
         }
+        delete req_m;
     }
     void DpdkTransport::do_transmit(d_thread_ctx *ctx)
     {
@@ -469,17 +489,25 @@ namespace rrr
         }
         //rte_pktmbuf_free_bulk(ctx->tx_bufs, prev_packets);
         // slow path send background requests
-        
+        #ifdef RPC_STATISTICS
+        ctx->sent_pkts+=prev_packets;
+        #endif
         unsigned int available;
         int nb_pkts = 0;
         int ret = 0;
         int retry_count = 0;
+        TransportConnection *current_conn;
         for (auto conn_entry : ctx->out_connections)
+        //for(int i=1;i<=20; i++)
         {
-            TransportConnection *current_conn = conn_entry.second;
-            //LOG_DEBUG("Num of pkts to deque %d, burst_size %d", rte_ring_count(current_conn->out_bufring), current_conn->burst_size);
-            if (current_conn->out_bufring == nullptr )//|| rte_ring_count(current_conn->out_bufring) < current_conn->burst_size)
-                continue;
+            current_conn = conn_entry.second;
+
+            // current_conn = ctx->conn_arr[i];
+            // if(unlikely(current_conn == nullptr))
+            //     continue;
+            // //LOG_DEBUG("Num of pkts to deque %d, burst_size %d", rte_ring_count(current_conn->out_bufring), current_conn->burst_size);
+            // if (unlikely(current_conn->out_bufring == nullptr ))//|| rte_ring_count(current_conn->out_bufring) < current_conn->burst_size)
+            //     continue;
 
             nb_pkts = rte_ring_sc_dequeue_burst(current_conn->out_bufring, (void **)ctx->tx_bufs, 32, &available);
 
@@ -503,16 +531,18 @@ namespace rrr
             }
             retry_count = 0;
            // rte_pktmbuf_free_bulk(my_buffers,nb_pkts);
-
-            while (rte_ring_sp_enqueue_bulk(current_conn->available_bufring, (void **)ctx->tx_bufs, nb_pkts, &available) == 0)
-            {
-                retry_count++;
-                if (unlikely(retry_count == 1000000))
-                {
-                    Log_warn("stuck in avail_buffers enqueue for conn: %lld, free space in ring %d, ring size: %d", current_conn->conn_id, available, rte_ring_count(current_conn->available_bufring));
-                    retry_count = 0;
-                }
-            }
+            #ifdef RPC_STATISTICS
+            ctx->sent_pkts+=nb_pkts;
+            #endif
+            // while (rte_ring_sp_enqueue_bulk(current_conn->available_bufring, (void **)ctx->tx_bufs, nb_pkts, &available) == 0)
+            // {
+            //     retry_count++;
+            //     if (unlikely(retry_count == 1000000))
+            //     {
+            //         Log_warn("stuck in avail_buffers enqueue for conn: %lld, free space in ring %d, ring size: %d", current_conn->conn_id, available, rte_ring_count(current_conn->available_bufring));
+            //         retry_count = 0;
+            //     }
+            // }
         }
     }
 

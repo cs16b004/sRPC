@@ -38,11 +38,9 @@ int main(int argc, char **argv) {
 
     bm.create_client_threads();
     bm.observe_client();
-    #ifdef DPDK
-         rrr::DpdkTransport::get_transport()->trigger_shutdown();
-         rrr::DpdkTransport::get_transport()->shutdown();
-    #endif
+    
     bm.stop_client();
+    
     
 
     

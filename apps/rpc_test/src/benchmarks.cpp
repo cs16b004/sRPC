@@ -13,9 +13,9 @@ void Benchmarks::create_server(){
     
     #ifdef DPDK
         
-        rrr::UDPServer *server = new rrr::UDPServer((rrr::PollMgr*)pollmgr_->ref_copy(),tp);
+         server = new rrr::UDPServer((rrr::PollMgr*)pollmgr_->ref_copy(),tp);
     #else
-        rrr::TCPServer *server = new rrr::TCPServer((rrr::PollMgr*)pollmgr_->ref_copy(), tp);
+        server = new rrr::TCPServer((rrr::PollMgr*)pollmgr_->ref_copy(), tp);
     #endif
     
     server->reg(csi);
@@ -30,37 +30,26 @@ void Benchmarks::create_server(){
     std::string port = conf->server_address_.substr(idx + 1);
 
     
-    
-   
-    
     server->start((std::string("0.0.0.0:") + port).c_str());
 
-    
-    
-    observe_server();
-   
-      
-      
-        #ifdef DPDK
+        
+}
+void Benchmarks::stop_server_loop(){
+    #ifdef DPDK
+        
+        ((rrr::UDPServer*)server)->stop_loop();
+       
+    #endif
+    pollmgr_->stop_threads();
+    pollmgr_->release();
+}
+void Benchmarks::stop_server(){
+     #ifdef DPDK
         
         ((rrr::UDPServer*)server)->stop();
         #else
             ((rrr::TCPServer*)server)->stop();
         #endif
-
-        pollmgr_->release();
-    
-     // pollmgr_->stop_threads();
-      
-    
-
-    
-   
-  
-    
-    delete server;
-    delete csi;
-    //delete rep;
 
 }
 void Benchmarks::create_proxies(){
@@ -103,13 +92,15 @@ void* Benchmarks::launch_client_thread(void *arg){
     benchmark_ctx* ct = (benchmark_ctx*)arg;
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
     BenchmarkProxy* pr= ct->my_proxy;
+    rrr::Future* f;
     while(!ct->stop){
          rrr::FutureGroup fg;
         for (int i = 0; i < ct->client_batch_size_; i++) {
-            (pr->add_bench_async());
+           f =  (pr->add_bench_async());
+           sleep(1);
         }
         //fg.wait_all();
-        pr->reply_count+=ct->client_batch_size_;
+         
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG
         //break;
@@ -145,27 +136,36 @@ void Benchmarks::create_client_threads(){
 }
 void Benchmarks::observe_server(){
     int i=0;
-    while(i < AppConfig::get_config()->server_duration_){
+ 
+    rrr::Timer t;
+    uint64_t last = 0;
+    t.start();
+    double s = 0;
+    while(t.elapsed() < AppConfig::get_config()->server_duration_){
         sleep(1);
-        i++;
+
+        
     }
+    std::cout<<"Observed Server for : "<<t.elapsed()<<" seconds"<<std::endl;
+        uint64_t num = csi->at_counter.next();
+            
+        std::cout<<(num - last) / (t.elapsed() - s)<<std::endl;
+        
+        t.stop();
     return;
 }
 void Benchmarks::observe_client(){
     int i=0;
         rrr::Timer t;
         t.start();
-        uint64_t last=0;
+        
         while(t.elapsed() < conf->client_duration_){
             sleep(1);
-            uint64_t num =0;
-            for(int i=0; i< conf->num_client_threads_; i++)
-                num+= service_proxies[i]->reply_count;
-            std::cout<<"RPC/sec "<<num-last<<std::endl;
-            last = num;
-
+            
         }
-        std::cout<<"Observed for : "<<t.elapsed()<<" seconds"<<std::endl;
+        
+        std::cout<<"Observed Client for : "<<t.elapsed()<<" seconds"<<std::endl;
+
         t.stop();
 }
 void Benchmarks::set_cpu_affinity(){
@@ -200,13 +200,18 @@ void Benchmarks::stop_client(){
          thread_info[i]->stop = true;
          
        }
-    //    for(int i=0; i< conf->num_client_threads_; i++){
-    //     pthread_join(*client_threads[i],nullptr);
-    //    }
+       for(int i=0; i< conf->num_client_threads_; i++){
+        pthread_join(*client_threads[i],nullptr);
+       }
+        #ifdef DPDK
+         rrr::DpdkTransport::get_transport()->trigger_shutdown();
+         rrr::DpdkTransport::get_transport()->shutdown();
+    #endif
+        pollmgr_->stop_threads();
        for(int i=0; i< conf->client_connections_; i++){
             service_proxies[i]->close();
        }
-
+       
        pollmgr_->release();
        
 }
