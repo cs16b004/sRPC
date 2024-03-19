@@ -31,6 +31,8 @@ public:
     uint16_t server_duration_ = 30;
     std::string server_address_;
     uint16_t client_batch_size_ = 3;
+    uint64_t rate = 1000000;
+    std::string exp_name="tput";
 
     std::vector<uint16_t> core_affinity_mask_;
     //

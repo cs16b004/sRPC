@@ -9,10 +9,16 @@
 #include <pthread.h>
 #include <vector>
 #include<cstdlib>
-#ifdef DPDK
+#include <sstream>
+#include<iomanip>
+#include<iostream>
+
+#include<fstream>
+#include<filesystem>
+
 #include<rte_launch.h>
 #include<rte_lcore.h>
-#endif
+#include<rte_cycles.h>
 #include "AppConfig.hpp"
 struct benchmark_ctx;
 class BenchmarkProxy:CounterProxy{
@@ -78,7 +84,7 @@ public:
     void add_bench(const std::string& in, std::string* out ) {
        // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
         //count_++;
-        at_counter.next();
+       // at_counter.next();
         out->append(out_string.c_str());
     }
 };
@@ -115,7 +121,14 @@ class Benchmarks{
     static void* launch_client_thread(void* args);
     void create_server();
     void stop_server();
-    void stop_server_loop();
+    void stop_server_loop(){
+        #ifdef DPDK
+        
+        ((rrr::UDPServer*)server)->stop();
+        #else
+            ((rrr::TCPServer*)server)->stop();
+        #endif
+    }
     void observe_server();
     void create_proxies();
     void create_client_threads();

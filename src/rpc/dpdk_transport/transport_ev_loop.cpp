@@ -16,14 +16,7 @@ namespace rrr
                                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    static uint8_t con_ack[64] = {CON_ACK, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    
 
 
     void DpdkTransport::reg_us_server(UDPServer* sv){
@@ -54,46 +47,52 @@ namespace rrr
 
         port = port & conn_id;
         port = port>>16;
+        
        // port = ntohs(port);
        // server_ip = ntohl(server_ip);
-        LOG_DEBUG("Accepting: %llu ip %s, port %d", server_ip, ipv4_to_string(server_ip).c_str(), ntohs(port));
+       
 
         oconn->src_addr = src_addr_[config_->host_name_];
+      //  oconn->src_addr.port = (u_port_counter.next());
+         LOG_DEBUG("Accepting: %s", ConnToString(conn_id).c_str());
+        // LOG_DEBUG("ConnId: ")
         oconn->out_addr = NetAddress(getMacFromIp(server_ip), server_ip, ntohs(port));
-        oconn->udp_port = src_addr_[config_->host_name_].port;
+        oconn->udp_port = oconn->src_addr.port;
+       oconn->conn_id = conn_id;
+
         // choose a connection based on round robin principle;
         conn_th_lock.lock();
 
         uint16_t chosen_thread = (next_thread_.next()  % (config_->num_threads_));
-
+        oconn->chosen_thread = chosen_thread;
         conn_counter.next();
 
-        if (out_connections.find(conn_id) != out_connections.end()){
-            send_ack(out_connections[conn_id]);
+        if (accepted.find(conn_id) != accepted.end()){
+            delete oconn;
+            send_ack(out_connections[accepted[conn_id]]);
             return;
         }
         // thread_ctx_arr[chosen_thread]->conn_lock.unlock();
         // return 0;
 
-        Log_info("Chosen threads for new conn: %lu, thread %d", conn_id, chosen_thread);
+        Log_info("Chosen threads for new conn: %s, thread %d", ConnToString(oconn->conn_id).c_str(), chosen_thread);
 
         oconn->conn_id = conn_id;
         oconn->assign_bufring();
         oconn->pkt_mempool = tx_mbuf_pool[chosen_thread];
+        oconn->all_pools = tx_mbuf_pool;
         //oconn->buf_alloc(tx_mbuf_pool[chosen_thread], config_->buffer_len);
         //oconn->assign_availring();
         //oconn->make_headers_and_produce();
        // oconn->pkt_mempool = 
-        out_connections[conn_id] = oconn;
+       
         UDPConnection* n_conn[num_threads_+1];
         for(int i=0;i<=num_threads_;i++){
             n_conn[i] = new UDPConnection(us_server, conn_id);
         }
+        out_connections[conn_id] = oconn;
 
         
-
-        while (rte_ring_sp_enqueue(sm_rings[chosen_thread], (void *)oconn) < 0)
-            ;
 
 
     us_server->sconns_l_.lock();
@@ -107,29 +106,66 @@ namespace rrr
     for(int i=1;i<=num_threads_;i++)
         oconn->sconn[i-1] = n_conn[i];
     us_server->sconns_l_.unlock();
-    send_ack(oconn);        
+    send_ack(oconn);  
+    
+
+    int send_all=0;
+        while(send_all < num_threads_){
+            while ((rte_ring_enqueue(sm_rings[send_all], (void *)oconn)) < 0)
+            {
+            ;
+            }
+            send_all++;
+        }      
     
     }
     void DpdkTransport::send_ack(TransportConnection* oconn){
+
         oconn->burst_size = 1;
-        conn_th_lock.unlock();
+        uint64_t acc_conn = oconn->conn_id;
+        uint8_t con_ack[64] = {CON_ACK, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+        
         // this->connections_[conn_id] = conn;
 
         int wait = 0;
-
+        if(oconn->udp_port == src_addr_[config_->host_name_].port)
+            oconn->udp_port = s_port_counter.next();
+        *((uint16_t*)(con_ack+1)) = oconn->udp_port;
         TransportMarshal accept_marshal = TransportMarshal(oconn->get_new_pkt());
+        rte_udp_hdr* sm_hdr = rte_pktmbuf_mtod_offset(accept_marshal.get_mbuf(), rte_udp_hdr*, udp_hdr_offset);
+        sm_hdr->src_port = htons(oconn->src_addr.port);
+
         accept_marshal.set_pkt_type_sm();
         accept_marshal.write(con_ack, 64);
+    
         accept_marshal.format_header();
-       // LOG_DEBUG("Sending Ack to: %s:%d ", ipv4_to_string(oconn->out_addr.ip).c_str(), oconn->out_addr.port);
-        while (rte_ring_enqueue(oconn->out_bufring, (void *)accept_marshal.get_mbuf()) < 0)
+        LOG_DEBUG("Sending Ack %s, pkt %s", ConnToString(acc_conn).c_str(), accept_marshal.print_request().c_str());
+
+        
+
+        while (rte_ring_enqueue(oconn->out_bufring[oconn->chosen_thread], (void *)accept_marshal.get_mbuf()) < 0)
             ;
         wait = 0;
-
+        oconn->conn_id = oconn->conn_id & (0xFFFFFFFFFFFFULL << 16);
+        oconn->conn_id = oconn->conn_id | rte_cpu_to_be_16(oconn->udp_port);
         //sleep(1);
+        accepted[acc_conn] = oconn->conn_id;
+        auto nh = out_connections.extract(acc_conn);
+        
+        nh.key() = oconn->conn_id;
+        out_connections.insert(std::move(nh));
+        ;
+        LOG_DEBUG("Accepted:  %s", ConnToString(oconn->conn_id).c_str());
         oconn->connected_ = true;
         oconn->burst_size = 32; // conf->client_batch_size_;
-        
+        conn_th_lock.unlock();
         return;
     }
     uint64_t DpdkTransport::connect(const char *addr_str)
@@ -165,6 +201,7 @@ namespace rrr
 
 
         uint16_t chosen_thread = (next_thread_.next()  % (config_->num_threads_));
+        oconn->chosen_thread = chosen_thread;
 
         oconn->udp_port = u_port_counter.next();
         oconn->src_addr.port = oconn->udp_port;
@@ -177,7 +214,7 @@ namespace rrr
         conn_id = conn_id << 16;
         conn_id = conn_id | rte_cpu_to_be_16(oconn->udp_port); // local host port in BE
         Log_info("Chosen thread for new conn: %llu is  %d", conn_id, chosen_thread);
-        out_connections[conn_id] = oconn;
+        
         
         // int ret;
         // ret = rte_hash_add_key_data(conn_table, &conn_id, oconn);
@@ -189,13 +226,18 @@ namespace rrr
         oconn->conn_id = conn_id;
         oconn->assign_bufring();
         oconn->pkt_mempool = tx_mbuf_pool[chosen_thread];
+        oconn->all_pools = tx_mbuf_pool;
        // oconn->buf_alloc(tx_mbuf_pool[chosen_thread], conf->buffer_len);
        // oconn->assign_availring();
        // oconn->make_headers_and_produce();
-        
-        while ((rte_ring_enqueue(sm_rings[chosen_thread], (void *)oconn)) < 0)
-        {
+        out_connections[conn_id] = oconn;
+        int send_all=0;
+        while(send_all < num_threads_){
+            while ((rte_ring_enqueue(sm_rings[send_all], (void *)oconn)) < 0)
+            {
             ;
+            }
+            send_all++;
         }
 
         conn_th_lock.unlock();
@@ -210,10 +252,10 @@ namespace rrr
         con_marshal.write(con_req, 64);
         con_marshal.format_header();
         rte_mbuf *pkt = con_marshal.get_mbuf();
-    
+        
         int wait = 0;
-        LOG_DEBUG("Sending Connection request");
-        while (rte_ring_sp_enqueue(oconn->out_bufring, (void *)con_marshal.get_mbuf()) < 0)
+        Log_info("Sending Connection request %s", con_marshal.print_request().c_str());
+        while (rte_ring_sp_enqueue(oconn->out_bufring[0], (void *)con_marshal.get_mbuf()) < 0)
         {
             wait++;
             if (wait > 100 * 1000)
@@ -221,23 +263,31 @@ namespace rrr
                 Log_warn("Unable to enque connection request packet: %llu", oconn->conn_id);
                 wait = 0;
             }
+
         }
         wait = 0;
         while (!oconn->connected_)
         {
             usleep(500 * 1000);
             wait++;
-            if (wait > 20)
+            if (wait > 2)
             {
-                Log_warn("Waiting for connection Request Ack %llu", conn_id);
+                Log_warn("Waiting for connection Request Ack %s", ConnToString(conn_id).c_str());
 
                 wait = 0;
                 goto send_con_req;
             }
         }
+        auto nh = out_connections.extract(conn_id);
+        conn_id = conn_id & ((0xFFFFFFFF0000FFFFULL));
+        conn_id = conn_id | ((uint64_t)htons(oconn->out_addr.port) << 16);
+        oconn->conn_id = conn_id;
+        nh.key() = conn_id;
+        out_connections.insert(std::move(nh));
+
         oconn->burst_size = conf->burst_size;
         ;
-        Log_info("Connected to %s", addr.c_str());
+        Log_info("Connected to %s", ConnToString(oconn->conn_id).c_str());
 
         return conn_id;
     }
@@ -307,8 +357,8 @@ namespace rrr
             t_layer->do_transmit(ctx);
             // transmit
         }
-        Log_info("Exiting RX thread %d, num pkts sent: %lu, num pkts received: %lu",
-                 ctx->thread_id, ctx->sent_pkts, ctx->rx_pkts);
+        Log_info("Exiting EV thread %d, num pkts sent: %lu, num pkts received: %lu dropped_pakcets: %lu",
+                 ctx->thread_id, ctx->sent_pkts, ctx->rx_pkts, ctx->dropped_packets);
         return 0;
     }
 
@@ -317,15 +367,15 @@ namespace rrr
 
         int nb_sm_reqs_ = 0;
         unsigned int available;
-        TransportConnection **conn_arr = new TransportConnection *[8];
+        
         if (unlikely(rte_ring_empty(ctx->sm_ring) == 0))
         {
-             nb_sm_reqs_ = rte_ring_sc_dequeue_burst(ctx->sm_ring, (void **)conn_arr, 8, &available);
+             nb_sm_reqs_ = rte_ring_sc_dequeue_burst(ctx->sm_ring, (void **) ctx->conn_arr, 8, &available);
             for (int i = 0; i < nb_sm_reqs_; i++)
             {
-                ctx->out_connections[conn_arr[i]->conn_id] = conn_arr[i]; // Put the connection in local conn_table
+                ctx->out_connections[ctx->conn_arr[i]->conn_id] = ctx->conn_arr[i]; // Put the connection in local conn_table
 
-                LOG_DEBUG("Added Connection %lu to thread %d", conn_arr[i]->conn_id, ctx->thread_id);
+              //  LOG_DEBUG("Added Connection %lu to thread %d", ctx->conn_arr[i]->conn_id, ctx->thread_id);
             }
             // for (int i = 0; i < nb_sm_reqs_; i++)
             // {
@@ -335,7 +385,7 @@ namespace rrr
             // }
 
         }
-        delete[]conn_arr;
+        
     }
 
     void DpdkTransport::process_requests(d_thread_ctx *ctx)
@@ -349,6 +399,7 @@ namespace rrr
         uint64_t conn_id;
         rte_ipv4_hdr *ip_hdr;
         uint32_t src_ip;
+        rte_be32_t host_ip = ctx->t_layer->host_ip;
         rte_udp_hdr *udp_hdr;
         rte_mbuf **rx_buffers = ctx->rx_bufs;
 
@@ -376,6 +427,12 @@ namespace rrr
             ip_hdr = ((rte_ipv4_hdr *)(pkt_ptr + ip_hdr_offset));
             src_ip = ip_hdr->src_addr;
             udp_hdr = ((rte_udp_hdr *)(pkt_ptr + udp_hdr_offset));
+            // if(unlikely(ip_hdr->dst_addr != host_ip)){
+            //     rte_pktmbuf_free(rx_buffers[i]);
+            //     continue;
+            // }
+            
+
 
             pkt_size = ntohs(udp_hdr->dgram_len) - sizeof(rte_udp_hdr);
             conn_id = 0;
@@ -386,24 +443,32 @@ namespace rrr
             // local host port in BE
             conn_id = conn_id << 16;
             conn_id = conn_id | (uint64_t)(udp_hdr->dst_port);
-
+            
+            
             data_ptr = pkt_ptr + data_offset;
 
-            net_type = *((uint16_t*)data_ptr);
-            LOG_DEBUG("PKT TYPE 0x%x", net_type);
-            if(unlikely(ntohs(net_type) != 0xfeed) ){
-                rte_pktmbuf_free(rx_buffers[i]);
-                continue;
-            }
-            data_ptr+= sizeof(uint16_t);
+            // net_type = *((uint16_t*)data_ptr);
+            // LOG_DEBUG("PKT TYPE 0x%x", net_type);
+            // if(unlikely(net_type != (uint16_t)0xfeed) ){
+            //     rte_pktmbuf_free(rx_buffers[i]);
+            //     continue;
+            // } 
+            // data_ptr+= sizeof(uint16_t);
+            
             pkt_type = *data_ptr;
             // mempcpy
             // pkt_type = *((uint8_t*)data_ptr);
 
             data_ptr += sizeof(uint8_t);
-           // LOG_DEBUG("Pkt type %02x from %s::%d",pkt_type, ipv4_to_string(src_ip).c_str(), ntohs(udp_hdr->src_port));
+           LOG_DEBUG("Pkt type %02x from %s::%d",pkt_type, ipv4_to_string(src_ip).c_str(), ntohs(udp_hdr->src_port));
             if ( likely(pkt_type >= RR)) // Run here or submit to bg thread
             {
+                if(out_connections.find(conn_id) == out_connections.end()){
+                rte_pktmbuf_free(rx_buffers[i]);
+                ctx->dropped_packets++;
+                LOG_DEBUG("Dropping pakcet for Conn Id : %s", ConnToString(conn_id).c_str());
+                continue;
+                }else{
                 if (pkt_type == RR)
                 {
 
@@ -419,11 +484,21 @@ namespace rrr
                     ctx->tx_bufs[ctx->nb_tx] = rx_buffers[i];
                     ctx->nb_tx++;
                 }
-                else if(unlikely( pkt_type == RR_BG))
+                else if(( pkt_type == RR_BG))
                 {
                     // background
                    // rte_pktmbuf_free(rx_buffers[i]);
-                    rte_ring_mp_enqueue(out_connections[conn_id]->in_bufring, (void *)rx_buffers[i]);
+                   int ret = 0;
+                   while(rte_ring_sp_enqueue(out_connections[conn_id]->in_bufring[ctx->thread_id], (void *)rx_buffers[i]) < 0){
+                    ret++;
+                    if(ret > 1000*1000){
+                        LOG_DEBUG("Cannot enqueue moving to next packet");
+                         rte_pktmbuf_free(rx_buffers[i]);
+                         ctx->dropped_packets++;
+                        break;
+                    }
+                   }
+                }
                 }
             }
             else if (unlikely(pkt_type == SM))
@@ -440,11 +515,13 @@ namespace rrr
                 {
                     if (out_connections.find(conn_id) != out_connections.end())
                     {
+                        out_connections[conn_id]->out_addr.port = *((uint16_t*)data_ptr);
                         out_connections[conn_id]->connected_ = true;
+                        
                     }
                     else
                     {
-                        LOG_DEBUG("Connection not found connid: %lu , thread_id rx-%d", conn_id, ctx->thread_id);
+                        LOG_DEBUG("Connection not found conn: %s , thread_id ev-%d", ConnToString(conn_id).c_str(), ctx->thread_id);
                     }
                     break;
                 }
@@ -461,6 +538,7 @@ namespace rrr
             else
             {
                 LOG_DEBUG("Packet Type Not found");
+                ctx->dropped_packets++;
             }
         }
         delete req_m;
@@ -469,10 +547,14 @@ namespace rrr
     {
 
         // send single thread request;
-        int prev_packets = 0;
+        uint16_t prev_packets = 0;
+        uint16_t sent=0;
+        
+        
         while (ctx->nb_tx > 0)
         {
-            prev_packets+= rte_eth_tx_burst(ctx->port_id, ctx->queue_id, &(ctx->tx_bufs[prev_packets]), ctx->nb_tx);
+            sent = rte_eth_tx_burst(ctx->port_id, ctx->queue_id, &(ctx->tx_bufs[prev_packets]), ctx->nb_tx );
+            prev_packets+=sent;
             #ifdef LOG_LEVEL_AS_DEBUG
             // for(int j=0;j<ctx->nb_tx;j++){
             //     uint8_t* pkt_ptr = rte_pktmbuf_mtod(ctx->tx_bufs[j], uint8_t *);
@@ -485,7 +567,9 @@ namespace rrr
             // }
 
             #endif
-            ctx->nb_tx -= prev_packets;
+            // if(ctx->nb_tx < sent)
+            //     Log_warn("!! nb_tx %d, ctx %d prev packcets %d", ctx->nb_tx, ctx->thread_id, prev_packets);
+            ctx->nb_tx -= sent;
         }
         //rte_pktmbuf_free_bulk(ctx->tx_bufs, prev_packets);
         // slow path send background requests
@@ -505,17 +589,16 @@ namespace rrr
             // current_conn = ctx->conn_arr[i];
             // if(unlikely(current_conn == nullptr))
             //     continue;
-            // //LOG_DEBUG("Num of pkts to deque %d, burst_size %d", rte_ring_count(current_conn->out_bufring), current_conn->burst_size);
+            
             // if (unlikely(current_conn->out_bufring == nullptr ))//|| rte_ring_count(current_conn->out_bufring) < current_conn->burst_size)
             //     continue;
 
-            nb_pkts = rte_ring_sc_dequeue_burst(current_conn->out_bufring, (void **)ctx->tx_bufs, 32, &available);
+            nb_pkts = rte_ring_sc_dequeue_burst(current_conn->out_bufring[ctx->thread_id], (void **)ctx->tx_bufs, 32, &available);
 
             if (nb_pkts <= 0)
                 return;
-
             ret = rte_eth_tx_burst(ctx->port_id, ctx->queue_id, ctx->tx_bufs, nb_pkts);
-            if (ret > 0)
+            
             
             if (unlikely(ret < 0))
                 rte_panic("Can't send packets from connection %lu\n", current_conn->conn_id);

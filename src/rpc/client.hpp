@@ -207,13 +207,14 @@ class UDPClient: public Client{
         uint64_t sock_;
         int wfd;
         Marshal* out_ptr_;
-       
+        uint16_t nr_inrings=0;
         uint64_t conn_id;
         TransportConnection* conn;
         rte_mbuf* pkt_array[32];
         TransportMarshal reply_array[32];
         Marshal::bookmark* bmark_;
         DpdkTransport* transport_ =nullptr;
+        i64 current_xid;
         using RefCounted::release;
 
     public:
@@ -242,6 +243,8 @@ class UDPClient: public Client{
             for(int i=0;i<32;i++){
                 pkt_array[i] = (rte_mbuf*)rte_malloc("req_deque_objs", sizeof(struct rte_mbuf), 0);
             }
+            nr_inrings = transport_->num_threads_;
+            Log_info("nr_rings %d",nr_inrings);
         }
         void end_request();
         int connect(const char* addr);

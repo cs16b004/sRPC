@@ -34,22 +34,10 @@ void Benchmarks::create_server(){
 
         
 }
-void Benchmarks::stop_server_loop(){
-    #ifdef DPDK
-        
-        ((rrr::UDPServer*)server)->stop_loop();
-       
-    #endif
-    pollmgr_->stop_threads();
-    pollmgr_->release();
-}
 void Benchmarks::stop_server(){
-     #ifdef DPDK
-        
-        ((rrr::UDPServer*)server)->stop();
-        #else
-            ((rrr::TCPServer*)server)->stop();
-        #endif
+     
+        pollmgr_->stop_threads();
+        pollmgr_->release();
 
 }
 void Benchmarks::create_proxies(){
@@ -77,8 +65,11 @@ void Benchmarks::create_proxies(){
         }
        
 }
+
 void* Benchmarks::launch_client_thread(void *arg){
     rrr::RPCConfig* conf= rrr::RPCConfig::get_config();
+
+    AppConfig* appConf  = AppConfig::get_config();
      while(1){
       //  Log_info("thread cpu %d",sched_getcpu());
         if(sched_getcpu() >= (conf->cpu_info_.numa)*(conf->cpu_info_.core_per_numa)
@@ -93,12 +84,43 @@ void* Benchmarks::launch_client_thread(void *arg){
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d launched", ct->tid);
     BenchmarkProxy* pr= ct->my_proxy;
     rrr::Future* f;
-    while(!ct->stop){
-         rrr::FutureGroup fg;
-        for (int i = 0; i < ct->client_batch_size_; i++) {
-           f =  (pr->add_bench_async());
-           sleep(1);
+    uint64_t intersend_time = 1e9 / appConf->rate ;
+   uint64_t cycle_wait = intersend_time * rte_get_timer_hz() / (1e9);
+   uint64_t last_sent = rte_get_timer_cycles();
+   uint64_t c=0,n=1;
+   rrr::Timer t;
+   t.start();
+   char data_file_name[128];
+   sprintf(data_file_name, "data/%s_cl_rate_%d.csv", appConf->exp_name.c_str(), ct->tid);
+    if (! std::filesystem::exists(data_file_name)) {
+        std::ofstream csvFile(data_file_name);
+        if (!csvFile.is_open()) {
+           rrr::Log::error( "Failed to open CSV file, %s", data_file_name);
+            exit(EXIT_FAILURE);
         }
+        csvFile << "Sent, Rate\n";
+        csvFile.close();
+    }
+     std::ofstream csvFile(data_file_name, std::ios::app); // Open file in append mode
+    if (!csvFile.is_open()) {
+        rrr::Log::error( "Failed to open CSV file, %s", data_file_name);
+        exit(EXIT_FAILURE);
+    }
+    while(!ct->stop){
+         
+        while (((last_sent + cycle_wait) >= rte_get_timer_cycles())) {
+                ;
+        }
+       
+           (pr->add_bench_async());
+           c++;
+           if(c % (1000*1000) == 0){
+            n++;
+
+            csvFile << c <<", " << c/t.elapsed() <<std::endl;
+            
+           }
+     last_sent = rte_get_timer_cycles();
         //fg.wait_all();
          
         #ifdef DPDK
@@ -107,6 +129,7 @@ void* Benchmarks::launch_client_thread(void *arg){
         #endif
         #endif
     }
+    csvFile.close();
     rrr::Log::info(__LINE__, __FILE__,"Benchmark thread: %d stopped", ct->tid);
       
     int *a  = new int;
@@ -203,11 +226,12 @@ void Benchmarks::stop_client(){
        for(int i=0; i< conf->num_client_threads_; i++){
         pthread_join(*client_threads[i],nullptr);
        }
+       pollmgr_->stop_threads();
         #ifdef DPDK
          rrr::DpdkTransport::get_transport()->trigger_shutdown();
          rrr::DpdkTransport::get_transport()->shutdown();
     #endif
-        pollmgr_->stop_threads();
+        
        for(int i=0; i< conf->client_connections_; i++){
             service_proxies[i]->close();
        }

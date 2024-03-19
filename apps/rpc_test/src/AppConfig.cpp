@@ -66,8 +66,12 @@ void AppConfig::load_benchmark_yml(YAML::Node config){
 
     server_address_ = config["server_address"].as<std::string>();
     client_batch_size_ = config["client_batch_size"].as<uint16_t>();
+    rate = config["rate"].as<std::uint64_t>();
     rrr::Log::info("Loading Affinity ");
     core_affinity_mask_ = config["core_affinity"].as<std::vector<uint16_t>>();
+
+    exp_name = config["experiment"].as<std::string>();
+
     if(core_affinity_mask_.size() <=0){
         rrr::Log::warn("AFFINITY MASK NOT PROVIDED Setting Default 0, 32");
         core_affinity_mask_.push_back(0);

@@ -6,7 +6,7 @@
 #define DPDK_RX_DESC_SIZE 1024
 #define DPDK_TX_DESC_SIZE 1024
 
-#define DPDK_NUM_MBUFS 8192
+#define DPDK_NUM_MBUFS 8192*2
 #define DPDK_MBUF_CACHE_SIZE 250
 
 #define MAX_PATTERN_NUM 3
@@ -14,11 +14,16 @@
 #define DPDK_RX_WRITEBACK_THRESH 64
 #define RSS_HASH_KEY_LENGTH 40
 static uint8_t hash_key[RSS_HASH_KEY_LENGTH] = {
-        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+
+    0x2c, 0xc6, 0x81, 0xd1, 0x5b, 0xdb, 0xf4, 0xf7, 0xfc, 0xa2,
+      0x83, 0x19, 0xdb, 0x1a, 0x3e, 0x94, 0x6b, 0x9e, 0x38, 0xd9,
+      0x2c, 0x9c, 0x03, 0xd1, 0xad, 0x99, 0x44, 0xa7, 0xd9, 0x56,
+      0x3d, 0x59, 0x06, 0x3c, 0x25, 0xf3, 0xfc, 0x1f, 0xdc, 0x2a,
+    // 0x6D, 0x5A, //0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
 };
 
 
@@ -45,25 +50,32 @@ namespace rrr
     DpdkTransport *DpdkTransport::transport_l = nullptr;
     std::unordered_map<uint64_t, TransportConnection *> DpdkTransport::out_connections;
 
+    
+
     std::unordered_map<uint64_t, rte_ring *> DpdkTransport::in_rings;
 
     RPCConfig *DpdkTransport::config_;
 
-    uint16_t rx_queue_ = 1, tx_queue_ = 1;
+    uint16_t DpdkTransport::rx_queue_ = 1;
+    uint16_t DpdkTransport::tx_queue_ = 1;
     struct rte_mempool **DpdkTransport::tx_mbuf_pool;
     struct rte_mempool **DpdkTransport::rx_mbuf_pool;
+    
 
     // Session Management rings for each thread;
     //    (Single consumer multiple producer)
     struct rte_ring **DpdkTransport::sm_rings;
 
     Counter DpdkTransport::u_port_counter(9000);
+    Counter DpdkTransport::s_port_counter(8700);
     Counter DpdkTransport::conn_counter(0);
+    std::unordered_map<uint64_t,uint64_t> DpdkTransport::accepted;
+    std::unordered_map<uint64_t,uint64_t> DpdkTransport::opn_conn;
     rrr::SpinLock pc_l;
     //  std::map<uint16_t,rrr::Connection*> connections_;
     SpinLock DpdkTransport::conn_th_lock;
     SpinLock DpdkTransport::init_lock;
-
+    rte_be32_t DpdkTransport::host_ip;
     rrr::UDPServer *DpdkTransport::us_server = nullptr;
     std::unordered_map<i32, USHWrapper *> DpdkTransport::handlers;
     int DpdkTransport::num_threads_;
@@ -250,6 +262,7 @@ namespace rrr
             {
                 addr = &src_addr_;
                 Log_info("Configuring local address %d, %s", net.id, ipv4_to_string(net.ip));
+                host_ip = net.ip;
             }
             else
                 addr = &dest_addr_;
@@ -270,7 +283,27 @@ namespace rrr
                                                 net.port));
         }
     }
+    std::string DpdkTransport::ConnToString(uint64_t conn_id)
+        {
+        uint64_t port = 0xFFFF;
+        port = port<<16;
+        uint64_t my_port = 0xFFFF;
+        uint64_t server_ip = 0xFFFFFFFF;
+        server_ip = server_ip<<32;
+       // std::cout<<"bitmask: "<<server_ip<<std::endl;
+        server_ip = (server_ip & conn_id);
+        server_ip = server_ip>>32;
+        my_port = conn_id & my_port;
+        
 
+        port = port & conn_id;
+        port = port>>16;
+        std::stringstream ret;
+
+        ret << ipv4_to_string(server_ip) << "::"<<std::to_string(ntohs(port)) <<  "::" << std::to_string(ntohs(my_port));
+        return ret.str();
+    }
+    
     int DpdkTransport::port_init(uint16_t port_id)
     {
         RPCConfig *conf = rrr::RPCConfig::get_config();
@@ -397,7 +430,7 @@ namespace rrr
             verify(sm_rings[i] != nullptr);
         }
         // for(int i=0;i<num_threads_;i++)
-        //     install_flow_rule(port_id,i);
+             install_flow_rule(port_id);
         return 0;
     }
 
@@ -489,6 +522,7 @@ namespace rrr
         max_size = burst_size;
         tx_bufs = new struct rte_mbuf *[burst_size];
         rx_bufs = new struct rte_mbuf *[burst_size];
+        conn_arr = new TransportConnection *[8];
         // conn_arr = new TransportConnection* [51];
         // for(int i=0; i <= 50; i++){
         //     conn_arr[i] = nullptr;
@@ -507,22 +541,42 @@ namespace rrr
     int DpdkTransport::isolate(uint8_t phy_port)
     {
         struct rte_flow_error *error = (struct rte_flow_error *)malloc(sizeof(struct rte_flow_error));
-        // int ret = rte_flow_isolate(phy_port, 1, error);
-        // if (ret < 0)
-        //     Log_error("Failed to enable flow isolation for port %d\n, message: %s", phy_port, error->message);
-        // else
-        //     Log_info("Flow isolation enabled for port %d\n", phy_port);
-        // return ret;
+        int ret = rte_flow_isolate(phy_port, 1, error);
+        if (ret < 0)
+            Log_error("Failed to enable flow isolation for port %d\n, message: %s", phy_port, error->message);
+        else
+            Log_info("Flow isolation enabled for port %d\n", phy_port);
+        return ret;
     }
 
-    void DpdkTransport::install_flow_rule(size_t phy_port, uint16_t q_id)
+    void DpdkTransport::install_flow_rule(size_t phy_port)
     {
 
         struct rte_flow_attr attr;
         struct rte_flow_item pattern[MAX_PATTERN_NUM];
         struct rte_flow_action action[MAX_ACTION_NUM];
         struct rte_flow *flow = NULL;
-        struct rte_flow_action_queue queue = {.index = q_id};
+
+
+        uint16_t *queues = new uint16_t[rx_queue_];
+
+        for( int i =0, j=0;i< rx_queue_; i++){
+            queues[j++] = i;
+            LOG_DEBUG("Queue %d - %d",j-1 , i);
+        }
+
+        struct rte_flow_action_rss rss_action  = {
+            .func = RTE_ETH_HASH_FUNCTION_TOEPLITZ,
+            .level = 0,
+            .types =  RTE_ETH_RSS_IPV4 | RTE_ETH_RSS_NONFRAG_IPV4_UDP,
+            .key_len = RSS_HASH_KEY_LENGTH,
+            .queue_num = rx_queue_,
+            .key = hash_key,
+            .queue = queues,
+            
+
+        };
+
         struct rte_flow_item_ipv4 ip_spec;
         struct rte_flow_item_ipv4 ip_mask;
         struct rte_flow_item_eth eth_spec;
@@ -548,8 +602,8 @@ namespace rrr
          * create the action sequence.
          * one action only,  move packet to queue
          */
-        action[0].type = RTE_FLOW_ACTION_TYPE_QUEUE;
-        action[0].conf = &queue;
+        action[0].type = RTE_FLOW_ACTION_TYPE_RSS;
+        action[0].conf = &rss_action;
         action[1].type = RTE_FLOW_ACTION_TYPE_END;
 
         /*
@@ -579,7 +633,7 @@ namespace rrr
         // ip_spec.hdr.src_addr = 0;
         // ip_mask.hdr.src_addr = RTE_BE32(0);
 
-        Log_info("IP Address to be queued %s at queue: %d", ipv4_to_string(ip_spec.hdr.dst_addr).c_str(), q_id);
+        Log_info("IP Address to be queued %s", ipv4_to_string(ip_spec.hdr.dst_addr).c_str());
 
         // ip_mask.hdr.dst_addr =
 
@@ -590,7 +644,7 @@ namespace rrr
         memset(&udp_mask, 0, sizeof(struct rte_flow_item_udp));
         memset(&udp_spec, 0, sizeof(struct rte_flow_item_udp));
         udp_spec.hdr.dst_port = RTE_BE16(8501);
-        udp_mask.hdr.dst_port = RTE_BE16(0xffff);
+        udp_mask.hdr.dst_port = RTE_BE16(0x0);
         /* TODO: Change this to support leader change */
         udp_spec.hdr.src_port = 0;
         udp_mask.hdr.src_port = RTE_BE16(0);

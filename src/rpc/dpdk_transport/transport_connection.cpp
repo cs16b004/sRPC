@@ -16,23 +16,53 @@ rte_mbuf* TransportConnection::get_new_pkt(){
 
     // rte_mbuf* ret = (rte_mbuf*) *tx_bufs; 
 
-   rte_mbuf* ret = rte_pktmbuf_alloc(pkt_mempool);
+   rte_mbuf* ret = rte_pktmbuf_alloc(all_pools[i%nr_inrings]);
     while(ret == NULL){
         i++;
+        ret = rte_pktmbuf_alloc(all_pools[i%nr_inrings]);
         if(i > 1000*1000){
-            Log_warn("Waiting to get a new pkt from connection %lld",conn_id);
+            Log_warn("Waiting to get a new pkt from connection %s",to_string().c_str());
              i=0;
         }
        
      }
-
-    
-    
     make_pkt_header(ret);
    // verify(ret != nullptr);
     return ret;
 
 }
+
+rte_mbuf* TransportConnection::get_new_pkt(uint16_t mpool_idx){
+    int i=0;
+    // void** tx_bufs = (void**)new rte_mbuf*;
+    // *tx_bufs = new rte_mbuf;
+    // while(rte_ring_dequeue(available_bufring, tx_bufs) < 0){
+    //     i++;
+    //     if(i > 1000*1000){
+    //         Log_warn("Waiting to get a new pkt from connection %lld",conn_id);
+    //          i=0;
+    //     }
+       
+    //  }
+
+    // rte_mbuf* ret = (rte_mbuf*) *tx_bufs; 
+
+   rte_mbuf* ret = rte_pktmbuf_alloc(all_pools[mpool_idx]);
+    while(ret == NULL){
+        i++;
+        ret = rte_pktmbuf_alloc(all_pools[mpool_idx]);
+        if(i > 1000*1000){
+            Log_warn("Waiting to get a new pkt from connection %s", to_string().c_str());
+             i=0;
+        }
+       
+     }
+    make_pkt_header(ret);
+   // verify(ret != nullptr);
+    return ret;
+
+}
+
 int TransportConnection::assign_availring(){
     rrr::RPCConfig* conf = RPCConfig::get_config();
      char buf_ring_name[128];
@@ -55,17 +85,24 @@ int TransportConnection::assign_availring(){
 int TransportConnection::assign_bufring(){
     rrr::RPCConfig* conf = RPCConfig::get_config();
      char buf_ring_name[128];
-    sprintf(buf_ring_name, "BF_%lu",conn_id);
+
+     for(int i=0;i<nr_outrings;i++){
+        sprintf(buf_ring_name, "BF_%lu_%d",conn_id, i);
                 // bigger size queue;
-         out_bufring = rte_ring_create(buf_ring_name,
+         out_bufring[i] = rte_ring_create(buf_ring_name,
+                                                    conf->rte_ring_size,
+                                                    rte_socket_id(), 
+                                                    RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
+
+     }
+         
+         for(int i=0;i<nr_inrings;i++){
+            sprintf(buf_ring_name, "IBF_%lu_%d",conn_id, i);                
+            in_bufring[i] = rte_ring_create(buf_ring_name,
                                                     conf->rte_ring_size,
                                                     rte_socket_id(), 
                                                     RING_F_SC_DEQ | RING_F_SP_ENQ);
-         sprintf(buf_ring_name, "IBF_%lu",conn_id);                   
-         in_bufring = rte_ring_create(buf_ring_name,
-                                                    conf->rte_ring_size,
-                                                    rte_socket_id(), 
-                                                    RING_F_SC_DEQ | RING_F_MP_RTS_ENQ);
+         }
         if(out_bufring && in_bufring)
             return 0;
         else{
@@ -124,7 +161,7 @@ void TransportConnection::make_pkt_header(rte_mbuf* pkt){
     pkt_offset += sizeof(rte_ipv4_hdr);
     rte_udp_hdr* udp_hdr = reinterpret_cast<rte_udp_hdr*>(pkt_buf + pkt_offset);
    
-    gen_udp_header(udp_hdr, src_addr.port, out_addr.port , 0);
+    gen_udp_header(udp_hdr, udp_port, out_addr.port , 0);
 
     pkt_offset += sizeof(rte_udp_hdr);
     pkt->l2_len = sizeof(struct rte_ether_hdr);

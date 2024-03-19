@@ -211,6 +211,7 @@ class UDPConnection: public ServerConnection {
     rte_mbuf* pkt_array[64];
     rte_mbuf* reply_arr[32];
     uint32_t nb_pkts;
+    uint16_t nr_inrings = 0;
     uint64_t times=0;
     uint64_t timestamps[32];
     std::unordered_map<i32, std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>> us_handlers_;
@@ -218,7 +219,7 @@ class UDPConnection: public ServerConnection {
     uint64_t reply_idx=0;
     //test call_back
     std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)> cb;
-    
+    i64 xid;
     void close();
     uint64_t connId;
 

@@ -7,6 +7,7 @@
 #include <string>
 #include <bitset>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "config.hpp"
 #include "transport_connection.hpp"
@@ -59,7 +60,11 @@ namespace rrr
             // swap_udp_addresses((req->m.get_mbuf()));
         }
     };
-
+    struct cnn_id{
+        uint64_t server_ip : 32;
+        uint64_t server_port: 16;
+        uint64_t local_port : 16;
+    };
     // Pakcet Type
     
     class DpdkTransport
@@ -70,6 +75,7 @@ namespace rrr
 
     private:
         static DpdkTransport *transport_l;
+        static rte_be32_t host_ip;
 
         static std::unordered_map<uint64_t, TransportConnection *> out_connections;
 
@@ -81,15 +87,18 @@ namespace rrr
 
         static int num_threads_;
 
-        uint16_t rx_queue_ = 1, tx_queue_ = 1;
+        static uint16_t rx_queue_, tx_queue_ ;
         static struct rte_mempool **tx_mbuf_pool;
         static struct rte_mempool **rx_mbuf_pool;
+        static std::unordered_map<uint64_t, uint64_t> accepted;
+        static std::unordered_map<uint64_t, uint64_t> opn_conn;
         
         // Session Management rings for each thread;
         //    (Single consumer multiple producer)
         static struct rte_ring **sm_rings;
 
         static Counter u_port_counter;
+        static Counter s_port_counter;
         static Counter conn_counter;
         rrr::SpinLock pc_l;
         //  std::map<uint16_t,rrr::Connection*> connections_;
@@ -117,7 +126,7 @@ namespace rrr
         int port_init(uint16_t port_id);
         int port_reset(uint16_t port_id);
         int port_close(uint16_t port_id);
-        static void install_flow_rule(size_t phy_port, uint16_t q_id);
+        static void install_flow_rule(size_t phy_port);
 
         static int ev_loop(void *arg);
         static UDPServer *us_server;
@@ -165,6 +174,7 @@ namespace rrr
         uint16_t get_open_port();
         void shutdown();
         void trigger_shutdown();
+        static std::string ConnToString(uint64_t conn_id);
 
         ~DpdkTransport()
         {
@@ -193,7 +203,10 @@ namespace rrr
         bool shutdown = false;
         SpinLock conn_lock;
         uint64_t sent_pkts  =0;
-        uint64_t rx_pkts=0;
+        uint64_t rx_pkts    =0;
+        uint64_t dropped_packets=0;
+        uint16_t chosen_thread=0;
+        TransportConnection **conn_arr;
         // Dedicated Connections
         std::unordered_map<uint64_t, TransportConnection *> out_connections;
         //TransportConnection** conn_arr;
@@ -218,9 +231,10 @@ namespace rrr
 
         ~d_thread_ctx()
         {
+            delete[]conn_arr;
         }
     };
-
+    
     /**
      * Helper function to process Session Management (SM) requests from other threads;
      * \param sm_ring,

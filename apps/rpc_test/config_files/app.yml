@@ -1,12 +1,14 @@
 benchmarks:
-  input_size: 64 #input size in bytes
-  output_size: 64
-  client_poll_threads: 2
-  client_connections: 1
-  client_threads: 1
-  server_duration: 15 #server_duration in seconds
-  client_duration: 160
+  input_size: 1346 #input size in bytes
+  output_size: 32
+  client_poll_threads: 8
+  client_connections: 8
+  client_threads: 8
+  rate: 2000000
+  server_duration: 70 #server_duration in seconds
+  client_duration: 70
   client_batch_size: 32
   server_address: "172.19.0.121:8501"
   server_poll_threads: 1
-  core_affinity: [42, 64]
+  experiment: "mc_tput"
+  core_affinity: [50, 90]

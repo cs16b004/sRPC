@@ -60,10 +60,10 @@ class Request {
              // verify(dst !=nullptr);
               dst+=offset;
               
-              uint16_t magic = htons(0xfeed); 
-              rte_memcpy(dst,&magic,sizeof(uint16_t));
-              dst += sizeof(uint16_t);
-              offset += sizeof(uint16_t); 
+              // uint16_t magic = 0xfeed; 
+              // rte_memcpy(dst,&magic,sizeof(uint16_t));
+              // dst += sizeof(uint16_t);
+              // offset += sizeof(uint16_t); 
               
               uint8_t pkt_type = 0x09;
               rte_memcpy(dst,&pkt_type,1);
@@ -83,10 +83,10 @@ class Request {
               udp_hdr = reinterpret_cast<rte_udp_hdr*>(dst + udp_hdr_offset);
              // verify(dst !=nullptr);
               dst+=offset;
-              uint16_t magic = htons(0xfeed); 
-              rte_memcpy(dst,&magic,sizeof(uint16_t));
-              dst += sizeof(uint16_t);
-              offset += sizeof(uint16_t); 
+              // uint16_t magic = 0xfeed; 
+              // rte_memcpy(dst,&magic,sizeof(uint16_t));
+              // dst += sizeof(uint16_t);
+              // offset += sizeof(uint16_t); 
               
               uint8_t pkt_type = 0x09;
               rte_memcpy(dst,&pkt_type,1);
@@ -110,8 +110,9 @@ class Request {
               dst+=offset;
               
              
-              
+              // offset+=sizeof(uint16_t);
               offset+=1;
+
               r_offset+=1;
             }
             size_t read(void *p, size_t n){
@@ -165,11 +166,13 @@ class Request {
             void set_pkt_type_sm(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               dst+= data_offset;
+              //dst+= sizeof(uint16_t);
               uint8_t pkt_type = 0x07;
               rte_memcpy(dst,&pkt_type,1);
             }
             std::string print_request(){
                char* req = new char[1024];
+               
                uint8_t* pkt_data = rte_pktmbuf_mtod(req_data, uint8_t*);
                int j=0;
                for(int i=  data_offset;
@@ -183,27 +186,36 @@ class Request {
                     } 
                 }
                 req[j] = 0;
-                return std::string(req);
+                std::stringstream ret;
+                ret << "\nFrom: "<<ipv4_to_string(ipv4_hdr->src_addr)<<"::"<<std::to_string(ntohs(udp_hdr->src_port))
+                    <<"\n"<<"To: "<<ipv4_to_string(ipv4_hdr->dst_addr)<<"::"<<std::to_string(ntohs(udp_hdr->dst_port))
+                   ;// <<"\n"<<std::string(req)<<std::endl;
+
+                
+                return ret.str();
             }
             void* get_offset(){
               return rte_pktmbuf_mtod_offset(req_data, void*, offset);
             }
             void set_pkt_type_bg(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
+
               dst += data_offset;
+              //dst += sizeof(uint16_t);
              
               *dst = 0xa;
             }
             void set_pkt_type_st(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               dst += data_offset;
+              //dst += sizeof(uint16_t);
              
               *dst = 0x9;
             }
             bool is_type_st(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
               dst += data_offset;
-              
+              //dst += sizeof(uint16_t);
               return (*dst == 0x09);
             }
           ~TransportMarshal(){

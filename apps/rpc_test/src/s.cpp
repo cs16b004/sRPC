@@ -24,15 +24,16 @@ int main(int argc, char **argv) {
 
     Benchmarks bm(appConf);
     bm.create_server();
-    bm.observe_server();
-
-    bm.stop_server_loop();
-    
+    bm.observe_server();    
     #ifdef DPDK
          rrr::DpdkTransport::get_transport()->trigger_shutdown();
-         rrr::DpdkTransport::get_transport()->shutdown();
+         
     #endif
     bm.stop_server();
     
+    #ifdef DPDK
+    rrr::DpdkTransport::get_transport()->shutdown();
+    #endif
+    bm.stop_server_loop();
     return 0;
 }

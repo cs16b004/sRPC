@@ -61,23 +61,23 @@ namespace rrr{
         
         public:
 
-            TransportConnection(uint16_t num_dpdk_threads){
-                sconn = new UDPConnection*[num_dpdk_threads];
-                for( int i=0;i<num_dpdk_threads;i++)
-                    sconn[i] = nullptr;
-            }
+            
             uint64_t conn_id;
             int in_fd_;
             int wfd;
             NetAddress out_addr;
             NetAddress src_addr;
             rte_mempool* pkt_mempool;
-            struct rte_ring* out_bufring; // Should be allocated by assigned dpdk thread
-            struct rte_ring* in_bufring;
+            rte_mempool** all_pools;
+            struct rte_ring** out_bufring; // Should be allocated by assigned dpdk thread
+            struct rte_ring** in_bufring;
             struct rte_ring* available_bufring;
             struct rte_mbuf** sm_msg_buffers;
             struct rte_mbuf** out_msg_buffers; //    Can be allocated earlier;
+            uint16_t nr_inrings;
+            uint16_t nr_outrings;
             uint16_t burst_size = 1;
+            uint16_t chosen_thread=0;
             Counter out_msg_counter;
             size_t out_max_size;
             //My port nbumber ;
@@ -85,11 +85,28 @@ namespace rrr{
             bool connected_ = false;
             UDPConnection** sconn;
             int buf_alloc(rte_mempool* mempool,uint16_t max_len);
+            
             void make_headers_and_produce();
             void make_pkt_header(rte_mbuf* pkt);
             int assign_bufring();
             int assign_availring();
             rte_mbuf* get_new_pkt();
+            rte_mbuf* get_new_pkt(uint16_t mempool_idx);
+            TransportConnection(uint16_t num_dpdk_threads){
+                sconn = new UDPConnection*[num_dpdk_threads];
+                in_bufring = new rte_ring*[num_dpdk_threads];  
+                out_bufring = new rte_ring*[num_dpdk_threads];
+                
+                nr_inrings = num_dpdk_threads;
+                nr_outrings = num_dpdk_threads;
+                for( int i=0;i<num_dpdk_threads;i++)
+                    sconn[i] = nullptr, in_bufring[i] = nullptr, out_bufring[i]=nullptr;
+            }
+            std::string to_string(){
+                std::string ret = "";
+                ret += out_addr.getAddr() + "::" + std::to_string((src_addr.port)); 
+                return ret;
+            }
 
     };
 }
