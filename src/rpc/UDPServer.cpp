@@ -120,7 +120,7 @@ namespace rrr
 
         current_reply.write_book_mark(&reply_size, sizeof(i32));
 #ifdef LATENCY
-        current_reply << timestamps[reply_idx % 32];
+        current_reply << (timestamps[reply_idx % 32]);
 #endif
         current_reply.format_header();
         int retry = 0;

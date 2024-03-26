@@ -72,9 +72,10 @@ namespace rrr
         
         if (accepted.find(conn_id) != accepted.end())
         {
-            LOG_DEBUG("Already Accepted %s !", ConnToString(conn_id).c_str())
-            delete oconn;
+            LOG_DEBUG("Already Accepted %s !!", ConnToString(conn_id).c_str());
+           
             send_ack(out_connections.find(accepted.find(conn_id)->second)->second);
+            delete oconn;
             conn_th_lock.unlock();
             return;
         }
@@ -91,8 +92,9 @@ namespace rrr
         {
             n_conn[i] = new UDPConnection(us_server, oconn->conn_id);
         }
-        out_connections.insert(std::make_pair(oconn->conn_id, oconn));
-
+        
+        out_connections[oconn->conn_id]  = oconn;
+       
         us_server->sconns_l_.lock();
         // Copies of Server Connection for parallely running the rpc;
         for (int i = 0; i <= num_threads_; i++)
@@ -468,7 +470,7 @@ namespace rrr
                         // background
                         // rte_pktmbuf_free(rx_buffers[i]);
                         int ret = 0;
-                        while (rte_ring_sp_enqueue(out_connections.find(conn_id)->second->in_bufring[ctx->thread_id], (void *)rx_buffers[i]) < 0)
+                        while (rte_ring_sp_enqueue(ft->second->in_bufring[ctx->thread_id], (void *)rx_buffers[i]) < 0)
                         {
                             ret++;
                             if (ret > 1000 * 1000)
