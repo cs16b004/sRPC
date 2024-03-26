@@ -61,6 +61,7 @@ void Benchmarks::create_proxies(){
             rrr::TCPClient* client = new rrr::TCPClient((rrr::PollMgr*)pollmgr_->ref_copy());
             #endif
             client->connect(conf->server_address_.c_str());
+           // sleep(1);
             service_proxies[i] = new BenchmarkProxy(input_size,client);
         }
        
@@ -101,16 +102,16 @@ void* Benchmarks::launch_client_thread(void *arg){
         csvFile << "Sent, Rate\n";
         csvFile.close();
     }
-     std::ofstream csvFile(data_file_name, std::ios::app); // Open file in append mode
+     std::ofstream csvFile(data_file_name); // Open file in append mode
     if (!csvFile.is_open()) {
         rrr::Log::error( "Failed to open CSV file, %s", data_file_name);
         exit(EXIT_FAILURE);
     }
     while(!ct->stop){
          
-        while (((last_sent + cycle_wait) >= rte_get_timer_cycles())) {
-                ;
-        }
+        // while (((last_sent + cycle_wait) >= rte_get_timer_cycles())) {
+        //         ;
+        // }
        
            (pr->add_bench_async());
            c++;
@@ -120,7 +121,7 @@ void* Benchmarks::launch_client_thread(void *arg){
             csvFile << c <<", " << c/t.elapsed() <<std::endl;
             
            }
-     last_sent = rte_get_timer_cycles();
+     //last_sent = rte_get_timer_cycles();
         //fg.wait_all();
          
         #ifdef DPDK
@@ -217,6 +218,45 @@ void Benchmarks::set_cpu_affinity(){
    }
 
 }
+
+void Benchmarks::set_cpu_affinity(pthread_t *th){
+
+ 
+    rrr::Log::debug(__LINE__, __FILE__, "Setting CPU affinity for thread %u", *(th));
+    cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        int core_id;
+        for(core_id=0; core_id< affinity_mask.size(); core_id++){
+            if (affinity_mask.test(core_id)){
+               // rrr::Log::debug(__LINE__, __FILE__,"Setting cpu affinity for thread: %d",i);
+                CPU_SET(core_id, &cpuset);
+            }
+        }
+
+        int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+        assert((core_id <= num_cores));
+        assert(th != nullptr);
+        int err = pthread_setaffinity_np(*(th), sizeof(cpu_set_t), &cpuset);
+        if (err < 0) {
+           // rrr::Log::debug(__LINE__, __FILE__,"Couldn't set affinity of thread %d to core %d",i, core_id);
+            return ;
+        }
+
+        while(1){
+      //  Log_info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n thread cpu %d\n\n>>>>>>>>>>>>>>>>>>>>>>\n",sched_getcpu());
+        if(sched_getcpu() >= conf->core_affinity_mask_[0]
+                || sched_getcpu() <= conf->core_affinity_mask_[1] ){
+            break;
+        }else{
+            Log_warn("Waiting for scheduled on right node");
+            usleep(5000);
+        }
+    }
+
+   
+
+}
+
 void Benchmarks::stop_client(){
         
        for(int i=0; i< conf->num_client_threads_; i++){

@@ -40,6 +40,7 @@ namespace rrr
     class UDPClient;
     class UDPServer;
     class ServerConnection;
+    class Pollable;
     void swap_udp_addresses(rte_mbuf *pkt);
     struct USHWrapper
     {
@@ -127,7 +128,7 @@ namespace rrr
         int port_reset(uint16_t port_id);
         int port_close(uint16_t port_id);
         static void install_flow_rule(size_t phy_port);
-
+     
         static int ev_loop(void *arg);
         static UDPServer *us_server;
 
@@ -153,11 +154,14 @@ namespace rrr
         static void process_requests(d_thread_ctx *ctx);
         static void do_transmit(d_thread_ctx *ctx);
         static void process_sm_req(d_thread_ctx *ctx);
+        static void do_poll_job(d_thread_ctx* ctx);
+        Counter poll_q_c_;
         // static void
         static DpdkTransport *get_transport();
         static void reg_us_server(UDPServer *ser);
         static void reg_us_handler(i32 id, std::function<void(Request<rrr::TransportMarshal> *, ServerConnection *)>);
         static void send_ack(TransportConnection *oconn);
+        void add_poll_job(Pollable* poll);
         // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
 
         // Send a connec request to server at addr_str
@@ -205,10 +209,16 @@ namespace rrr
         uint64_t sent_pkts  =0;
         uint64_t rx_pkts    =0;
         uint64_t dropped_packets=0;
-        uint16_t chosen_thread=0;
+        rte_ring* poll_req_q;
+        Pollable** poll_reqs;
+        
         TransportConnection **conn_arr;
         // Dedicated Connections
         std::unordered_map<uint64_t, TransportConnection *> out_connections;
+        std::unordered_set<TransportConnection*> t_conns;
+        // Dedicated poll jobs
+        std::mutex poll_l_;
+        std::unordered_set<Pollable*> poll_jobs;
         //TransportConnection** conn_arr;
         Counter conn_counter;
         uint16_t max_conn=0;
@@ -228,10 +238,12 @@ namespace rrr
                   int q_id, int burst_size);
 
         int buf_alloc(struct rte_mempool *mbuf_pool);
+        // void add_poll_job(Pollable* pj);
 
         ~d_thread_ctx()
         {
             delete[]conn_arr;
+            delete[] poll_reqs;
         }
     };
     
@@ -242,7 +254,7 @@ namespace rrr
      * \param mempool,
      * the  mempool to use allocate buffers etc.
      */
-    uint16_t process_sm_requests(rte_ring *sm_ring, rte_mempool *mempool);
+    
     void inline swap_udp_addresses(rte_mbuf *pkt)
     {
         // Extract Ethernet header

@@ -189,7 +189,7 @@ class Request {
                 std::stringstream ret;
                 ret << "\nFrom: "<<ipv4_to_string(ipv4_hdr->src_addr)<<"::"<<std::to_string(ntohs(udp_hdr->src_port))
                     <<"\n"<<"To: "<<ipv4_to_string(ipv4_hdr->dst_addr)<<"::"<<std::to_string(ntohs(udp_hdr->dst_port))
-                   ;// <<"\n"<<std::string(req)<<std::endl;
+                    <<"\n"<<std::string(req)<<std::endl;
 
                 
                 return ret.str();

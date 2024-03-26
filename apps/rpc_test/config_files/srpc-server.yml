@@ -46,7 +46,7 @@ network:
       port: 8501
 
 dpdk:
-  num_threads: 8
+  num_threads: 16
   pkt_burst_size: 32
-  option: ./server -a e3:00.0 -l 32-42
+  option: ./server -a e3:00.0 -l 32-48
 

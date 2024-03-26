@@ -10,16 +10,11 @@ int main(int argc, char **argv) {
 
     AppConfig::create_config(argc, argv);
     rrr::RPCConfig* conf = rrr::RPCConfig::get_config();
-    while(1){
-      //  Log_info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n thread cpu %d\n\n>>>>>>>>>>>>>>>>>>>>>>\n",sched_getcpu());
-        if(sched_getcpu() >= (conf->cpu_info_.numa)*(conf->cpu_info_.core_per_numa)
-                || sched_getcpu() <= (conf->cpu_info_.numa +1)*(conf->cpu_info_.core_per_numa) ){
-            break;
-        }else{
-            Log_warn("Waiting for scheduled on right node");
-            sleep(1);
-        }
-    }
+
+   
+    
+
+    
     
     #ifdef DPDK
      rrr::DpdkTransport::create_transport(conf);
@@ -32,6 +27,8 @@ int main(int argc, char **argv) {
     LOG_DEBUG("Tranport at %p", rrr::DpdkTransport::get_transport());
 
     Benchmarks bm(AppConfig::get_config());
+     pthread_t curr_th = pthread_self();
+     bm.set_cpu_affinity(&curr_th);
 
   
     bm.create_proxies();

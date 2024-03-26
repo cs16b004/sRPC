@@ -28,6 +28,7 @@ namespace rrr{
     class DPDKTransport;
     class UDPConnection;
     class UDPServer;
+    class UDPClient;
     struct NetAddress {
         uint8_t id;
 
@@ -58,6 +59,7 @@ namespace rrr{
         friend class UDPConnection;
         friend class ServerConnection;
         friend class UDPServer;
+        
         
         public:
 

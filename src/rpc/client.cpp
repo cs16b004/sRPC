@@ -101,8 +101,8 @@ namespace rrr
 
         conn = transport_->get_conn(conn_id);
         // conn->set_us_conn()
-
-        pollmgr_->add(this);
+        transport_->add_poll_job(this);
+       // pollmgr_->add(this);
 
         return 0;
     }

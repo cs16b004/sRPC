@@ -15,17 +15,22 @@
 #define RSS_HASH_KEY_LENGTH 40
 static uint8_t hash_key[RSS_HASH_KEY_LENGTH] = {
 
-    0x2c, 0xc6, 0x81, 0xd1, 0x5b, 0xdb, 0xf4, 0xf7, 0xfc, 0xa2,
-      0x83, 0x19, 0xdb, 0x1a, 0x3e, 0x94, 0x6b, 0x9e, 0x38, 0xd9,
+        //  0xa8, 0x85, 0x9e, 0x1a, 0x18, 0xd, 0xf6, 0xc3, 
+        //  0x89, 0x55, 0xb6, 0xf0, 0x68, 0x1c, 0x6f, 0x6d,
+        //  0x7c, 0xae, 0x3c, 0x19, 0x3b, 0x8b, 0x55, 0xe7, 
+        //  0xd5, 0x1c, 0x55, 0x7d, 0xea, 0xc3, 0xea, 0x8a, 
+        //  0x54, 0x5d, 0x25, 0x6c, 0xd7, 0x9f, 0xa0, 0x2a
+
+      0x2c, 0xc6, 0x6d, 0xd1, 0x5b, 0xdb, 0xf4, 0xf7, 0xfc, 0xa2,
+      0x83, 0x19, 0xdb, 0x5a, 0x3e, 0x94, 0x6b, 0x9e, 0x38, 0xd9,
       0x2c, 0x9c, 0x03, 0xd1, 0xad, 0x99, 0x44, 0xa7, 0xd9, 0x56,
       0x3d, 0x59, 0x06, 0x3c, 0x25, 0xf3, 0xfc, 0x1f, 0xdc, 0x2a,
-    // 0x6D, 0x5A, //0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-        // 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+      //0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+    //      0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+    //     0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+    //     0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+    //     0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
 };
-
 
 namespace rrr
 {
@@ -69,6 +74,7 @@ namespace rrr
     Counter DpdkTransport::u_port_counter(9000);
     Counter DpdkTransport::s_port_counter(8700);
     Counter DpdkTransport::conn_counter(0);
+    
     std::unordered_map<uint64_t,uint64_t> DpdkTransport::accepted;
     std::unordered_map<uint64_t,uint64_t> DpdkTransport::opn_conn;
     rrr::SpinLock pc_l;
@@ -246,7 +252,7 @@ namespace rrr
         {
             int retval = rte_eal_remote_launch(ev_loop, thread_ctx_arr[lcore % num_threads_], lcore);
             if (retval < 0)
-                rte_exit(EXIT_FAILURE, "Couldn't launch core %d\n", lcore % total_lcores);
+                rte_exit(EXIT_FAILURE, "Couldnt launch core %d\n", lcore % total_lcores);
         }
         initiated = true;
     }
@@ -358,7 +364,7 @@ namespace rrr
         // rxconf.
         /**Configure nic port with offloads like CKSUM/SEGMENTATION and other features*/
 
-        retval = rte_eth_dev_configure(port_id, rx_queue_, tx_queue_, &port_conf);
+        retval = rte_eth_dev_configure(port_id, rx_queue_+1, tx_queue_+1, &port_conf);
 
         if (retval != 0)
         {
@@ -378,11 +384,22 @@ namespace rrr
         rxconf.rx_thresh.wthresh = DPDK_RX_WRITEBACK_THRESH;
         // Setup rx_queues each thread will have its own mbuf pool to avoid
         // synchronisation while allocating space for packets or rings
-        for (q = 0; q < rx_queue_; q++)
+        //setup 0th q
+            retval = rte_eth_rx_queue_setup(port_id, 0, nb_rxd,
+                                            rte_eth_dev_socket_id(port_id),
+                                            &rxconf, rx_mbuf_pool[0]);
+                            
+            if (retval < 0)
+            {
+                Log_error("Error during rx queue %d setup (port %u) info: %s",
+                          0, port_id, strerror(-retval));
+                return retval;
+            }
+        for (q = 1; q <= rx_queue_; q++)
         {
             retval = rte_eth_rx_queue_setup(port_id, q, nb_rxd,
                                             rte_eth_dev_socket_id(port_id),
-                                            &rxconf, rx_mbuf_pool[q]);
+                                            &rxconf, rx_mbuf_pool[q-1]);
             if (retval < 0)
             {
                 Log_error("Error during rx queue %d setup (port %u) info: %s",
@@ -391,7 +408,16 @@ namespace rrr
             }
         }
         // Setting tx_queue for each thread;
-        for (q = 0; q < tx_queue_; q++)
+        retval = rte_eth_tx_queue_setup(port_id, 0, nb_txd,
+                                            rte_eth_dev_socket_id(port_id),
+                                            &txconf);
+            if (retval < 0)
+            {
+                Log_error("Error during tx queue %d setup (port %u) info: %s",
+                          0, port_id, strerror(-retval));
+                return retval;
+            }
+        for (q = 1; q <= tx_queue_; q++)
         {
             retval = rte_eth_tx_queue_setup(port_id, q, nb_txd,
                                             rte_eth_dev_socket_id(port_id),
@@ -417,11 +443,11 @@ namespace rrr
 
             LOG_DEBUG("Create rx thread %d info on port %d and queue %d",
                       i, port_id, i);
-            thread_ctx_arr[i]->init(this, i, port_id, i, RPCConfig::get_config()->burst_size);
+            thread_ctx_arr[i]->init(this, i, port_id, i+1, RPCConfig::get_config()->burst_size);
             thread_ctx_arr[i]->mem_pool = rx_mbuf_pool[i];
             char sm_ring_name[128];
             sprintf(sm_ring_name, "sRPC_SMRING_CTX_%d", i);
-            // SM ring doesn't need size;
+            // SM ring doesnt need size;
             thread_ctx_arr[i]->sm_ring = rte_ring_create(sm_ring_name,
                                                          (conf->rte_ring_size) / 32,
                                                          rte_socket_id(),
@@ -522,6 +548,12 @@ namespace rrr
         max_size = burst_size;
         tx_bufs = new struct rte_mbuf *[burst_size];
         rx_bufs = new struct rte_mbuf *[burst_size];
+        poll_reqs = new Pollable*[8];
+        char poll_q_name[50];
+        sprintf(poll_q_name,"poll_req_q_%d",thread_id);
+        poll_req_q = rte_ring_create(poll_q_name, 8, rte_socket_id(), RING_F_SC_DEQ | RING_F_MP_HTS_ENQ);
+        if(poll_req_q == nullptr)
+            rte_panic("Cannot create poll q %s", poll_q_name);
         conn_arr = new TransportConnection *[8];
         // conn_arr = new TransportConnection* [51];
         // for(int i=0; i <= 50; i++){
@@ -548,6 +580,16 @@ namespace rrr
             Log_info("Flow isolation enabled for port %d\n", phy_port);
         return ret;
     }
+    void DpdkTransport::add_poll_job(Pollable * pj){
+      uint16_t th =  poll_q_c_.next() % num_threads_;
+      uint32_t retry=0;
+      while(rte_ring_mp_enqueue (thread_ctx_arr[th]->poll_req_q, (void*) pj)< 0){
+         retry++;
+         if(retry > 1000* 1000)
+            Log_warn("Not able to add poll  job to thread %d",th), retry=0;
+        }
+      LOG_DEBUG("Added Poll job %p to %d",pj, th);
+    }
 
     void DpdkTransport::install_flow_rule(size_t phy_port)
     {
@@ -560,13 +602,13 @@ namespace rrr
 
         uint16_t *queues = new uint16_t[rx_queue_];
 
-        for( int i =0, j=0;i< rx_queue_; i++){
+        for( int i =1, j=0;i<=rx_queue_; i++){
             queues[j++] = i;
             LOG_DEBUG("Queue %d - %d",j-1 , i);
         }
 
         struct rte_flow_action_rss rss_action  = {
-            .func = RTE_ETH_HASH_FUNCTION_TOEPLITZ,
+            .func = RTE_ETH_HASH_FUNCTION_DEFAULT,
             .level = 0,
             .types =  RTE_ETH_RSS_IPV4 | RTE_ETH_RSS_NONFRAG_IPV4_UDP,
             .key_len = RSS_HASH_KEY_LENGTH,
@@ -643,8 +685,8 @@ namespace rrr
 
         memset(&udp_mask, 0, sizeof(struct rte_flow_item_udp));
         memset(&udp_spec, 0, sizeof(struct rte_flow_item_udp));
-        udp_spec.hdr.dst_port = RTE_BE16(8501);
-        udp_mask.hdr.dst_port = RTE_BE16(0x0);
+        udp_spec.hdr.dst_port = RTE_BE16(0);
+        udp_mask.hdr.dst_port = RTE_BE16(0);
         /* TODO: Change this to support leader change */
         udp_spec.hdr.src_port = 0;
         udp_mask.hdr.src_port = RTE_BE16(0);
@@ -653,7 +695,7 @@ namespace rrr
         pattern[2].spec = &udp_spec;
         pattern[2].mask = &udp_mask;
         /* the final level must be always type end */
-        pattern[2].type = RTE_FLOW_ITEM_TYPE_END;
+        pattern[3].type = RTE_FLOW_ITEM_TYPE_END;
         res = rte_flow_validate(phy_port, &attr, pattern, action, &error);
 
         if (!res)

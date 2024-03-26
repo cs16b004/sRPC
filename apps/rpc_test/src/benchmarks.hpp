@@ -133,6 +133,7 @@ class Benchmarks{
     void create_proxies();
     void create_client_threads();
     void set_cpu_affinity();
+    void set_cpu_affinity(pthread_t* th);
     void observe_client();
     void stop_client();
     double diff_timespec(const struct timespec &time1, const struct timespec &time0) {

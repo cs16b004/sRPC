@@ -23,6 +23,9 @@ int main(int argc, char **argv) {
     #endif
 
     Benchmarks bm(appConf);
+    pthread_t curr_th = pthread_self();
+     bm.set_cpu_affinity(&curr_th);
+     
     bm.create_server();
     bm.observe_server();    
     #ifdef DPDK

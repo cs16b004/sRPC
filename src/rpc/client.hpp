@@ -26,7 +26,7 @@ class Reporter;
 class Future;
 class Client;
 class TCPClient;
-class UDPClient;
+//class UDPClient;
 struct FutureAttr {
     FutureAttr(const std::function<void(Future*)>& cb = std::function<void(Future*)>()) : callback(cb) { }
 
