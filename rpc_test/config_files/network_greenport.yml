@@ -26,7 +26,7 @@ network:
   - catskill:
       id: 4
       mac: e4:1d:2d:f2:9e:5c
-      ip: 172.19.0.121
+      ip: 172.19.0.123
       port: 8501
 
   - greenport:
@@ -37,5 +37,5 @@ network:
   - brooklyn:
       id: 6
       mac: e0:07:1b:82:ed:74
-      ip: 172.19.0.123
+      ip: 172.19.0.121
       port: 8501

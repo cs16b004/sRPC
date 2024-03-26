@@ -5,21 +5,21 @@ INC=-I.. -I. -I../rpc -I../base -I../rpc/dpdk_transport
 LIB_DPDK=$(shell pkg-config --libs libdpdk) -lrte_net_qdma
 CFLAG_DPDK=$(shell pkg-config --cflags libdpdk)
 LIB=-Llib -lrpc -lbase -lpthread -lyaml-cpp $(LIB_DPDK)
-CXXFLAGS=-std=c++17 -Wall $(CFLAG_DPDK)
+CXXFLAGS=-std=c++17 $(CFLAG_DPDK)
 
 .PHONY: all
 all: clean bin/server bin/client
 
-debug: CXXFLAGS += -g3 -O0 -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS
+debug: CXXFLAGS += -g3 -O0 -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS -Wall
 debug: all
 
-stat: CXXFLAGS += -g3 -O0 -DRPC_STATISTICS
+stat: CXXFLAGS += -O02 -DRPC_STATISTICS
 stat: all 
 
-dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS 
+dpdk_debug: CXXFLAGS += -g3 -O0  -DDPDK -DLOG_LEVEL_AS_DEBUG -DRPC_STATISTICS -Wall
 dpdk_debug: all
 
-dpdk_stat: CXXFLAGS += -DDPDK -DRPC_STATISTICS 
+dpdk_stat: CXXFLAGS += -O02 -DDPDK -DRPC_STATISTICS 
 dpdk_stat: all
 
 .PHONY: clean
@@ -37,7 +37,7 @@ clean:
 counter.hpp: ../bin/rpcgen counter.rpc
 	../bin/rpcgen --dpdk --cpp counter.rpc
 
-bin/server: s.cpp counter.hpp lib/librpc.a lib/libbase.a benchmarks.o
+bin/server: s.cpp lib/librpc.a lib/libbase.a benchmarks.o counter.hpp
 	${CXX} ${CXXFLAGS} ${INC} s.cpp benchmarks.o ${LIB} -o bin/server
 
 bin/client: c.cpp counter.hpp lib/librpc.a lib/libbase.a benchmarks.o

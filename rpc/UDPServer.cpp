@@ -1,4 +1,3 @@
-#pragma once
 #include "server.hpp"
 
 #include <stdio.h>

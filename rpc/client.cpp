@@ -100,8 +100,8 @@ Future* UDPClient::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */){
 
      Future* fu = new Future(xid_counter_.next(), attr);
     pending_fu_l_.lock();
-    //pending_fu_[fu->xid_] = fu;
-    // //Future* tfu = fu;
+    pending_fu_[fu->xid_] = fu;
+    Future* tfu = fu;
      pending_fu_l_.unlock();
     current_req.allot_buffer(conn->get_new_pkt());
     current_req.set_book_mark(sizeof(i32));

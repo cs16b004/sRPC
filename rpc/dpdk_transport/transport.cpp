@@ -1,14 +1,14 @@
-
-#pragma once
 #include <cstdint>
 #include "transport.hpp"
 #include <rte_ring.h>
 #include<rte_ring_core.h>
 #include "utils.hpp"
 
-
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <utmpx.h>
+
 #include "transport_marshal.hpp"
    
 

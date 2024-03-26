@@ -1,4 +1,4 @@
 cpu:
-  numa: 0
+  numa: 1
   core_per_numa: 32
 
