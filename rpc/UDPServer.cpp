@@ -1,4 +1,3 @@
-#pragma once
 #include "server.hpp"
 
 #include <stdio.h>
@@ -90,8 +89,8 @@ void UDPConnection::handle_read() {
        // in_.print();
         i32 packet_size;
         int n_peek = in_.peek(&packet_size, sizeof(i32));
-       //  Log_debug("Packet Size %d",packet_size);
-       //     Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
+         Log_debug("Packet Size %d",packet_size);
+            Log_debug("n_peek = %d, content_size = %d",n_peek,in_.content_size());
            
         if (n_peek == sizeof(i32) && in_.content_size() >= packet_size + sizeof(i32)) {
             // consume the packet size
@@ -100,19 +99,11 @@ void UDPConnection::handle_read() {
             Request* req = new Request;
             verify(req->m.read_from_marshal(in_, packet_size) == (size_t) packet_size);
             
-            v64 v_xid;
+            i64 v_xid;
             req->m >> v_xid;
-            req->xid = v_xid.get();
+            req->xid = v_xid;
             complete_requests.push_back(req);
-            #ifdef RPC_MICRO_STATISTICS
-            // Read packet ID
            
-            uint64_t pkt_id;
-            verify(in_.read(&pkt_id,sizeof(uint64_t)) == sizeof(uint64_t));
-            Log_debug("Packet Id processed by app thread %d", pkt_id);
-            rx_pkt_ids[v_xid.get()] = pkt_id;
-            #endif
-
         } else {
             // Log_debug("packet not complete or there's no more packet to process");
             break;
@@ -122,7 +113,7 @@ void UDPConnection::handle_read() {
       //  Log_info("Request read");
 #ifdef RPC_STATISTICS
     //stat_server_batching(complete_requests.size());
-     record_batch(complete_requests.size());
+   //  record_batch(complete_requests.size());
 #endif // RPC_STATISTICS
 
     for (auto& req: complete_requests) {
@@ -137,7 +128,7 @@ void UDPConnection::handle_read() {
         //req->print();
         i32 rpc_id;
         req->m >> rpc_id;
-
+        Log_debug("rpc_id, %d", rpc_id);
 #ifdef RPC_STATISTICS
         count(0);
 #endif // RPC_STATISTICS
@@ -145,7 +136,7 @@ void UDPConnection::handle_read() {
         auto it = server_->handlers_.find(rpc_id);
         if (it != server_->handlers_.end()) {
             // the handler should delete req, and release server_connection refcopy.
-           // Log_debug("RPC Triggered");
+            Log_debug("RPC Triggered");
             it->second(req, (UDPConnection *) this->ref_copy());
             
         } else {

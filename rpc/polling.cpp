@@ -413,6 +413,7 @@ int PollMgr::set_cpu_affinity(std::bitset<128> &core_mask){
    for(int i=0; i< n_threads_; i++){
     poll_threads_[i]->set_cpu_affinity(core_mask);
    }
+   return 0;
 }
 
 } // namespace rrr

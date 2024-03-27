@@ -150,5 +150,6 @@ void* Reporter::run(void* arg){
             diff_count=0; //ith pollable of poll manager;
     }
     Log::info("Reporter Thread Stopped");
+    return reporter;
 }
 }

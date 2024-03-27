@@ -1,4 +1,4 @@
 host:
   name: catskill
-  thread_affinity: [4,31]
+  thread_affinity: [49,64]
 

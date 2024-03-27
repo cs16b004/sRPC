@@ -224,6 +224,7 @@ int ThreadPool::set_cpu_affinity(std::bitset<128> &core_mask){
     for(int i=0;i<n_;i++){
         th_[i]->set_cpu_affinity(core_mask);
     }
+    return 0;
 }
 void* RunLater::start_run_later(void* thiz) {
     RunLater* rl = (RunLater *) thiz;

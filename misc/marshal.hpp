@@ -338,10 +338,10 @@ inline rrr::Marshal &operator<<(rrr::Marshal &m, const double &v) {
 }
 
 inline rrr::Marshal &operator<<(rrr::Marshal &m, const std::string &v) {
-  v64 v_len = v.length();
+  i64 v_len = v.length();
   m << v_len;
-  if (v_len.get() > 0) {
-    verify(m.write(v.c_str(), v_len.get()) == (size_t) v_len.get());
+  if (v_len > 0) {
+    verify(m.write(v.c_str(), v_len) == (size_t) v_len);
   }
   return m;
 }
@@ -489,11 +489,11 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, double &v) {
 }
 
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::string &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
-  v.resize(v_len.get());
-  if (v_len.get() > 0) {
-    verify(m.read(&v[0], v_len.get()) == (size_t) v_len.get());
+  v.resize(v_len);
+  if (v_len > 0) {
+    verify(m.read(&v[0], v_len) == (size_t) v_len);
   }
   return m;
 }

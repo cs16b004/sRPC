@@ -353,44 +353,6 @@ public:
      */
    
 };
-class DeferredReply: public NoCopy {
-    rrr::Request* req_;
-    rrr::ServerConnection* sconn_;
-    std::function<void()> marshal_reply_;
-    std::function<void()> cleanup_;
-
-public:
-
-    DeferredReply(rrr::Request* req, rrr::ServerConnection* sconn,
-                  const std::function<void()>& marshal_reply, const std::function<void()>& cleanup)
-        : req_(req), sconn_(sconn), marshal_reply_(marshal_reply), cleanup_(cleanup) {}
-
-    ~DeferredReply() {
-        cleanup_();
-        delete req_;
-        #ifdef DPDK
-            (UDPConnection*)sconn_->release(); 
-        #else
-            ((TCPConnection*)sconn_)->release();
-        #endif
-        req_ = nullptr;
-        sconn_ = nullptr;
-    }
-
-    int run_async(const std::function<void()>& f) {
-        return sconn_->run_async(f);
-    }
-
-    void reply() {
-        
-            sconn_->begin_reply(req_);
-            marshal_reply_();
-            sconn_->end_reply();
-     
-        delete this;
-    }
-
-};
 class UDPConnection: public ServerConnection {
 
     friend class UDPServer;
@@ -454,6 +416,45 @@ class UDPServer : public Server{
     public:
         ~UDPServer();
         UDPServer(PollMgr* pollmgr = nullptr, ThreadPool* thrpool = nullptr,DpdkTransport* transport=nullptr);
+};
+
+class DeferredReply: public NoCopy {
+    rrr::Request* req_;
+    rrr::ServerConnection* sconn_;
+    std::function<void()> marshal_reply_;
+    std::function<void()> cleanup_;
+
+public:
+
+    DeferredReply(rrr::Request* req, rrr::ServerConnection* sconn,
+                  const std::function<void()>& marshal_reply, const std::function<void()>& cleanup)
+        : req_(req), sconn_(sconn), marshal_reply_(marshal_reply), cleanup_(cleanup) {}
+
+    ~DeferredReply() {
+        cleanup_();
+        delete req_;
+        #ifdef DPDK
+            ((UDPConnection*)sconn_)->release(); 
+        #else
+            ((TCPConnection*)sconn_)->release();
+        #endif
+        req_ = nullptr;
+        sconn_ = nullptr;
+    }
+
+    int run_async(const std::function<void()>& f) {
+        return sconn_->run_async(f);
+    }
+
+    void reply() {
+        
+            sconn_->begin_reply(req_);
+            marshal_reply_();
+            sconn_->end_reply();
+     
+        delete this;
+    }
+
 };
 
 } // namespace rrr

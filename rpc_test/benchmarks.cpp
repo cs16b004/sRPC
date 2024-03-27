@@ -2,7 +2,7 @@
 
 void Benchmarks::create_server(){
 
-     csi = new BenchmarkServiceImpl(conf->output_size_/64);
+     csi = new BenchmarkServiceImpl(conf->output_size_);
 
 
     pollmgr_ = new rrr::PollMgr(conf->server_poll_threads_);
@@ -61,7 +61,7 @@ void Benchmarks::create_proxies(){
         service_proxies = new BenchmarkProxy*[conf->client_connections_];
 
         uint16_t input_size;
-        input_size = conf->input_size_/64;
+        input_size = conf->input_size_;
         for (int i=0; i < conf->client_connections_; i++) {
             #ifdef DPDK
                 rrr::UDPClient *client = new rrr::UDPClient(pollmgr_);
@@ -80,9 +80,11 @@ void* Benchmarks::launch_client_thread(void *arg){
     while(!ct->stop){
          rrr::FutureGroup fg;
         for (int i = 0; i < ct->client_batch_size_; i++) {
-            fg.add(ct->my_proxy->add_bench_async());
+            //fg.add(
+                ct->my_proxy->add_bench_async();
+                //);
         }
-        fg.wait_all();
+        //fg.wait_all();
         #ifdef DPDK
         #ifdef LOG_LEVEL_AS_DEBUG
         //break;
