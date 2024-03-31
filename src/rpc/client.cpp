@@ -162,7 +162,7 @@ namespace rrr
         unsigned int available;
         for (int j = 0; j < nr_inrings; j++)
         {
-            unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring[j], (void **)pkt_array, 16, &available);
+            unsigned int nb_pkts = rte_ring_sc_dequeue_burst(conn->in_bufring[j], (void **)pkt_array, 32, &available);
             for (int i = 0; i < nb_pkts; i++)
             {
                 

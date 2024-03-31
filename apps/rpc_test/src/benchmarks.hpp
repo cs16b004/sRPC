@@ -56,40 +56,57 @@ private:
     unsigned int time_;
     uint16_t out_size=1;
     rrr::PollMgr* pollmgr_;
-   
+    rrr::Timer server_timer;
+    std::string data_file_name;
     
     std::string out_string;
+    std::ofstream csvFile;
 public:
     uint64_t count_=0;
      static rrr::Counter at_counter;
-    BenchmarkServiceImpl(uint16_t num_out): out_size(num_out){
+    BenchmarkServiceImpl(uint16_t num_out, std::string data_file): out_size(num_out), data_file_name(data_file){
         for(int i=0;i<num_out;i++){
             out_string.push_back('a'+ rand()%26);
         }
+        csvFile.open(data_file_name.c_str());
+        csvFile << "Received,rate\n";
+        at_counter.next();
+        
     }
 
     void add() {
-        count_++;
+        //count_++;
     }
 
     void add_long(const rrr::i32& a, const rrr::i32& b, const rrr::i32& c, const rrr::i64& d, const rrr::i64& e, const std::vector<rrr::i64>& input, rrr::i32* out, std::vector<rrr::i64>* output) {
-        count_++;
+        //count_++;
         output->insert(output->end(), {1, 2/*, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10*/});
     }
 
     void add_short(const rrr::i64& a, rrr::i32* out) {
-        count_++;
+        //count_++;
         *out = a+1; 
     }
     void add_bench(const std::string& in, std::string* out ) {
        // rrr::Log::info(__LINE__,__FILE__, "Out size  = %d * 32",out_size);
         //count_++;
-       // at_counter.next();
+        
+        uint64_t val =  at_counter.next();
         out->append(out_string.c_str());
+        if(val == 1000*1000){
+            server_timer.start();
+        }
+        else if((val%(1000*1000)) == 0){
+            csvFile << val <<"," << val/server_timer.elapsed() <<std::endl;
+        }
+        
+    }
+    void closeFile(){
+        csvFile.close();
     }
 };
 class Benchmarks{
-    BenchmarkServiceImpl *csi;
+    
     BenchmarkProxy** service_proxies;
     pthread_t** client_threads;
     std::thread stat_thread;
@@ -109,6 +126,7 @@ class Benchmarks{
     rrr::PollMgr* pollmgr_;
 
     public:
+    BenchmarkServiceImpl *csi;
     Benchmarks(AppConfig* config) : conf(config){
         rrr::Log::info("Core Affinity from %d - %d", conf->core_affinity_mask_[0], conf->core_affinity_mask_[1]);
         for(int i=conf->core_affinity_mask_[0];i <= conf->core_affinity_mask_[1];i++)

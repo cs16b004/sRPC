@@ -4,11 +4,11 @@ benchmarks:
   client_poll_threads: 1
   client_connections: 1
   client_threads: 1
-  rate: 1000000
+  rate: 4000000
   server_duration: 50 #server_duration in seconds
   client_duration: 50
   client_batch_size: 32
   server_address: "172.19.0.121:8501"
   server_poll_threads: 1
-  experiment: "mc_tput_16"
+  experiment: "small_rpc_tput"
   core_affinity: [49, 64]

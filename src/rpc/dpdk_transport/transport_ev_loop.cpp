@@ -124,7 +124,8 @@ namespace rrr
             send_all++;
         }
         oconn->burst_size=32;
-        accepted.insert({conn_id, oconn->conn_id});
+        while(accepted.insert({conn_id, oconn->conn_id}).second ==false )
+        ;
        LOG_DEBUG("Accepted: %s, chosen thread %d", ConnToString(oconn->conn_id).c_str(),oconn->chosen_thread);
         conn_counter.next();
         conn_th_lock.unlock();
@@ -240,7 +241,8 @@ namespace rrr
         wait = 0;
         while (!oconn->connected_)
         {
-            usleep(500 * 1000);
+            usleep(
+        500*1000);
             wait++;
             if (wait > 2)
             {
@@ -330,7 +332,7 @@ namespace rrr
             t_layer->process_sm_req(ctx);
             // transmit
             t_layer->do_transmit(ctx);
-
+          
             t_layer->do_poll_job(ctx);
         }
         Log_info("Exiting EV thread %d, num pkts sent: %lu, num pkts received: %lu dropped_pakcets: %lu",
@@ -350,8 +352,8 @@ namespace rrr
             for (int i = 0; i < nb_sm_reqs_; i++)
             {
                 ctx->out_connections[ctx->conn_arr[i]->conn_id] = ctx->conn_arr[i]; // Put the connection in local conn_table
-                ctx->t_conns.insert(ctx->conn_arr[i]);
-                // LOG_DEBUG("Added Connection %lu to thread %d, out_ring: %s", ctx->conn_arr[i]->conn_id, ctx->thread_id, ctx->conn_arr[i]->out_bufring[ctx->thread_id]->name);
+                while(ctx->t_conns.insert(ctx->conn_arr[i]).second == false);
+                LOG_DEBUG("Added Connection %lu to thread %d, out_ring: %s", ctx->conn_arr[i]->conn_id, ctx->thread_id, ctx->conn_arr[i]->out_bufring[ctx->thread_id]->name);
             }
             //if (nb_sm_reqs_ > 0 && ctx->thread_id == 8) 
             // for (TransportConnection* current_conn : ctx->t_conns)
@@ -605,10 +607,15 @@ namespace rrr
         nb_polls = rte_ring_sc_dequeue_burst(ctx->poll_req_q, (void **)ctx->poll_reqs, 8, &available);
         for (int i = 0; i < nb_polls; i++)
         {
-            ctx->poll_jobs.insert((Pollable *)(ctx->poll_reqs[i]));
+            LOG_DEBUG("Client added poll job %p", ctx->poll_reqs[i]);
+            while(ctx->poll_jobs.insert((Pollable *)(ctx->poll_reqs[i])).second == false);
         }
-        for (Pollable *poll : ctx->poll_jobs)
-            poll->handle_read();
+       
+       std::unordered_set<Pollable*>::iterator it = ctx->poll_jobs.begin();
+        for(;it != ctx->poll_jobs.end(); ++it){
+            LOG_DEBUG("RUNNNING POll JOB!!")
+            (*it)->handle_read();
+        }
     }
 
 }

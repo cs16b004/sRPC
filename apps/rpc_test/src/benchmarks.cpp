@@ -4,7 +4,10 @@ rrr::Counter BenchmarkServiceImpl::at_counter;
 
 void Benchmarks::create_server(){
 
-     csi = new BenchmarkServiceImpl(conf->output_size_);
+
+    char dat_fil[256];
+    sprintf(dat_fil, "data/sv_%s.csv", conf->exp_name.c_str());
+     csi = new BenchmarkServiceImpl(conf->output_size_, std::string(dat_fil));
 
 
     pollmgr_ = new rrr::PollMgr(conf->server_poll_threads_);
@@ -35,7 +38,7 @@ void Benchmarks::create_server(){
         
 }
 void Benchmarks::stop_server(){
-     
+        csi->closeFile();
         pollmgr_->stop_threads();
         pollmgr_->release();
 
@@ -99,7 +102,7 @@ void* Benchmarks::launch_client_thread(void *arg){
            rrr::Log::error( "Failed to open CSV file, %s", data_file_name);
             exit(EXIT_FAILURE);
         }
-        csvFile << "Sent, Rate\n";
+        csvFile << "Sent,Rate\n";
         csvFile.close();
     }
      std::ofstream csvFile(data_file_name); // Open file in append mode
@@ -109,19 +112,19 @@ void* Benchmarks::launch_client_thread(void *arg){
     }
     while(!ct->stop){
          
-        // while (((last_sent + cycle_wait) >= rte_get_timer_cycles())) {
-        //         ;
-        // }
+        while (((last_sent + cycle_wait) >= rte_get_timer_cycles())) {
+                ;
+        }
        
            (pr->add_bench_async());
            c++;
            if(c % (1000*1000) == 0){
             n++;
 
-            csvFile << c <<", " << c/t.elapsed() <<std::endl;
+            csvFile << c <<"," << c/t.elapsed() <<std::endl;
             
            }
-     //last_sent = rte_get_timer_cycles();
+     last_sent = rte_get_timer_cycles();
         //fg.wait_all();
          
         #ifdef DPDK
