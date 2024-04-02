@@ -76,7 +76,6 @@ namespace rrr
     Counter DpdkTransport::conn_counter(0);
     
     std::unordered_map<uint64_t,uint64_t> DpdkTransport::accepted;
-    std::unordered_map<uint64_t,uint64_t> DpdkTransport::opn_conn;
     rrr::SpinLock pc_l;
     //  std::map<uint16_t,rrr::Connection*> connections_;
     SpinLock DpdkTransport::conn_th_lock;

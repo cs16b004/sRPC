@@ -6,6 +6,12 @@
 #include "misc.hpp"
 #include "strop.hpp"
 #include "threading.hpp"
+/**
+ * @brief A dummy class to set log level at compile time.
+ * This header file also adds other headers in base/ directory.
+ * 
+ *
+ */
 class dummy_class {
 public:
     dummy_class() {

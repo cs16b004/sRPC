@@ -41,7 +41,14 @@ namespace rrr
     class UDPServer;
     class ServerConnection;
     class Pollable;
+    /**
+     * @brief swap src and sdestination address in the pkt mbuf, used by single thread server to send requests
+     * back to the client.
+     * 
+     * @param pkt Mbuf Packet from client/sender.
+     */
     void swap_udp_addresses(rte_mbuf *pkt);
+    // TODO: use wrapper instead od directly calling handlers from us_server
     struct USHWrapper
     {
         std::function<void(Request<rrr::TransportMarshal> *, ServerConnection *)> us_handler_;
@@ -61,12 +68,17 @@ namespace rrr
             // swap_udp_addresses((req->m.get_mbuf()));
         }
     };
+    // TODO: better representation for conn_id
     struct cnn_id{
         uint64_t server_ip : 32;
         uint64_t server_port: 16;
         uint64_t local_port : 16;
     };
-    // Pakcet Type
+    /**
+     * @brief This class can be called the DPDK transport layer, it hides away netowrk related details from UDPClient and 
+     * Server.This is a static class, and only one instance should exists in a runtime.
+     * 
+     */
     
     class DpdkTransport
     {
@@ -75,74 +87,214 @@ namespace rrr
         friend class UDPConnection;
 
     private:
+
         static DpdkTransport *transport_l;
+        /**
+         * @brief host's ip address in network (BE) byte order.
+         * 
+         */
         static rte_be32_t host_ip;
-
+        /**
+         * @brief A list of all cTransport connection managed by this transport layer.
+         * 
+         */
         static std::unordered_map<uint64_t, TransportConnection *> out_connections;
-
+        /**
+         * @brief Experimental: this was part of experiments. Should be ignored.
+         * 
+         */
         static std::unordered_map<uint64_t, rte_ring *> in_rings;
 
-
+        /**
+         * @brief Config class, provides information like network, burst size, ring size, host information etc.
+         * 
+         */
         static RPCConfig *config_;
         int port_num_ = 0;
-
+        /**
+         * @brief Number of dpdk threads which run event loop.
+         * 
+         */
         static int num_threads_;
-
+        /**
+         * @brief number of receive queues (rx_queue_), number of transmit queues (tx_queue_)
+         * to configure the ETH device with.
+         */
         static uint16_t rx_queue_, tx_queue_ ;
+        /**
+         * @brief mempools from which packet mbufs are taken while receiving and forming requests, replies.
+         * Each dpdk thread has its own mempool to increase parallelism.
+         */
         static struct rte_mempool **tx_mbuf_pool;
         static struct rte_mempool **rx_mbuf_pool;
+        /**
+         * @brief A list of accpeted connections, maintained for a rpc server, helps in handling multiple/duplicated
+         * connect request.  
+         * The key is the inital conn_id client_ip::client_port::server_port and value is client_ip::client_port::assigned_port
+         * Assigning a different port to every connection helps in RSS as the addresses are different.
+         */
         static std::unordered_map<uint64_t, uint64_t> accepted;
-        static std::unordered_map<uint64_t, uint64_t> opn_conn;
+       
         
-        // Session Management rings for each thread;
-        //    (Single consumer multiple producer)
+        
+        /**
+         * @brief Session management rings for each thread, this the default means of inter-thread communications
+         * Whenever applications want to connect through a client or server accepts etc, a pointer to concerned Transport COnnection 
+         *  is loaded onto the ring, and the dpdk threads poll on this ring signal and handle them appropriately.
+         * Polling on ring is better than using locks.
+         * 
+         */
         static struct rte_ring **sm_rings;
-
+        /**
+         * @brief A counter to allot increasing ports to outgoing connections from clients.
+         * 
+         */
         static Counter u_port_counter;
+        /**
+         * @brief A counter to allot increasing ports to incoming connections from clients.
+         * 
+         */
         static Counter s_port_counter;
+        /**
+         * @brief Keep track of number of connections in the system.
+         * 
+         */
         static Counter conn_counter;
+
         rrr::SpinLock pc_l;
         //  std::map<uint16_t,rrr::Connection*> connections_;
+        /**
+         * @brief Its possible that a multiple connection requests are handled in parallel, this locks prevents racing 
+         * between threads while modifying shared data structures like out_connection table etc.
+         * 
+         */
         static SpinLock conn_th_lock;
+        /**
+         * @brief In case dpdk layer is initialzed multiple times this lock helps in providing atmost once initialization
+         * 
+         */
         static SpinLock init_lock;
 
         bool initiated = false;
-
+        /**
+         * @brief A counter to assign connections to dpdk threads in a round robing manner.
+         * 
+         */
         static rrr::Counter next_thread_;
-
+        /**
+         * @brief src_addr_ and dest_addr_ keep addresses for each host on the network, with their ip and mac addresses, these are used 
+         * in forming packet headers. Since DPDK lacks ARP, these data structures help in maintaining an arp table. 
+         * 
+         */
         static std::unordered_map<std::string, NetAddress> src_addr_;
         static std::unordered_map<std::string, NetAddress> dest_addr_;
-        static std::unordered_map<i32, USHWrapper *> handlers;
+        
+
+        //Part of earlier experiments
         static SpinLock sm_queue_l;
         static std::queue<Marshal *> sm_queue;
+        static std::unordered_map<i32, USHWrapper *> handlers;
 
+
+        /**
+         * @brief Context provided to each thread to run. Each thread receives and trasnmit from different queues to increase parallelism.
+         * moreover they service different pollable if added  via add_poll_job()
+         * 
+         */
         struct d_thread_ctx **thread_ctx_arr{nullptr};
 
         bool force_quit{false};
+        /**
+         * @brief Get the Mac for the given ip.
+         * 
+         * @param ip IPv4 address of the machin in BE
+         * @return uint8_t* mac address bytes
+         */
         static uint8_t *getMacFromIp(uint32_t ip);
+        /**
+         * @brief Populate src_addr4_ and dest_addr data structures.
+         * 
+         * @param host_name name of the host where this method is called. (Could be catskill, brooklyn anything provided in the name field in the RPC config)
+         * @param net_info network information from config files.
+         */
         void addr_config(std::string host_name,
                          std::vector<RPCConfig::NetworkInfo> net_info);
         void init_dpdk_main_thread(const char *argv_str);
-
+        /**
+         * @brief Initialize the port of ETH device, set up queues, RSS RX descriptors TX descriptors etc.
+         * 
+         * @param port_id port to configure.
+         * @return int 0 if successful.
+         */
         int port_init(uint16_t port_id);
+        /**
+         * @brief Reset a port 
+         * 
+         * @param port_id port to reset.
+         * @return int 0 if successful.
+         */
         int port_reset(uint16_t port_id);
+        /**
+         * @brief Close the port , stop receiving and tranmit packets from the port.
+         * 
+         * @param port_id port to close.
+         * @return int 0 if successful.
+         */
         int port_close(uint16_t port_id);
+        /**
+         * @brief Install flow rule on the port. For eg. filter packets for the host's ip, RSS setup etc.
+         * 
+         * @param phy_port port to be configured.
+         */
         static void install_flow_rule(size_t phy_port);
-     
+        /**
+         * @brief Event loop that each dpdk thread performs.
+         * 
+         * @param arg the thread context in which the thread performs.
+         * @return int 
+         */
         static int ev_loop(void *arg);
+        /**
+         * @brief User space UDPServer, to handle the requests in dpdk threads instead of passing it to some 
+         * poll thread.
+         * 
+         */
         static UDPServer *us_server;
-
+        /**
+         * @brief Isolate all incoming traffic to this port, this along with flow rule helps in establishing a filter which
+         * helps in keeping the network flow simple.
+         * 
+         * 
+         * @param phy_port port to isolate
+         * @return int 0 if successful
+         */
         static int isolate(uint8_t phy_port);
+        // Part of previous work should be removed.
         SpinLock sendl;
 
     public:
-        // static int createTransport();
-        // static DpdkTransport* getTransport();
+        /**
+         * @brief Initialize the DPDK Eal and this layer with the given confiugration
+         * 
+         * @param config Config for DPDK Transport layer.
+         */
         void init(RPCConfig *config);
+        /**
+         * @brief Check if the layer is initialzed or not
+         * 
+         * @return true if initialized
+         * @return false otherwise
+         */
         bool initialized()
         {
             return initiated;
         }
+        /**
+         * @brief Get the connection record for the goven connection id.
+         * 
+         * @param conn_id Connection Id of the record sought.
+         * @return TransportConnection* connection record.
+         */
         static TransportConnection *get_conn(uint64_t conn_id)
         {
             conn_th_lock.lock();
@@ -150,29 +302,83 @@ namespace rrr
             conn_th_lock.unlock();
             return conn;
         }
+        /**
+         * @brief Create a transport layer (singleton) instance.
+         * 
+         * @param config Configs for this instance.
+         */
         static void create_transport(RPCConfig *config);
+        /**
+         * @brief process packets received by the dpdk thread runnning in ctx.
+         * 
+         * @param ctx  Context of thread which received pakcets from NIC.
+         */
         static void process_requests(d_thread_ctx *ctx);
+
+        /**
+         * @brief Transmit packets from thread contexts out transmit rings.
+         * 
+         * @param ctx the thread context from which the packets are to be sent.
+         */
         static void do_transmit(d_thread_ctx *ctx);
+        /**
+         * @brief Process session management (sm) request fo this thread.
+         * 
+         * @param ctx the thread for which sm request is intended.
+         */
         static void process_sm_req(d_thread_ctx *ctx);
+        /**
+         * @brief Trigger a poll job if a thread has one.
+         * 
+         * @param ctx thread which holds the poll job.
+         */
         static void do_poll_job(d_thread_ctx* ctx);
+        /**
+         * @brief Counter to assign poll jobs in a round robin fashion to threads.
+         * 
+         */
         Counter poll_q_c_;
         // static void
         static DpdkTransport *get_transport();
+        /**
+         * @brief Register a UDP Server in this layer to handle request in a single threaded fashion
+         * 
+         * @param ser User space server to be registered.
+         */
         static void reg_us_server(UDPServer *ser);
         static void reg_us_handler(i32 id, std::function<void(Request<rrr::TransportMarshal> *, ServerConnection *)>);
+        /**
+         * @brief Send Ack to the client for for this connection. 
+         * 
+         * @param oconn the connection which is acknowledged by the server.
+         */
         static void send_ack(TransportConnection *oconn);
+        /**
+         * @brief Add a poll job to be triggered periodically by dpdk threads. 
+         * 
+         * @param poll Poll Job to be triggered.
+         */
         void add_poll_job(Pollable* poll);
-        // void send(uint8_t* payload, unsigned length, int server_id, int client_id);
-
-        // Send a connec request to server at addr_str
-        // Called from Application thread
-        // Assigns a dedicated dpdk thread
-        // returns the conn_id to use in future
+        /**
+         * @brief Send a connec request to server at addr_str
+         Called from Application thread
+         Assigns a dedicated dpdk thread.
+         returns the conn_id to use in future.
+         * 
+         * @param addr Address of the RPC server.
+         * @return uint64_t  id of the connection established.
+         */
+        
         uint64_t connect(const char *addr);
         // Accept a Connection
         // Called from application thread to (server loop)
         // creates a transport_connection, assigns a dedicated tx_thread;
         // returns a connection  id to be used by application thread
+        /**
+         * @brief 
+         * 
+         * @param conn_id 
+         */
         static void accept(uint64_t conn_id);
         int connect(std::string addr);
         uint16_t get_open_port();

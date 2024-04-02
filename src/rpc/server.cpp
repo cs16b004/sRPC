@@ -17,10 +17,20 @@ namespace rrr {
 
 
 
-
+/**
+ * @brief Global Data structure to keep track of requests for which RPC methods doesn't exist.
+ * 
+ */
 std::unordered_set<i32> ServerConnection::rpc_id_missing_s;
 SpinLock ServerConnection::rpc_id_missing_l_s;
 
+
+/**
+ * @brief Construct a new TCPConnection::TCPConnection object
+ * 
+ * @param server The TCP Server to which this connectionr ecord belongs.
+ * @param socket The TCP socket to the client.
+ */
 
 TCPConnection::TCPConnection(TCPServer* server, int socket)
         : ServerConnection((Server*) server,socket) {
@@ -32,11 +42,25 @@ TCPConnection::~TCPConnection() {
     // decrease number of open connections
     server_->sconns_ctr_.next(-1);
 }
-
+/**
+ * @brief This method when called will add the function to the threadpool's worload queue
+ * Thread pool as inbuilt support for parallel queues and work stealing.
+ * 
+ * @param f the function to be run (workload).
+ * @return int 0 when queued else EPERM. 
+ */
 int TCPConnection::run_async(const std::function<void()>& f) {
     return server_->threadpool_->run_async(f);
 }
-
+/**
+ * @brief Function to prepare transport for sending a reply back to the client.
+ * This method is called by stub class wrapper method for a particular RPC. The data from network is parsed into a request object which
+ * is then used to marshal arguments for the actual method call. This provides transparency in method call.
+ * @param req Request object which has deserialized arguments.
+ * @param error_code Error Code if any from the RPC call.
+ * @return void
+ * 
+ */
 void TCPConnection::begin_reply(Request<rrr::Marshal>* req, i32 error_code /* =... */) {
     out_l_.lock();
     v32 v_error_code = error_code;
@@ -47,7 +71,10 @@ void TCPConnection::begin_reply(Request<rrr::Marshal>* req, i32 error_code /* =.
     *this << v_reply_xid;
     *this << v_error_code;
 }
-
+/**
+ * @brief Function call to end the reply and complete the RPC call.
+ * 
+ */
 void TCPConnection::end_reply() {
     // set reply size in packet
     if (bmark_ != nullptr) {
@@ -63,7 +90,12 @@ void TCPConnection::end_reply() {
 
     out_l_.unlock();
 }
-
+/**
+ * @brief Method to read from TCP socket to the client. This method is typically called from the Poll threads in PollMgr.
+ * Each call will read some bytes and form Request objects. Finally these requests object will be passed to Stub class wrappers to
+ * run the RPC.
+ * 
+ */
 void TCPConnection::handle_read() {
     if (status_ == CLOSED) {
         return;
@@ -134,7 +166,10 @@ void TCPConnection::handle_read() {
         }
     }
 }
-
+/**
+ * @brief A method typically called by Pollthreads in PollMGr class to write replies to socket to the client.
+ * 
+ */
 void TCPConnection::handle_write() {
     if (status_ == CLOSED) {
         return;
@@ -147,11 +182,17 @@ void TCPConnection::handle_write() {
     }
     out_l_.unlock();
 }
-
+/**
+ * @brief Method to handle any error encountered while handling rpc calls from the service. 
+ * 
+ */
 void TCPConnection::handle_error() {
     this->close();
 }
-
+/**
+ * @brief Method to close connection to client.
+ * 
+ */
 void TCPConnection::close() {
     bool should_release = false;
 
@@ -182,7 +223,12 @@ void TCPConnection::close() {
         this->release();
     }
 }
-
+/**
+ * @brief Method to change the poll_mode which can be either READ, (PollMGr only reads from the socket)
+ * READ | WRITE (PollMgr both reads and writes to the socket to the client) 
+ * 
+ * @return int 
+ */
 int TCPConnection::poll_mode() {
     int mode = Pollable::READ;
     out_l_.lock();
@@ -192,7 +238,16 @@ int TCPConnection::poll_mode() {
     out_l_.unlock();
     return mode;
 }
-
+/**
+ * @brief Construct a TCPServer Object
+ * 
+ * @param pollmgr Poll Manager instance which polls all the connections in this server.
+ * 
+ * @param thrpool Threadpool used to handle rpc call workload from all the client.
+ * 
+ * @param server_sock_ socket on which the server listens for connection requests.
+ * 
+ */
 TCPServer::TCPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */)
         : Server(pollmgr,thrpool),server_sock_(-1), status_(NEW) {
 
@@ -215,7 +270,11 @@ TCPServer::TCPServer(PollMgr* pollmgr /* =... */, ThreadPool* thrpool /* =? */)
 TCPServer::~TCPServer() {
    stop();
 }
-
+/**
+ * @brief Call stops the server loop there by stopping future connection requests from clients. Closes all TCP connections 
+ * releases PollMgr and ThreadPool.
+ * 
+ */
 void TCPServer::stop(){
     if (status_ == RUNNING) {
         status_ = STOPPING;
@@ -259,7 +318,11 @@ void TCPServer::stop(){
     status_ = STOPPED;
     //LOG_DEBUG("rrr::TCPServer: destroyed");
 }
-
+/**
+ * @brief Launches the server loop.
+ * @param arg Argument in the form of start+server_loop_args
+ * @return void* 
+ */
 void* TCPServer::start_server_loop(void* arg) {
     start_server_loop_args_type* start_server_loop_args = (start_server_loop_args_type*) arg;
     TCPServer* svr = (TCPServer*)(start_server_loop_args->server);
@@ -271,7 +334,12 @@ void* TCPServer::start_server_loop(void* arg) {
     pthread_exit(nullptr);
     return nullptr;
 }
-
+/**
+ * @brief Server Loop which listens for connections from client and assigns a new TCPConnection record for every client.
+ * 
+ * 
+ * @param svr_addr 
+ */
 void TCPServer::server_loop(struct addrinfo* svr_addr) {
     fd_set fds;
     while (status_ == RUNNING) {
@@ -309,7 +377,12 @@ void TCPServer::server_loop(struct addrinfo* svr_addr) {
     server_sock_ = -1;
     status_ = STOPPED;
 }
-
+/**
+ * @brief start a TCP based RPC server on bind_addr
+ * 
+ * @param bind_addr IP Address and port at which the RPC server listens for RPC calls from client.
+ * @return int 0 if succeful EINVAL otherwise.
+ */
 int TCPServer::start(const char* bind_addr) {
     string addr(bind_addr);
     size_t idx = addr.find(":");
@@ -373,7 +446,13 @@ int TCPServer::start(const char* bind_addr) {
 
     return 0;
 }
-
+/**
+ * @brief Register a RPC method to the server with TCP based transport. Called from service class to add RPC methods as function objects.
+ * 
+ * @param rpc_id the 32 bit ID to identufy a function corresponding to the RPC.
+ * @param func the logic of RPC in a function object.
+ * @return int return 0 if added succesfully, EEXIST if a function already registered agains rpc_id.
+ */
 int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::Marshal>*, ServerConnection*)>& func) {
     // disallow duplicate rpc_id
     if (handlers_.find(rpc_id) != handlers_.end()) {
@@ -386,6 +465,13 @@ int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::Marshal>*, Ser
     return 0;
 }
 
+/**
+ * @brief Register a RPC method to the server with DPDK (User Space) based transport. Called from service class to add RPC methods as function objects.
+ * 
+ * @param rpc_id the 32 bit ID to identufy a function corresponding to the RPC.
+ * @param func the logic of RPC in a function object.
+ * @return int return 0 if added succesfully, EEXIST if a function already registered agains rpc_id.
+ */
 int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::TransportMarshal>*, ServerConnection*)>& func) {
     // disallow duplicate rpc_id
     if (us_handlers_.find(rpc_id) != us_handlers_.end()) {
@@ -397,7 +483,11 @@ int Server::reg(i32 rpc_id, const std::function<void(Request<rrr::TransportMarsh
 
     return 0;
 }
-
+/**
+ * @brief Unregister a RPC.
+ * 
+ * @param rpc_id 
+ */
 void Server::unreg(i32 rpc_id) {
     handlers_.erase(rpc_id);
     us_handlers_.erase(rpc_id);

@@ -54,7 +54,11 @@ namespace rrr
 
 #endif
     }
-
+   /**
+    * @brief Code to see how slow is unordered_map lookup, this turned up in one of the profiling experiements I did.
+    * uncomment to check if any performance boost is seen.
+    * 
+    */
     // UDPConnection::UDPConnection(const UDPConnection& other)
     //         : ServerConnection(other.server_, 0), connId(other.connId) {
 
@@ -103,7 +107,7 @@ namespace rrr
         }
         i32 v_error_code = error_code;
         i64 v_reply_xid = req->xid;
-        // rte_pktmbuf_free(req->m.get_mbuf());
+     
 #ifdef LATENCY
         req->m >> timestamps[reply_idx % 32];
 #endif
