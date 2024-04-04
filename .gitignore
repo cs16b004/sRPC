@@ -6,6 +6,7 @@ apps/rpc_test/*.o
 apps/rpc_test/lib/
 apps/build
 build
-docs
+docs/latex
+docs/html
 
 
