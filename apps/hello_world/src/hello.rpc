@@ -1,0 +1,5 @@
+abstract service HelloWorld {
+    
+    fast hellow(string in | string out);
+    fast add_short (i64 a | i32 out);
+}

@@ -472,12 +472,14 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, double &v) {
 }
 
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::string &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
-  v.resize(v_len.get());
-  if (v_len.get() > 0) {
-    verify(m.read(&v[0], v_len.get()) == (size_t) v_len.get());
+  
+  v.resize(v_len);
+  if (v_len > 0) {
+    verify(m.read(&v[0], v_len) == (size_t) v_len);
   }
+  
   return m;
 }
 
@@ -490,11 +492,11 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, std::pair<T1, T2> &v) {
 
 template<class T>
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::vector<T> &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
   v.clear();
-  v.reserve(v_len.get());
-  for (int i = 0; i < v_len.get(); i++) {
+  v.reserve(v_len);
+  for (int i = 0; i < v_len; i++) {
     T elem;
     m >> elem;
     v.push_back(elem);
@@ -504,10 +506,10 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, std::vector<T> &v) {
 
 template<class T>
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::list<T> &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
   v.clear();
-  for (int i = 0; i < v_len.get(); i++) {
+  for (int i = 0; i < v_len; i++) {
     T elem;
     m >> elem;
     v.push_back(elem);
@@ -517,10 +519,10 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, std::list<T> &v) {
 
 template<class T>
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::set<T> &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
   v.clear();
-  for (int i = 0; i < v_len.get(); i++) {
+  for (int i = 0; i < v_len; i++) {
     T elem;
     m >> elem;
     v.insert(elem);
@@ -530,10 +532,10 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, std::set<T> &v) {
 
 template<class K, class V>
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::map<K, V> &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
   v.clear();
-  for (int i = 0; i < v_len.get(); i++) {
+  for (int i = 0; i < v_len; i++) {
     K key;
     V value;
     m >> key >> value;
@@ -544,10 +546,10 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, std::map<K, V> &v) {
 
 template<class T>
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::unordered_set<T> &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
   v.clear();
-  for (int i = 0; i < v_len.get(); i++) {
+  for (int i = 0; i < v_len; i++) {
     T elem;
     m >> elem;
     v.insert(elem);
@@ -557,10 +559,10 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, std::unordered_set<T> &v) {
 
 template<class K, class V>
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::unordered_map<K, V> &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
   v.clear();
-  for (int i = 0; i < v_len.get(); i++) {
+  for (int i = 0; i < v_len; i++) {
     K key;
     V value;
     m >> key >> value;

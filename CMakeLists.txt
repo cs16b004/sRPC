@@ -69,3 +69,4 @@ else(PERF)
 endif(PERF)
 
 add_subdirectory(apps/rpc_test)
+add_subdirectory(apps/hello_world)

@@ -168,7 +168,7 @@ namespace rrr
                 
 
                 reply_array[i].allot_buffer(pkt_array[i]);
-                // LOG_DEBUG("Reply %s",reply_array[i].print_request().c_str());
+              //  LOG_DEBUG("Reply %s",reply_array[i].print_request().c_str());
                 reply_array[i] >> reply_size >> v_reply_xid >> v_error_code;
                 pending_fu_l_.lock();
                 Future *fu;
@@ -181,7 +181,9 @@ namespace rrr
                     pending_fu_l_.unlock();
 
                     fu->error_code_ = v_error_code;
-                    fu->reply_.write(reply_array[i].get_offset(), reply_size - sizeof(i64) - sizeof(i32));
+                    // LOG_DEBUG("Received reply size: %d", reply_size );
+                  //  LOG_DEBUG("reply %s", reply_array[i].print_request().c_str());
+                    fu->reply_.write(reply_array[i].get_offset(), reply_size - sizeof(i64));
 
                     // Log_info("For reply for req: %lu",v_reply_xid);
                     fu->notify_ready();
@@ -194,8 +196,8 @@ namespace rrr
                     // put_end_ts(fu->xid_);
                     // must be released for memory safety other wise the application has to release
 
-                    while (k)
-                        k = fu->release();
+                    // while (k)
+                    //     k = fu->release();
 
 #endif
                 }

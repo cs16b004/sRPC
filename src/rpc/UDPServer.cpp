@@ -127,14 +127,16 @@ namespace rrr
         current_reply << (timestamps[reply_idx % 32]);
 #endif
         current_reply.format_header();
+        
         int retry = 0;
         if (current_reply.is_type_st())
         {
             current_reply.set_pkt_type_bg();
-
+             // LOG_DEBUG("Reply %s", current_reply.print_request().c_str());
             return;
         }
         // reply_arr[reply_idx%32] = current_reply.get_mbuf();
+      
         reply_idx++;
         while (
             rte_ring_mp_enqueue(conn->out_bufring[retry%nr_inrings], current_reply.get_mbuf()) < 0)
@@ -146,7 +148,7 @@ namespace rrr
                 retry = 0;
             }
         }
-        LOG_DEBUG("Enqueued Packet");
+       // LOG_DEBUG("Enqueued Packet");
     }
 
     void UDPConnection::handle_read()

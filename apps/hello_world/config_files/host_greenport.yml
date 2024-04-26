@@ -1,0 +1,3 @@
+host:
+  name: greenport
+  thread_affinity: [42,64]

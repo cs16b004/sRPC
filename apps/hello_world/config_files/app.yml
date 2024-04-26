@@ -1,0 +1,5 @@
+app:
+  server_duration: 50 #server_duration in seconds
+  client_duration: 50
+  server_address: "172.19.0.121:8501"
+  core_affinity: [49, 64]

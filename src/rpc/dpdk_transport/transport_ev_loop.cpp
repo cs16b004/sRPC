@@ -613,7 +613,6 @@ namespace rrr
        
        std::unordered_set<Pollable*>::iterator it = ctx->poll_jobs.begin();
         for(;it != ctx->poll_jobs.end(); ++it){
-            LOG_DEBUG("RUNNNING POll JOB!!")
             (*it)->handle_read();
         }
     }

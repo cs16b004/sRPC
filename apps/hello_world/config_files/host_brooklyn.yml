@@ -1,0 +1,3 @@
+host:
+  name: brooklyn
+  thread_affinity: [49,65]

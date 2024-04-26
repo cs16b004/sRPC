@@ -162,6 +162,7 @@ class Request {
               req_data->pkt_len = offset;
               ipv4_hdr->total_length = htons(offset -  ip_hdr_offset);
               udp_hdr->dgram_len = htons(offset -  udp_hdr_offset);
+              LOG_DEBUG("pkt len %d", offset - udp_hdr_offset);
             }
             void set_pkt_type_sm(){
               uint8_t* dst = rte_pktmbuf_mtod(req_data, uint8_t*);
@@ -175,8 +176,9 @@ class Request {
                
                uint8_t* pkt_data = rte_pktmbuf_mtod(req_data, uint8_t*);
                int j=0;
+               //std::cout<<ntohs(udp_hdr->dgram_len)<<std::endl;
                for(int i=  data_offset;
-                        i < 70; i++){
+                        i < 84 ; i++){
                   
                     sprintf(req+j,"%02x ", pkt_data[i]);
                     j+=3;   
@@ -193,7 +195,7 @@ class Request {
 
                 
                 return ret.str();
-            }
+            } 
             void* get_offset(){
               return rte_pktmbuf_mtod_offset(req_data, void*, offset);
             }
@@ -281,10 +283,10 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const double 
 }
 
 inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::string &v) {
-  v64 v_len = v.length();
+  i64 v_len = v.length();
   m << v_len;
-  if (v_len.get() > 0) {
-    verify(m.write(v.c_str(), v_len.get()) == (size_t) v_len.get());
+  if (v_len > 0) {
+    verify(m.write(v.c_str(), v_len) == (size_t) v_len);
   }
   return m;
 }
@@ -298,7 +300,7 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::pa
 
 template<class T>
 inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::vector<T> &v) {
-  v64 v_len = v.size();
+  i64 v_len = v.size();
   m << v_len;
   for (typename std::vector<T>::const_iterator it = v.begin(); it != v.end();
        ++it) {
@@ -310,7 +312,7 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::ve
 
 template<class T>
 inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::list<T> &v) {
-  v64 v_len = v.size();
+  i64 v_len = v.size();
   m << v_len;
   for (typename std::list<T>::const_iterator it = v.begin(); it != v.end();
        ++it) {
@@ -321,7 +323,7 @@ inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::li
 
 template<class T>
 inline rrr::TransportMarshal &operator<<(rrr::TransportMarshal &m, const std::set<T> &v) {
-  v64 v_len = v.size();
+  i64 v_len = v.size();
   m << v_len;
   for (typename std::set<T>::const_iterator it = v.begin(); it != v.end();
        ++it) {
@@ -427,11 +429,11 @@ inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, double &v) {
 }
 
 inline rrr::TransportMarshal &operator>>(rrr::TransportMarshal &m, std::string &v) {
-  v64 v_len;
+  i64 v_len;
   m >> v_len;
-  v.resize(v_len.get());
-  if (v_len.get() > 0) {
-    verify(m.read(&v[0], v_len.get()) == (size_t) v_len.get());
+  v.resize(v_len);
+  if (v_len > 0) {
+    verify(m.read(&v[0], v_len) == (size_t) v_len);
   }
   return m;
 }
